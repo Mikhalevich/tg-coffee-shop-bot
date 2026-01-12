@@ -188,6 +188,13 @@ func (b *Bot) SendPoll(ctx context.Context, params *SendPollParams) (*models.Mes
 	return result, err
 }
 
+// SendChecklist https://core.telegram.org/bots/api#sendchecklist
+func (b *Bot) SendChecklist(ctx context.Context, params *SendChecklistParams) (*models.Message, error) {
+	result := &models.Message{}
+	err := b.rawRequest(ctx, "sendChecklist", params, &result)
+	return result, err
+}
+
 // SendDice https://core.telegram.org/bots/api#senddice
 func (b *Bot) SendDice(ctx context.Context, params *SendDiceParams) (*models.Message, error) {
 	result := &models.Message{}
@@ -664,6 +671,13 @@ func (b *Bot) EditMessageMedia(ctx context.Context, params *EditMessageMediaPara
 	return result, err
 }
 
+// EditMessageChecklist https://core.telegram.org/bots/api#editmessagechecklist
+func (b *Bot) EditMessageChecklist(ctx context.Context, params *EditMessageChecklistParams) (*models.Message, error) {
+	result := &models.Message{}
+	err := b.rawRequest(ctx, "editMessageChecklist", params, result)
+	return result, err
+}
+
 // EditMessageReplyMarkup https://core.telegram.org/bots/api#editmessagereplymarkup
 func (b *Bot) EditMessageReplyMarkup(ctx context.Context, params *EditMessageReplyMarkupParams) (*models.Message, error) {
 	result := &models.Message{}
@@ -675,6 +689,20 @@ func (b *Bot) EditMessageReplyMarkup(ctx context.Context, params *EditMessageRep
 func (b *Bot) StopPoll(ctx context.Context, params *StopPollParams) (*models.Poll, error) {
 	result := &models.Poll{}
 	err := b.rawRequest(ctx, "stopPoll", params, &result)
+	return result, err
+}
+
+// ApproveSuggestedPost https://core.telegram.org/bots/api#approvesuggestedpost
+func (b *Bot) ApproveSuggestedPost(ctx context.Context, params *ApproveSuggestedPostParams) (bool, error) {
+	var result bool
+	err := b.rawRequest(ctx, "approveSuggestedPost", params, &result)
+	return result, err
+}
+
+// DeclineSuggestedPost https://core.telegram.org/bots/api#declinesuggestedpost
+func (b *Bot) DeclineSuggestedPost(ctx context.Context, params *DeclineSuggestedPostParams) (bool, error) {
+	var result bool
+	err := b.rawRequest(ctx, "declineSuggestedPost", params, &result)
 	return result, err
 }
 
@@ -853,6 +881,13 @@ func (b *Bot) AnswerPreCheckoutQuery(ctx context.Context, params *AnswerPreCheck
 	return result, err
 }
 
+// GetMyStarBalance https://core.telegram.org/bots/api#getmystarbalance
+func (b *Bot) GetMyStarBalance(ctx context.Context) (*models.StarAmount, error) {
+	result := models.StarAmount{}
+	err := b.rawRequest(ctx, "getMyStarBalance", nil, &result)
+	return &result, err
+}
+
 // GetStarTransactions https://core.telegram.org/bots/api#getstartransactions
 func (b *Bot) GetStarTransactions(ctx context.Context, params *GetStarTransactionsParams) (*models.StarTransactions, error) {
 	result := models.StarTransactions{}
@@ -913,5 +948,159 @@ func (b *Bot) GetAvailableGifts(ctx context.Context) (*models.Gifts, error) {
 func (b *Bot) SendGift(ctx context.Context, params *SendGiftParams) (bool, error) {
 	var result bool
 	err := b.rawRequest(ctx, "sendGift", params, &result)
+	return result, err
+}
+
+// VerifyUser https://core.telegram.org/bots/api#verifyuser
+func (b *Bot) VerifyUser(ctx context.Context, params *VerifyUserParams) (bool, error) {
+	var result bool
+	err := b.rawRequest(ctx, "verifyUser", params, &result)
+	return result, err
+}
+
+// VerifyChat https://core.telegram.org/bots/api#verifychat
+func (b *Bot) VerifyChat(ctx context.Context, params *VerifyChatParams) (bool, error) {
+	var result bool
+	err := b.rawRequest(ctx, "verifyChat", params, &result)
+	return result, err
+}
+
+// RemoveUserVerification https://core.telegram.org/bots/api#removeuserverification
+func (b *Bot) RemoveUserVerification(ctx context.Context, params *RemoveUserVerificationParams) (bool, error) {
+	var result bool
+	err := b.rawRequest(ctx, "removeUserVerification", params, &result)
+	return result, err
+}
+
+// RemoveChatVerification https://core.telegram.org/bots/api#removechatverification
+func (b *Bot) RemoveChatVerification(ctx context.Context, params *RemoveChatVerificationParams) (bool, error) {
+	var result bool
+	err := b.rawRequest(ctx, "removeChatVerification", params, &result)
+	return result, err
+}
+
+// ReadBusinessMessage https://core.telegram.org/bots/api#readbusinessmessage
+func (b *Bot) ReadBusinessMessage(ctx context.Context, params *ReadBusinessMessageParams) (bool, error) {
+	var result bool
+	err := b.rawRequest(ctx, "readBusinessMessage", params, &result)
+	return result, err
+}
+
+// DeleteBusinessMessages https://core.telegram.org/bots/api#deletebusinessmessages
+func (b *Bot) DeleteBusinessMessages(ctx context.Context, params *DeleteBusinessMessagesParams) (bool, error) {
+	var result bool
+	err := b.rawRequest(ctx, "deleteBusinessMessages", params, &result)
+	return result, err
+}
+
+// SetBusinessAccountName https://core.telegram.org/bots/api#setbusinessaccountname
+func (b *Bot) SetBusinessAccountName(ctx context.Context, params *SetBusinessAccountNameParams) (bool, error) {
+	var result bool
+	err := b.rawRequest(ctx, "setBusinessAccountName", params, &result)
+	return result, err
+}
+
+// SetBusinessAccountUsername https://core.telegram.org/bots/api#setbusinessaccountusername
+func (b *Bot) SetBusinessAccountUsername(ctx context.Context, params *SetBusinessAccountUsernameParams) (bool, error) {
+	var result bool
+	err := b.rawRequest(ctx, "setBusinessAccountUsername", params, &result)
+	return result, err
+}
+
+// SetBusinessAccountBio https://core.telegram.org/bots/api#setbusinessaccountbio
+func (b *Bot) SetBusinessAccountBio(ctx context.Context, params *SetBusinessAccountBioParams) (bool, error) {
+	var result bool
+	err := b.rawRequest(ctx, "setBusinessAccountBio", params, &result)
+	return result, err
+}
+
+// SetBusinessAccountProfilePhoto https://core.telegram.org/bots/api#setbusinessaccountprofilephoto
+func (b *Bot) SetBusinessAccountProfilePhoto(ctx context.Context, params *SetBusinessAccountProfilePhotoParams) (bool, error) {
+	var result bool
+	err := b.rawRequest(ctx, "SetBusinessAccountProfilePhoto", params, &result)
+	return result, err
+}
+
+// RemoveBusinessAccountProfilePhoto https://core.telegram.org/bots/api#removebusinessaccountprofilephoto
+func (b *Bot) RemoveBusinessAccountProfilePhoto(ctx context.Context, params *RemoveBusinessAccountProfilePhotoParams) (bool, error) {
+	var result bool
+	err := b.rawRequest(ctx, "removeBusinessAccountProfilePhoto", params, &result)
+	return result, err
+}
+
+// SetBusinessAccountGiftSettings https://core.telegram.org/bots/api#setbusinessaccountgiftsettings
+func (b *Bot) SetBusinessAccountGiftSettings(ctx context.Context, params *SetBusinessAccountGiftSettingsParams) (bool, error) {
+	var result bool
+	err := b.rawRequest(ctx, "setBusinessAccountGiftSettings", params, &result)
+	return result, err
+}
+
+// GetBusinessAccountStarBalance https://core.telegram.org/bots/api#getbusinessaccountstarbalance
+func (b *Bot) GetBusinessAccountStarBalance(ctx context.Context, params *GetBusinessAccountStarBalanceParams) (*models.StarAmount, error) {
+	result := &models.StarAmount{}
+	err := b.rawRequest(ctx, "getBusinessAccountStarBalance", params, &result)
+	return result, err
+}
+
+// TransferBusinessAccountStars https://core.telegram.org/bots/api#transferbusinessaccountstars
+func (b *Bot) TransferBusinessAccountStars(ctx context.Context, params *TransferBusinessAccountStarsParams) (bool, error) {
+	var result bool
+	err := b.rawRequest(ctx, "transferBusinessAccountStars", params, &result)
+	return result, err
+}
+
+// GetBusinessAccountGifts https://core.telegram.org/bots/api#getbusinessaccountgifts
+func (b *Bot) GetBusinessAccountGifts(ctx context.Context, params *GetBusinessAccountGiftsParams) (*models.OwnedGifts, error) {
+	result := &models.OwnedGifts{}
+	err := b.rawRequest(ctx, "getBusinessAccountGifts", params, &result)
+	return result, err
+}
+
+// ConvertGiftToStars https://core.telegram.org/bots/api#convertgifttostars
+func (b *Bot) ConvertGiftToStars(ctx context.Context, params *ConvertGiftToStarsParams) (bool, error) {
+	var result bool
+	err := b.rawRequest(ctx, "convertGiftToStars", params, &result)
+	return result, err
+}
+
+// UpgradeGift https://core.telegram.org/bots/api#upgradegift
+func (b *Bot) UpgradeGift(ctx context.Context, params *UpgradeGiftParams) (bool, error) {
+	var result bool
+	err := b.rawRequest(ctx, "upgradeGift", params, &result)
+	return result, err
+}
+
+// TransferGift https://core.telegram.org/bots/api#transfergift
+func (b *Bot) TransferGift(ctx context.Context, params *TransferGiftParams) (bool, error) {
+	var result bool
+	err := b.rawRequest(ctx, "transferGift", params, &result)
+	return result, err
+}
+
+// PostStory https://core.telegram.org/bots/api#poststory
+func (b *Bot) PostStory(ctx context.Context, params *PostStoryParams) (*models.Story, error) {
+	result := &models.Story{}
+	err := b.rawRequest(ctx, "postStory", params, &result)
+	return result, err
+}
+
+// EditStory https://core.telegram.org/bots/api#editstory
+func (b *Bot) EditStory(ctx context.Context, params *EditStoryParams) (*models.Story, error) {
+	result := &models.Story{}
+	err := b.rawRequest(ctx, "editStory", params, &result)
+	return result, err
+}
+
+// DeleteStory https://core.telegram.org/bots/api#deletestory
+func (b *Bot) DeleteStory(ctx context.Context, params *DeleteStoryParams) (bool, error) {
+	var result bool
+	err := b.rawRequest(ctx, "deleteStory", params, &result)
+	return result, err
+}
+
+// GiftPremiumSubscription https://core.telegram.org/bots/api#giftpremiumsubscription
+func (b *Bot) GiftPremiumSubscription(ctx context.Context, params *GiftPremiumSubscriptionParams) (bool, error) {
+	var result bool
+	err := b.rawRequest(ctx, "giftPremiumSubscription", params, &result)
 	return result, err
 }
