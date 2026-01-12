@@ -47,6 +47,8 @@ func (m *InputPaidMediaPhoto) MarshalInputMedia() ([]byte, error) {
 type InputPaidMediaVideo struct {
 	Media             string    `json:"media"`
 	Thumbnail         InputFile `json:"thumbnail,omitempty"`
+	Cover             string    `json:"cover,omitempty"`
+	StartTimestamp    int       `json:"start_timestamp,omitempty"`
 	Width             int       `json:"width,omitempty"`
 	Height            int       `json:"height,omitempty"`
 	Duration          int       `json:"duration,omitempty"`
@@ -153,4 +155,15 @@ type PaidMediaInfo struct {
 type PaidMediaPurchased struct {
 	From             User   `json:"from"`
 	PaidMediaPayload string `json:"paid_media_payload"`
+}
+
+// PaidMessagePriceChanged https://core.telegram.org/bots/api#paidmessagepricechanged
+type PaidMessagePriceChanged struct {
+	PaidMessageStarCount int `json:"paid_message_star_count"`
+}
+
+// DirectMessagePriceChanged https://core.telegram.org/bots/api#directmessagepricechanged
+type DirectMessagePriceChanged struct {
+	AreDirectMessagesEnabled bool `json:"are_direct_messages_enabled"`
+	DirectMessageStarCount   int  `json:"direct_message_star_count,omitempty"`
 }

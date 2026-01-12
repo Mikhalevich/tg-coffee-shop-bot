@@ -72,6 +72,7 @@ type MessageAutoDeleteTimerChanged struct {
 type Message struct {
 	ID                            int                            `json:"message_id"`
 	MessageThreadID               int                            `json:"message_thread_id,omitempty"`
+	DirectMessagesTopic           *DirectMessagesTopic           `json:"direct_messages_topic,omitempty"`
 	From                          *User                          `json:"from,omitempty"`
 	SenderChat                    *Chat                          `json:"sender_chat,omitempty"`
 	SenderBoostCount              int                            `json:"sender_boost_count,omitempty"`
@@ -86,15 +87,19 @@ type Message struct {
 	ExternalReply                 *ExternalReplyInfo             `json:"external_reply,omitempty"`
 	Quote                         *TextQuote                     `json:"quote,omitempty"`
 	ReplyToStore                  *Story                         `json:"reply_to_store,omitempty"`
+	ReplyToChecklistTaskID        int                            `json:"reply_to_checklist_task_id,omitempty"`
 	ViaBot                        *User                          `json:"via_bot,omitempty"`
 	EditDate                      int                            `json:"edit_date,omitempty"`
 	HasProtectedContent           bool                           `json:"has_protected_content,omitempty"`
 	IsFromOffline                 bool                           `json:"is_from_offline,omitempty"`
+	IsPaidPost                    bool                           `json:"is_paid_post,omitempty"`
 	MediaGroupID                  string                         `json:"media_group_id,omitempty"`
 	AuthorSignature               string                         `json:"author_signature,omitempty"`
+	PaidStarCount                 int                            `json:"paid_star_count,omitempty"`
 	Text                          string                         `json:"text,omitempty"`
 	Entities                      []MessageEntity                `json:"entities,omitempty"`
 	LinkPreviewOptions            *LinkPreviewOptions            `json:"link_preview_options,omitempty"`
+	SuggestedPostInfo             *SuggestedPostInfo             `json:"suggested_post_info,omitempty"`
 	EffectID                      string                         `json:"effect_id,omitempty"`
 	Animation                     *Animation                     `json:"animation,omitempty"`
 	Audio                         *Audio                         `json:"audio,omitempty"`
@@ -110,6 +115,7 @@ type Message struct {
 	CaptionEntities               []MessageEntity                `json:"caption_entities,omitempty"`
 	ShowCaptionAboveMedia         bool                           `json:"show_caption_above_media,omitempty"`
 	HasMediaSpoiler               bool                           `json:"has_media_spoiler,omitempty"`
+	Checklist                     *Checklist                     `json:"checklist,omitempty"`
 	Contact                       *Contact                       `json:"contact,omitempty"`
 	Dice                          *Dice                          `json:"dice,omitempty"`
 	Game                          *Game                          `json:"game,omitempty"`
@@ -127,18 +133,23 @@ type Message struct {
 	MessageAutoDeleteTimerChanged *MessageAutoDeleteTimerChanged `json:"message_auto_delete_timer_changed,omitempty"`
 	MigrateToChatID               int64                          `json:"migrate_to_chat_id,omitempty"`
 	MigrateFromChatID             int64                          `json:"migrate_from_chat_id,omitempty"`
-	PinnedMessage                 MaybeInaccessibleMessage       `json:"pinned_message,omitempty"`
+	PinnedMessage                 *MaybeInaccessibleMessage      `json:"pinned_message,omitempty"`
 	Invoice                       *Invoice                       `json:"invoice,omitempty"`
 	SuccessfulPayment             *SuccessfulPayment             `json:"successful_payment,omitempty"`
 	RefundedPayment               *RefundedPayment               `json:"refunded_payment,omitempty"`
 	UsersShared                   *UsersShared                   `json:"users_shared,omitempty"`
 	ChatShared                    *ChatShared                    `json:"chat_shared,omitempty"`
+	Gift                          *GiftInfo                      `json:"gift,omitempty"`
+	UniqueGift                    *UniqueGiftInfo                `json:"unique_gift,omitempty"`
 	ConnectedWebsite              string                         `json:"connected_website,omitempty"`
 	WriteAccessAllowed            *WriteAccessAllowed            `json:"write_access_allowed,omitempty"`
 	PassportData                  *PassportData                  `json:"passport_data,omitempty"`
 	ProximityAlertTriggered       *ProximityAlertTriggered       `json:"proximity_alert_triggered,omitempty"`
 	BoostAdded                    *ChatBoostAdded                `json:"boost_added,omitempty"`
 	ChatBackgroundSet             *ChatBackground                `json:"chat_background_set,omitempty"`
+	ChecklistTasksDone            *ChecklistTasksDone            `json:"checklist_tasks_done,omitempty"`
+	ChecklistTasksAdded           *ChecklistTasksAdded           `json:"checklist_tasks_added,omitempty"`
+	DirectMessagePriceChanged     *DirectMessagePriceChanged     `json:"direct_message_price_changed,omitempty"`
 	ForumTopicCreated             *ForumTopicCreated             `json:"forum_topic_created,omitempty"`
 	ForumTopicEdited              *ForumTopicEdited              `json:"forum_topic_edited,omitempty"`
 	ForumTopicClosed              *ForumTopicClosed              `json:"forum_topic_closed,omitempty"`
@@ -149,16 +160,28 @@ type Message struct {
 	Giveaway                      *Giveaway                      `json:"giveaway,omitempty"`
 	GiveawayWinners               *GiveawayWinners               `json:"giveaway_winners,omitempty"`
 	GiveawayCompleted             *GiveawayCompleted             `json:"giveaway_completed,omitempty"`
+	PaidMessagePriceChanged       *PaidMessagePriceChanged       `json:"paid_message_price_changed,omitempty"`
+	SuggestedPostApproved         *SuggestedPostApproved         `json:"suggested_post_approved,omitempty"`
+	SuggestedPostApprovalFailed   *SuggestedPostApprovalFailed   `json:"suggested_post_approval_failed,omitempty"`
+	SuggestedPostDeclined         *SuggestedPostDeclined         `json:"suggested_post_declined,omitempty"`
+	SuggestedPostPaid             *SuggestedPostPaid             `json:"suggested_post_paid,omitempty"`
+	SuggestedPostRefunded         *SuggestedPostRefunded         `json:"suggested_post_refunded,omitempty"`
 	VoiceChatScheduled            *VoiceChatScheduled            `json:"voice_chat_scheduled,omitempty"`
 	VoiceChatStarted              *VoiceChatStarted              `json:"voice_chat_started,omitempty"`
 	VoiceChatEnded                *VoiceChatEnded                `json:"voice_chat_ended,omitempty"`
 	VoiceChatParticipantsInvited  *VoiceChatParticipantsInvited  `json:"voice_chat_participants_invited,omitempty"`
 	WebAppData                    *WebAppData                    `json:"web_app_data,omitempty"`
-	ReplyMarkup                   InlineKeyboardMarkup           `json:"reply_markup,omitempty"`
+	ReplyMarkup                   *InlineKeyboardMarkup          `json:"reply_markup,omitempty"`
 }
 
 // PreparedInlineMessage https://core.telegram.org/bots/api#preparedinlinemessage
 type PreparedInlineMessage struct {
 	ID             string `json:"id"`
 	ExpirationDate int    `json:"expiration_date"`
+}
+
+// DirectMessagesTopic https://core.telegram.org/bots/api#directmessagestopic
+type DirectMessagesTopic struct {
+	TopicID int   `json:"topic_id"`
+	User    *User `json:"user,omitempty"`
 }
