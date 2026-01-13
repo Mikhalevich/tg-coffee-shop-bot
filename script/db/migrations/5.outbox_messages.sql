@@ -14,7 +14,10 @@ CREATE TABLE outbox_messages(
     msg_text TEXT NOT NULL,
     msg_type message_type NOT NULL,
     payload BYTEA,
-    buttons JSONB NOT NULL
+    buttons JSONB NOT NULL,
+    is_dispatched BOOLEAN NOT NULL DEFAULT FALSE,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT (CURRENT_TIMESTAMP),
+    dispatched_at TIMESTAMPTZ
 );
 
 ALTER TABLE outbox_messages REPLICA IDENTITY NOTHING;

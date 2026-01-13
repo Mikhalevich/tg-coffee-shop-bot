@@ -92,6 +92,15 @@ type ButtonRepository interface {
 	IsNotFoundError(err error) bool
 }
 
+type Message struct {
+	ChatID     msginfo.ChatID
+	ReplyMsgID msginfo.MessageID
+	Text       string
+	Type       MessageTextType
+	Payload    []byte
+	Buttons    []button.ButtonRow
+}
+
 type MessageProcessor struct {
 	sender           Sender
 	escaper          MarkdownEscaper
