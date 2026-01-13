@@ -9,7 +9,7 @@ BIN_PATH ?= $(ROOT)/bin
 LINTER_NAME := golangci-lint
 LINTER_VERSION := v2.7.2
 
-.PHONY: all build test compose-up compose-down load-test-data vendor install-linter lint fmt tools tools-update generate activate-python-venv install-admin-deps run-django-admin
+.PHONY: all build test debezium-compose-up debezium-compose-down load-test-data vendor install-linter lint fmt tools tools-update generate activate-python-venv install-admin-deps run-django-admin
 
 all: build
 
@@ -21,11 +21,11 @@ build:
 test:
 	go test ./...
 
-compose-up:
-	docker-compose -f ./script/docker/docker-compose.yml up --build
+debezium-compose-up:
+	docker compose -f ./script/docker/debezium-docker-compose.yml up --build
 
-compose-down:
-	docker-compose -f ./script/docker/docker-compose.yml down
+debezium-compose-down:
+	docker compose -f ./script/docker/debezium-docker-compose.yml down
 
 load-test-data:
 	docker run -it --rm --network host \
