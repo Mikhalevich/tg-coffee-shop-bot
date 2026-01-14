@@ -1,0 +1,18 @@
+log_level: "info"
+tracing:
+  endpoint: "jaeger:4318"
+  service_name: "outbox-poller"
+bot:
+  token: "bot_token"
+  payment_token: "bot_payment_token"
+postgres:
+  connection: "host=postgres port=5432 user=bot password=bot dbname=bot sslmode=disable"
+button_redis:
+  addr: "redis:6379"
+  pwd: "redis123"
+  db: 1
+  ttl: 1h
+worker:
+  count: 4
+  interval: 5s
+  batch_size: 100

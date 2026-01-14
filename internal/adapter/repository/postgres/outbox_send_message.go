@@ -3,6 +3,7 @@ package postgres
 import (
 	"context"
 	"fmt"
+	"time"
 
 	"github.com/jmoiron/sqlx"
 
@@ -20,9 +21,10 @@ func (p *Postgres) OutboxSendMessage(
 	rows ...button.ButtonRow,
 ) error {
 	if err := p.insertOutboxMessage(ctx, model.OutboxMessage{
-		ChatID: chatID.Int64(),
-		Text:   text,
-		Type:   model.ToDBMessageType(textType),
+		ChatID:    chatID.Int64(),
+		Text:      text,
+		Type:      model.ToDBMessageType(textType),
+		CreatedAt: time.Now(),
 	}); err != nil {
 		return fmt.Errorf("insert outbox message: %w", err)
 	}
@@ -39,14 +41,16 @@ func (p *Postgres) insertOutboxMessage(ctx context.Context, msg model.OutboxMess
 				msg_text,
 				msg_type,
 				payload,
-				buttons
+				buttons,
+				created_at
 			) VALUES (
 				:chat_id,
 				:reply_msg_id,
 				:msg_text,
 				:msg_type,
 				:payload,
-				:buttons
+				:buttons,
+				:created_at
 			)
 		`
 	)
