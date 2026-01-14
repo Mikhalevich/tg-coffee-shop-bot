@@ -20,7 +20,8 @@ CREATE TABLE outbox_messages(
     dispatched_at TIMESTAMPTZ
 );
 
-ALTER TABLE outbox_messages REPLICA IDENTITY NOTHING;
+-- use only with debezium config
+-- ALTER TABLE outbox_messages REPLICA IDENTITY NOTHING;
 
 INSERT INTO outbox_messages(chat_id, msg_text, msg_type, payload, buttons) VALUES(0, 'test text', 'plain', ''::bytea, '{}');
 

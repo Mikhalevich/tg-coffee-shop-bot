@@ -1,0 +1,104 @@
+version: "3"
+services:
+  bot:
+    build:
+      context: ../../
+      dockerfile: script/docker/bot.Dockerfile
+    depends_on:
+      jaeger:
+        condition: service_started
+      sql-migrate:
+        condition: service_completed_successfully
+      redis:
+        condition: service_healthy
+    networks:
+      - bot-net
+
+  httpmanager:
+    build:
+      context: ../../
+      dockerfile: script/docker/httpManager.Dockerfile
+    depends_on:
+      jaeger:
+        condition: service_started
+      sql-migrate:
+        condition: service_completed_successfully
+    ports:
+      - 8080:8080
+    networks:
+      - bot-net
+
+  outboxpoller:
+    build:
+      context: ../../
+      dockerfile: script/docker/outboxpoller.Dockerfile
+    depends_on:
+      jaeger:
+        condition: service_started
+      sql-migrate:
+        condition: service_completed_successfully
+      redis:
+        condition: service_healthy
+    networks:
+      - bot-net
+
+  jaeger:
+    image: jaegertracing/all-in-one:1.57
+    ports:
+      - "14268:14268"
+      - "16686:16686"
+      - "4318:4318"
+    networks:
+      - bot-net
+
+  postgres:
+    image: postgres:16.3-alpine3.20
+    restart: always
+    ports:
+      - 5432:5432
+    command: >
+      -c wal_level=logical
+      -c max_wal_senders=1
+      -c max_replication_slots=1
+    environment:
+      POSTGRES_DB: bot
+      POSTGRES_USER: bot
+      POSTGRES_PASSWORD: bot
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U bot"]
+      interval: 2s
+      timeout: 2s
+      retries: 10
+    networks:
+      - bot-net
+
+  sql-migrate:
+    build:
+      context: ../../
+      dockerfile: script/docker/sqlmigrate.Dockerfile
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - bot-net
+
+  redis:
+    image: redis:8.2
+    ports:
+      - 6379:6379
+    environment:
+      - REDIS_PASSWORD=redis123
+    healthcheck:
+      test: [ "CMD", "redis-cli", "--raw", "incr", "ping" ]
+      interval: 2s
+      timeout: 2s
+      retries: 10
+    networks:
+      - bot-net
+
+networks:
+  bot-net:
+    driver: bridge
+
+volumes:
+  database:

@@ -20,6 +20,7 @@ func (p *Postgres) OutboxSelectForDispatchMessages(
 				chat_id,
 				reply_msg_id,
 				msg_text,
+				msg_type,
 				payload,
 				buttons
 			FROM

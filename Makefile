@@ -9,7 +9,7 @@ BIN_PATH ?= $(ROOT)/bin
 LINTER_NAME := golangci-lint
 LINTER_VERSION := v2.7.2
 
-.PHONY: all build test debezium-compose-up debezium-compose-down load-test-data vendor install-linter lint fmt tools tools-update generate activate-python-venv install-admin-deps run-django-admin
+.PHONY: all build test compose-up compose-down debezium-compose-up debezium-compose-down load-test-data vendor install-linter lint fmt tools tools-update generate activate-python-venv install-admin-deps run-django-admin
 
 all: build
 
@@ -17,9 +17,16 @@ build:
 	go build -mod=vendor -o $(BIN_PATH)/bot ./cmd/bot/main.go
 	go build -mod=vendor -o $(BIN_PATH)/manager ./cmd/manager/main.go
 	go build -mod=vendor -o $(BIN_PATH)/msgconsumer ./cmd/msgconsumer/main.go
+	go build -mod=vendor -o $(BIN_PATH)/outboxpoller ./cmd/outboxpoller/main.go
 
 test:
 	go test ./...
+
+compose-up:
+	docker compose -f ./script/docker/docker-compose.yml up --build
+
+compose-down:
+	docker compose -f ./script/docker/docker-compose.yml down
 
 debezium-compose-up:
 	docker compose -f ./script/docker/debezium-docker-compose.yml up --build
