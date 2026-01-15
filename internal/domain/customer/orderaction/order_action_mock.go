@@ -14,7 +14,6 @@ import (
 	reflect "reflect"
 	time "time"
 
-	messageprocessor "github.com/Mikhalevich/tg-coffee-shop-bot/internal/domain/messageprocessor"
 	button "github.com/Mikhalevich/tg-coffee-shop-bot/internal/domain/messageprocessor/button"
 	msginfo "github.com/Mikhalevich/tg-coffee-shop-bot/internal/domain/port/msginfo"
 	gomock "go.uber.org/mock/gomock"
@@ -91,42 +90,61 @@ func (mr *MockMessageSenderMockRecorder) EscapeMarkdown(s any) *gomock.Call {
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "EscapeMarkdown", reflect.TypeOf((*MockMessageSender)(nil).EscapeMarkdown), s)
 }
 
-// ReplyMessage mocks base method.
-func (m *MockMessageSender) ReplyMessage(ctx context.Context, chatID msginfo.ChatID, replyMessageID msginfo.MessageID, text string, textType messageprocessor.MessageTextType, rows ...button.ButtonRow) error {
+// ReplyTextMarkdown mocks base method.
+func (m *MockMessageSender) ReplyTextMarkdown(ctx context.Context, chatID msginfo.ChatID, replyMessageID msginfo.MessageID, text string, rows ...button.ButtonRow) error {
 	m.ctrl.T.Helper()
-	varargs := []any{ctx, chatID, replyMessageID, text, textType}
+	varargs := []any{ctx, chatID, replyMessageID, text}
 	for _, a := range rows {
 		varargs = append(varargs, a)
 	}
-	ret := m.ctrl.Call(m, "ReplyMessage", varargs...)
+	ret := m.ctrl.Call(m, "ReplyTextMarkdown", varargs...)
 	ret0, _ := ret[0].(error)
 	return ret0
 }
 
-// ReplyMessage indicates an expected call of ReplyMessage.
-func (mr *MockMessageSenderMockRecorder) ReplyMessage(ctx, chatID, replyMessageID, text, textType any, rows ...any) *gomock.Call {
+// ReplyTextMarkdown indicates an expected call of ReplyTextMarkdown.
+func (mr *MockMessageSenderMockRecorder) ReplyTextMarkdown(ctx, chatID, replyMessageID, text any, rows ...any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	varargs := append([]any{ctx, chatID, replyMessageID, text, textType}, rows...)
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ReplyMessage", reflect.TypeOf((*MockMessageSender)(nil).ReplyMessage), varargs...)
+	varargs := append([]any{ctx, chatID, replyMessageID, text}, rows...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ReplyTextMarkdown", reflect.TypeOf((*MockMessageSender)(nil).ReplyTextMarkdown), varargs...)
 }
 
-// SendMessage mocks base method.
-func (m *MockMessageSender) SendMessage(ctx context.Context, chatID msginfo.ChatID, text string, textType messageprocessor.MessageTextType, rows ...button.ButtonRow) error {
+// ReplyTextPlain mocks base method.
+func (m *MockMessageSender) ReplyTextPlain(ctx context.Context, chatID msginfo.ChatID, replyMessageID msginfo.MessageID, text string, rows ...button.ButtonRow) error {
 	m.ctrl.T.Helper()
-	varargs := []any{ctx, chatID, text, textType}
+	varargs := []any{ctx, chatID, replyMessageID, text}
 	for _, a := range rows {
 		varargs = append(varargs, a)
 	}
-	ret := m.ctrl.Call(m, "SendMessage", varargs...)
+	ret := m.ctrl.Call(m, "ReplyTextPlain", varargs...)
 	ret0, _ := ret[0].(error)
 	return ret0
 }
 
-// SendMessage indicates an expected call of SendMessage.
-func (mr *MockMessageSenderMockRecorder) SendMessage(ctx, chatID, text, textType any, rows ...any) *gomock.Call {
+// ReplyTextPlain indicates an expected call of ReplyTextPlain.
+func (mr *MockMessageSenderMockRecorder) ReplyTextPlain(ctx, chatID, replyMessageID, text any, rows ...any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	varargs := append([]any{ctx, chatID, text, textType}, rows...)
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SendMessage", reflect.TypeOf((*MockMessageSender)(nil).SendMessage), varargs...)
+	varargs := append([]any{ctx, chatID, replyMessageID, text}, rows...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ReplyTextPlain", reflect.TypeOf((*MockMessageSender)(nil).ReplyTextPlain), varargs...)
+}
+
+// SendTextPlain mocks base method.
+func (m *MockMessageSender) SendTextPlain(ctx context.Context, chatID msginfo.ChatID, text string, rows ...button.ButtonRow) error {
+	m.ctrl.T.Helper()
+	varargs := []any{ctx, chatID, text}
+	for _, a := range rows {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "SendTextPlain", varargs...)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// SendTextPlain indicates an expected call of SendTextPlain.
+func (mr *MockMessageSenderMockRecorder) SendTextPlain(ctx, chatID, text any, rows ...any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]any{ctx, chatID, text}, rows...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SendTextPlain", reflect.TypeOf((*MockMessageSender)(nil).SendTextPlain), varargs...)
 }
 
 // MockTimeProvider is a mock of TimeProvider interface.

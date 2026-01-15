@@ -31,9 +31,11 @@ func (o *OrderProcessing) GetNextPendingOrderToProcess(ctx context.Context) (*or
 
 		if err := o.customerSender.OutboxSendMessage(
 			ctx,
-			orderToProcess.ChatID,
-			o.makeChangedOrderStatusMarkdownMsg(orderToProcess.Status),
-			messageprocessor.MessageTextTypeMarkdown,
+			messageprocessor.Message{
+				ChatID: orderToProcess.ChatID,
+				Text:   o.makeChangedOrderStatusMarkdownMsg(orderToProcess.Status),
+				Type:   messageprocessor.MessageTypeMarkdown,
+			},
 		); err != nil {
 			return fmt.Errorf("send outbox message: %w", err)
 		}

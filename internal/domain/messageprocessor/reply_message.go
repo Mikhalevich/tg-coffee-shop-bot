@@ -8,56 +8,41 @@ import (
 	"github.com/Mikhalevich/tg-coffee-shop-bot/internal/domain/port/msginfo"
 )
 
-func (m *MessageProcessor) ReplyMessage(
+func (m *MessageProcessor) ReplyTextPlain(
 	ctx context.Context,
 	chatID msginfo.ChatID,
 	replyMessageID msginfo.MessageID,
 	text string,
-	textType MessageTextType,
 	rows ...button.ButtonRow,
 ) error {
-	inlineButtons, err := m.SetButtonRows(ctx, rows...)
-	if err != nil {
-		return fmt.Errorf("set button rows: %w", err)
-	}
-
-	if err := m.replyMsg(ctx, chatID, replyMessageID, text, textType, inlineButtons); err != nil {
-		return fmt.Errorf("reply msg: %w", err)
+	if err := m.SendMessage(ctx, Message{
+		ChatID:     chatID,
+		ReplyMsgID: replyMessageID,
+		Text:       text,
+		Type:       MessageTypePlain,
+		Buttons:    rows,
+	}); err != nil {
+		return fmt.Errorf("send message: %w", err)
 	}
 
 	return nil
 }
 
-func (m *MessageProcessor) replyMsg(
+func (m *MessageProcessor) ReplyTextMarkdown(
 	ctx context.Context,
 	chatID msginfo.ChatID,
 	replyMessageID msginfo.MessageID,
 	text string,
-	textType MessageTextType,
-	inlineButtons []button.InlineKeyboardButtonRow,
+	rows ...button.ButtonRow,
 ) error {
-	switch textType {
-	case MessageTextTypePlain:
-		if err := m.sender.ReplyText(
-			ctx,
-			chatID,
-			replyMessageID,
-			text,
-			inlineButtons...,
-		); err != nil {
-			return fmt.Errorf("reply text: %w", err)
-		}
-
-	case MessageTextTypeMarkdown:
-		if err := m.sender.ReplyTextMarkdown(
-			ctx,
-			chatID,
-			replyMessageID,
-			text,
-			inlineButtons...,
-		); err != nil {
-			return fmt.Errorf("reply text markdown: %w", err)
-		}
+	if err := m.SendMessage(ctx, Message{
+		ChatID:     chatID,
+		ReplyMsgID: replyMessageID,
+		Text:       text,
+		Type:       MessageTypeMarkdown,
+		Buttons:    rows,
+	}); err != nil {
+		return fmt.Errorf("send message: %w", err)
 	}
 
 	return nil

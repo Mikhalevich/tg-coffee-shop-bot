@@ -9,46 +9,36 @@ import (
 	"github.com/Mikhalevich/tg-coffee-shop-bot/internal/domain/port/product"
 )
 
-type MessageTextType int
+type MessageType int
 
 const (
-	MessageTextTypePlain MessageTextType = iota + 1
-	MessageTextTypeMarkdown
+	MessageTypePlain MessageType = iota + 1
+	MessageTypeMarkdown
+	MessageTypePNG
 )
 
+type Message struct {
+	ChatID     msginfo.ChatID
+	ReplyMsgID msginfo.MessageID
+	Text       string
+	Type       MessageType
+	Payload    []byte
+	Buttons    []button.ButtonRow
+}
+
+type SenderMessage struct {
+	ChatID     msginfo.ChatID
+	ReplyMsgID msginfo.MessageID
+	Text       string
+	Type       MessageType
+	Payload    []byte
+	Buttons    []button.InlineKeyboardButtonRow
+}
+
 type Sender interface {
-	SendText(
+	SendMessage(
 		ctx context.Context,
-		chatID msginfo.ChatID,
-		text string,
-		rows ...button.InlineKeyboardButtonRow,
-	) error
-	SendTextMarkdown(
-		ctx context.Context,
-		chatID msginfo.ChatID,
-		text string,
-		rows ...button.InlineKeyboardButtonRow,
-	) error
-	ReplyText(
-		ctx context.Context,
-		chatID msginfo.ChatID,
-		replyToMsgID msginfo.MessageID,
-		text string,
-		rows ...button.InlineKeyboardButtonRow,
-	) error
-	ReplyTextMarkdown(
-		ctx context.Context,
-		chatID msginfo.ChatID,
-		replyToMsgID msginfo.MessageID,
-		text string,
-		rows ...button.InlineKeyboardButtonRow,
-	) error
-	SendPNGMarkdown(
-		ctx context.Context,
-		chatID msginfo.ChatID,
-		caption string,
-		png []byte,
-		rows ...button.InlineKeyboardButtonRow,
+		msg SenderMessage,
 	) error
 	EditText(
 		ctx context.Context,
@@ -90,15 +80,6 @@ type ButtonRepository interface {
 
 	GetButton(ctx context.Context, id button.ID) (*button.Button, error)
 	IsNotFoundError(err error) bool
-}
-
-type Message struct {
-	ChatID     msginfo.ChatID
-	ReplyMsgID msginfo.MessageID
-	Text       string
-	Type       MessageTextType
-	Payload    []byte
-	Buttons    []button.ButtonRow
 }
 
 type MessageProcessor struct {

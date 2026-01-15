@@ -3,7 +3,6 @@ package v2
 import (
 	"context"
 
-	"github.com/Mikhalevich/tg-coffee-shop-bot/internal/domain/messageprocessor"
 	"github.com/Mikhalevich/tg-coffee-shop-bot/internal/domain/messageprocessor/button"
 	"github.com/Mikhalevich/tg-coffee-shop-bot/internal/domain/port/currency"
 	"github.com/Mikhalevich/tg-coffee-shop-bot/internal/domain/port/msginfo"
@@ -21,11 +20,10 @@ type CurrencyProvider interface {
 }
 
 type MessageSender interface {
-	SendMessage(
+	SendTextPlain(
 		ctx context.Context,
 		chatID msginfo.ChatID,
 		text string,
-		textType messageprocessor.MessageTextType,
 		rows ...button.ButtonRow,
 	) error
 	EditMessage(
@@ -64,7 +62,7 @@ func (o *OrderHistory) sendPlainText(
 	text string,
 	buttons ...button.ButtonRow,
 ) {
-	if err := o.sender.SendMessage(ctx, chatID, text, messageprocessor.MessageTextTypePlain, buttons...); err != nil {
+	if err := o.sender.SendTextPlain(ctx, chatID, text, buttons...); err != nil {
 		logger.FromContext(ctx).WithError(err).Error("send message plain")
 	}
 }

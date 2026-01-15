@@ -7,7 +7,6 @@ import (
 
 	"github.com/Mikhalevich/tg-coffee-shop-bot/cmd/msgconsumer/internal/app/event"
 	"github.com/Mikhalevich/tg-coffee-shop-bot/internal/domain/messageprocessor"
-	"github.com/Mikhalevich/tg-coffee-shop-bot/internal/domain/messageprocessor/button"
 	"github.com/Mikhalevich/tg-coffee-shop-bot/internal/domain/port/msginfo"
 )
 
@@ -21,10 +20,7 @@ type Consumer interface {
 type MessageSender interface {
 	SendMessage(
 		ctx context.Context,
-		chatID msginfo.ChatID,
-		text string,
-		textType messageprocessor.MessageTextType,
-		rows ...button.ButtonRow,
+		msg messageprocessor.Message,
 	) error
 }
 
@@ -50,34 +46,17 @@ func (a *App) Start(ctx context.Context) error {
 			return fmt.Errorf("unmarshal message: %w", err)
 		}
 
-		switch msg.MessageType {
-		case event.OutboxMessageTypePlain:
-			return a.sendTextMessage(ctx, &msg, messageprocessor.MessageTextTypePlain)
-
-		case event.OutboxMessageTypeMarkdown:
-			return a.sendTextMessage(ctx, &msg, messageprocessor.MessageTextTypeMarkdown)
+		if err := a.sender.SendMessage(ctx, messageprocessor.Message{
+			ChatID: msginfo.ChatIDFromInt(msg.ChatID),
+			Text:   msg.MessageText,
+			Type:   event.ToMessageType(msg.MessageType),
+		}); err != nil {
+			return fmt.Errorf("send message: %w", err)
 		}
 
 		return fmt.Errorf("unknown message type: %s", msg.MessageType)
 	}); err != nil {
 		return fmt.Errorf("consume: %w", err)
-	}
-
-	return nil
-}
-
-func (a *App) sendTextMessage(
-	ctx context.Context,
-	msg *event.OutboxMessage,
-	msgType messageprocessor.MessageTextType,
-) error {
-	if err := a.sender.SendMessage(
-		ctx,
-		msginfo.ChatID(msg.ChatID),
-		msg.MessageText,
-		msgType,
-	); err != nil {
-		return fmt.Errorf("send message: %w", err)
 	}
 
 	return nil

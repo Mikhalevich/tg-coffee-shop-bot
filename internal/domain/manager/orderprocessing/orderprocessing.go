@@ -5,8 +5,6 @@ import (
 	"time"
 
 	"github.com/Mikhalevich/tg-coffee-shop-bot/internal/domain/messageprocessor"
-	"github.com/Mikhalevich/tg-coffee-shop-bot/internal/domain/messageprocessor/button"
-	"github.com/Mikhalevich/tg-coffee-shop-bot/internal/domain/port/msginfo"
 	"github.com/Mikhalevich/tg-coffee-shop-bot/internal/domain/port/order"
 )
 
@@ -20,10 +18,7 @@ type Transactor interface {
 type CustomerOutboxMessageSender interface {
 	OutboxSendMessage(
 		ctx context.Context,
-		chatID msginfo.ChatID,
-		text string,
-		textType messageprocessor.MessageTextType,
-		rows ...button.ButtonRow,
+		msg messageprocessor.Message,
 	) error
 }
 

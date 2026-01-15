@@ -3,29 +3,18 @@ package postgres
 import (
 	"context"
 	"fmt"
-	"time"
 
 	"github.com/jmoiron/sqlx"
 
 	"github.com/Mikhalevich/tg-coffee-shop-bot/internal/adapter/repository/postgres/internal/model"
 	"github.com/Mikhalevich/tg-coffee-shop-bot/internal/domain/messageprocessor"
-	"github.com/Mikhalevich/tg-coffee-shop-bot/internal/domain/messageprocessor/button"
-	"github.com/Mikhalevich/tg-coffee-shop-bot/internal/domain/port/msginfo"
 )
 
 func (p *Postgres) OutboxSendMessage(
 	ctx context.Context,
-	chatID msginfo.ChatID,
-	text string,
-	textType messageprocessor.MessageTextType,
-	rows ...button.ButtonRow,
+	msg messageprocessor.Message,
 ) error {
-	if err := p.insertOutboxMessage(ctx, model.OutboxMessage{
-		ChatID:    chatID.Int64(),
-		Text:      text,
-		Type:      model.ToDBMessageType(textType),
-		CreatedAt: time.Now(),
-	}); err != nil {
+	if err := p.insertOutboxMessage(ctx, model.MessageToOutboxMessage(msg)); err != nil {
 		return fmt.Errorf("insert outbox message: %w", err)
 	}
 

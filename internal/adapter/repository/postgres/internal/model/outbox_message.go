@@ -31,27 +31,50 @@ type OutboxMessage struct {
 	DispatchedAt   sql.NullTime  `db:"dispatched_at"`
 }
 
-func ToDBMessageType(msgType messageprocessor.MessageTextType) MessageType {
+func intToNullInt64(value int) sql.NullInt64 {
+	if value == 0 {
+		return sql.NullInt64{}
+	}
+
+	return sql.NullInt64{
+		Int64: int64(value),
+		Valid: true,
+	}
+}
+
+func MessageToOutboxMessage(msg messageprocessor.Message) OutboxMessage {
+	return OutboxMessage{
+		ChatID:         msg.ChatID.Int64(),
+		ReplyMessageID: intToNullInt64(msg.ReplyMsgID.Int()),
+		Text:           msg.Text,
+		Type:           ToDBMessageType(msg.Type),
+		Payload:        msg.Payload,
+	}
+}
+
+func ToDBMessageType(msgType messageprocessor.MessageType) MessageType {
 	switch msgType {
-	case messageprocessor.MessageTextTypePlain:
+	case messageprocessor.MessageTypePlain:
 		return MessageTypePlain
-	case messageprocessor.MessageTextTypeMarkdown:
+	case messageprocessor.MessageTypeMarkdown:
 		return MessageTypeMarkdown
+	case messageprocessor.MessageTypePNG:
+		return MessageTypePNG
 	}
 
 	return ""
 }
 
-func ToMessageType(mt MessageType) messageprocessor.MessageTextType {
+func ToMessageType(mt MessageType) messageprocessor.MessageType {
 	switch mt {
 	case MessageTypePlain:
-		return messageprocessor.MessageTextTypePlain
+		return messageprocessor.MessageTypePlain
 
 	case MessageTypeMarkdown:
-		return messageprocessor.MessageTextTypeMarkdown
+		return messageprocessor.MessageTypeMarkdown
 
 	case MessageTypePNG:
-		return 0
+		return messageprocessor.MessageTypePNG
 	}
 
 	return 0

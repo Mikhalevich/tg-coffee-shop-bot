@@ -34,9 +34,11 @@ func (o *OrderProcessing) UpdateOrderStatus(ctx context.Context, orderID order.I
 
 		if err := o.customerSender.OutboxSendMessage(
 			ctx,
-			updatedOrder.ChatID,
-			o.makeChangedOrderStatusMarkdownMsg(status),
-			messageprocessor.MessageTextTypeMarkdown,
+			messageprocessor.Message{
+				ChatID: updatedOrder.ChatID,
+				Text:   o.makeChangedOrderStatusMarkdownMsg(status),
+				Type:   messageprocessor.MessageTypeMarkdown,
+			},
 		); err != nil {
 			return fmt.Errorf("send outbox message: %w", err)
 		}

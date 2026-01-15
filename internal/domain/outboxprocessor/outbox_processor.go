@@ -5,8 +5,6 @@ import (
 	"time"
 
 	"github.com/Mikhalevich/tg-coffee-shop-bot/internal/domain/messageprocessor"
-	"github.com/Mikhalevich/tg-coffee-shop-bot/internal/domain/messageprocessor/button"
-	"github.com/Mikhalevich/tg-coffee-shop-bot/internal/domain/port/msginfo"
 )
 
 type OutboxMessage struct {
@@ -37,10 +35,7 @@ type Repository interface {
 type Sender interface {
 	SendMessage(
 		ctx context.Context,
-		chatID msginfo.ChatID,
-		text string,
-		textType messageprocessor.MessageTextType,
-		rows ...button.ButtonRow,
+		msg messageprocessor.Message,
 	) error
 }
 
