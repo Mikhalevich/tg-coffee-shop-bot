@@ -4,7 +4,6 @@ import (
 	"context"
 	"time"
 
-	"github.com/Mikhalevich/tg-coffee-shop-bot/internal/domain/messageprocessor"
 	"github.com/Mikhalevich/tg-coffee-shop-bot/internal/domain/messageprocessor/button"
 	"github.com/Mikhalevich/tg-coffee-shop-bot/internal/domain/port"
 	"github.com/Mikhalevich/tg-coffee-shop-bot/internal/domain/port/msginfo"
@@ -12,19 +11,24 @@ import (
 )
 
 type MessageSender interface {
-	SendMessage(
+	SendTextPlain(
 		ctx context.Context,
 		chatID msginfo.ChatID,
 		text string,
-		textType messageprocessor.MessageTextType,
 		rows ...button.ButtonRow,
 	) error
-	ReplyMessage(
+	ReplyTextPlain(
 		ctx context.Context,
 		chatID msginfo.ChatID,
 		replyMessageID msginfo.MessageID,
 		text string,
-		textType messageprocessor.MessageTextType,
+		rows ...button.ButtonRow,
+	) error
+	ReplyTextMarkdown(
+		ctx context.Context,
+		chatID msginfo.ChatID,
+		replyMessageID msginfo.MessageID,
+		text string,
 		rows ...button.ButtonRow,
 	) error
 	EditMessage(
@@ -79,7 +83,7 @@ func (o *OrderAction) sendPlainText(
 	chatID msginfo.ChatID,
 	text string,
 ) {
-	if err := o.sender.SendMessage(ctx, chatID, text, messageprocessor.MessageTextTypePlain); err != nil {
+	if err := o.sender.SendTextPlain(ctx, chatID, text); err != nil {
 		logger.FromContext(ctx).WithError(err).Error("send message")
 	}
 }
@@ -91,12 +95,11 @@ func (o *OrderAction) replyPlainText(
 	text string,
 	buttons ...button.ButtonRow,
 ) {
-	if err := o.sender.ReplyMessage(
+	if err := o.sender.ReplyTextPlain(
 		ctx,
 		chatID,
 		replyMessageID,
 		text,
-		messageprocessor.MessageTextTypePlain,
 		buttons...,
 	); err != nil {
 		logger.FromContext(ctx).WithError(err).Error("reply message")
@@ -110,12 +113,11 @@ func (o *OrderAction) replyMarkdown(
 	text string,
 	buttons ...button.ButtonRow,
 ) {
-	if err := o.sender.ReplyMessage(
+	if err := o.sender.ReplyTextMarkdown(
 		ctx,
 		chatID,
 		replyMessageID,
 		text,
-		messageprocessor.MessageTextTypeMarkdown,
 		buttons...,
 	); err != nil {
 		logger.FromContext(ctx).WithError(err).Error("reply message")

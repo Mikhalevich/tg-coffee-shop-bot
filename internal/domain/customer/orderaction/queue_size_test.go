@@ -6,7 +6,6 @@ import (
 
 	"go.uber.org/mock/gomock"
 
-	"github.com/Mikhalevich/tg-coffee-shop-bot/internal/domain/messageprocessor"
 	"github.com/Mikhalevich/tg-coffee-shop-bot/internal/domain/port/msginfo"
 	"github.com/Mikhalevich/tg-coffee-shop-bot/internal/domain/port/order"
 )
@@ -43,7 +42,7 @@ func (s *OrderActionSuite) TestQueueSizeSuccess() {
 			GetOrdersCountByStatus(ctx, order.StatusConfirmed, order.StatusInProgress).
 			Return(1, nil),
 
-		s.sender.EXPECT().ReplyMessage(ctx, info.ChatID, info.MessageID, "*1*", messageprocessor.MessageTextTypeMarkdown),
+		s.sender.EXPECT().ReplyTextMarkdown(ctx, info.ChatID, info.MessageID, "*1*"),
 	)
 
 	err := s.orderAction.QueueSize(ctx, info)

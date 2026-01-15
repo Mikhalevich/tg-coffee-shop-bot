@@ -1,10 +1,13 @@
 package event
 
+import "github.com/Mikhalevich/tg-coffee-shop-bot/internal/domain/messageprocessor"
+
 type OutboxMessageType string
 
 const (
 	OutboxMessageTypePlain    OutboxMessageType = "plain"
 	OutboxMessageTypeMarkdown OutboxMessageType = "markdown"
+	OutboxMessageTypePNG      OutboxMessageType = "png"
 )
 
 type OutboxMessage struct {
@@ -15,4 +18,17 @@ type OutboxMessage struct {
 	MessageType    OutboxMessageType `json:"msg_type"`
 	Payload        *string           `json:"payload"`
 	Buttons        string            `json:"buttons"`
+}
+
+func ToMessageType(mt OutboxMessageType) messageprocessor.MessageType {
+	switch mt {
+	case OutboxMessageTypePlain:
+		return messageprocessor.MessageTypePlain
+	case OutboxMessageTypeMarkdown:
+		return messageprocessor.MessageTypeMarkdown
+	case OutboxMessageTypePNG:
+		return messageprocessor.MessageTypePNG
+	}
+
+	return 0
 }

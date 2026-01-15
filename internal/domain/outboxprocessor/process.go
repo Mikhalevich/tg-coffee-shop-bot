@@ -19,7 +19,7 @@ func (o *OutboxProcessor) Process(ctx context.Context, batchSize int) error {
 		)
 
 		for _, msg := range msgs {
-			if err := o.sender.SendMessage(ctx, msg.ChatID, msg.Text, msg.Type); err != nil {
+			if err := o.sender.SendMessage(ctx, msg.Message); err != nil {
 				errs = errors.Join(errs, fmt.Errorf("send message: %w", err))
 
 				continue

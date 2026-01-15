@@ -3,47 +3,26 @@ package messageprocessor
 import (
 	"context"
 	"fmt"
-
-	"github.com/Mikhalevich/tg-coffee-shop-bot/internal/domain/messageprocessor/button"
-	"github.com/Mikhalevich/tg-coffee-shop-bot/internal/domain/port/msginfo"
 )
 
 func (m *MessageProcessor) SendMessage(
 	ctx context.Context,
-	chatID msginfo.ChatID,
-	text string,
-	textType MessageTextType,
-	rows ...button.ButtonRow,
+	msg Message,
 ) error {
-	inlineButtons, err := m.SetButtonRows(ctx, rows...)
+	inlineButtons, err := m.SetButtonRows(ctx, msg.Buttons...)
 	if err != nil {
 		return fmt.Errorf("set button rows: %w", err)
 	}
 
-	if err := m.sendMsg(ctx, chatID, text, textType, inlineButtons); err != nil {
-		return fmt.Errorf("send msg: %w", err)
-	}
-
-	return nil
-}
-
-func (m *MessageProcessor) sendMsg(
-	ctx context.Context,
-	chatID msginfo.ChatID,
-	text string,
-	textType MessageTextType,
-	inlineButtons []button.InlineKeyboardButtonRow,
-) error {
-	switch textType {
-	case MessageTextTypePlain:
-		if err := m.sender.SendText(ctx, chatID, text, inlineButtons...); err != nil {
-			return fmt.Errorf("send text: %w", err)
-		}
-
-	case MessageTextTypeMarkdown:
-		if err := m.sender.SendTextMarkdown(ctx, chatID, text, inlineButtons...); err != nil {
-			return fmt.Errorf("send text markdown: %w", err)
-		}
+	if err := m.sender.SendMessage(ctx, SenderMessage{
+		ChatID:     msg.ChatID,
+		ReplyMsgID: msg.ReplyMsgID,
+		Text:       msg.Text,
+		Type:       msg.Type,
+		Payload:    msg.Payload,
+		Buttons:    inlineButtons,
+	}); err != nil {
+		return fmt.Errorf("sender send message: %w", err)
 	}
 
 	return nil

@@ -4,7 +4,6 @@ import (
 	"context"
 	"time"
 
-	"github.com/Mikhalevich/tg-coffee-shop-bot/internal/domain/messageprocessor"
 	"github.com/Mikhalevich/tg-coffee-shop-bot/internal/domain/messageprocessor/button"
 	"github.com/Mikhalevich/tg-coffee-shop-bot/internal/domain/port"
 	"github.com/Mikhalevich/tg-coffee-shop-bot/internal/domain/port/msginfo"
@@ -19,19 +18,17 @@ type StoreInfo interface {
 }
 
 type MessageSender interface {
-	SendMessage(
+	SendTextPlain(
 		ctx context.Context,
 		chatID msginfo.ChatID,
 		text string,
-		textType messageprocessor.MessageTextType,
 		rows ...button.ButtonRow,
 	) error
-	ReplyMessage(
+	ReplyTextPlain(
 		ctx context.Context,
 		chatID msginfo.ChatID,
 		replyMessageID msginfo.MessageID,
 		text string,
-		textType messageprocessor.MessageTextType,
 		rows ...button.ButtonRow,
 	) error
 	EditMessage(
@@ -94,7 +91,7 @@ func (cp *CartProcessing) sendPlainText(
 	chatID msginfo.ChatID,
 	text string,
 ) {
-	if err := cp.sender.SendMessage(ctx, chatID, text, messageprocessor.MessageTextTypePlain); err != nil {
+	if err := cp.sender.SendTextPlain(ctx, chatID, text); err != nil {
 		logger.FromContext(ctx).WithError(err).Error("send message")
 	}
 }
@@ -106,12 +103,11 @@ func (cp *CartProcessing) replyPlainText(
 	text string,
 	buttons ...button.ButtonRow,
 ) {
-	if err := cp.sender.ReplyMessage(
+	if err := cp.sender.ReplyTextPlain(
 		ctx,
 		chatID,
 		replyMessageID,
 		text,
-		messageprocessor.MessageTextTypePlain,
 		buttons...,
 	); err != nil {
 		logger.FromContext(ctx).WithError(err).Error("reply message")
