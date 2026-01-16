@@ -10,7 +10,7 @@ import (
 	"github.com/Mikhalevich/tg-coffee-shop-bot/internal/domain/messageprocessor"
 )
 
-func (p *Postgres) OutboxSendMessage(
+func (p *Postgres) SendMessage(
 	ctx context.Context,
 	msg messageprocessor.Message,
 ) error {
