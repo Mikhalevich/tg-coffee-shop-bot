@@ -21,8 +21,9 @@ var (
 	_ cartprocessing.StoreInfo = (*Postgres)(nil)
 	_ orderpayment.StoreInfo   = (*Postgres)(nil)
 
-	_ orderhistory.CurrencyProvider = (*Postgres)(nil)
-	_ orderprocessing.Repository    = (*Postgres)(nil)
+	_ orderhistory.CurrencyProvider               = (*Postgres)(nil)
+	_ orderprocessing.Repository                  = (*Postgres)(nil)
+	_ orderprocessing.CustomerOutboxMessageSender = (*Postgres)(nil)
 )
 
 type Driver interface {

@@ -32,7 +32,7 @@ func (o *OrderProcessing) UpdateOrderStatus(ctx context.Context, orderID order.I
 			return fmt.Errorf("update order status: %w", err)
 		}
 
-		if err := o.customerSender.OutboxSendMessage(
+		if err := o.customerSender.SendMessage(
 			ctx,
 			messageprocessor.Message{
 				ChatID: updatedOrder.ChatID,

@@ -16,7 +16,7 @@ type Transactor interface {
 }
 
 type CustomerOutboxMessageSender interface {
-	OutboxSendMessage(
+	SendMessage(
 		ctx context.Context,
 		msg messageprocessor.Message,
 	) error

@@ -29,7 +29,7 @@ func (o *OrderProcessing) GetNextPendingOrderToProcess(ctx context.Context) (*or
 			return fmt.Errorf("update next order status: %w", err)
 		}
 
-		if err := o.customerSender.OutboxSendMessage(
+		if err := o.customerSender.SendMessage(
 			ctx,
 			messageprocessor.Message{
 				ChatID: orderToProcess.ChatID,
