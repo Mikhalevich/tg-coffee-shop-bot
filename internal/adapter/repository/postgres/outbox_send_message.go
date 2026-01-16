@@ -14,7 +14,12 @@ func (p *Postgres) SendMessage(
 	ctx context.Context,
 	msg messageprocessor.Message,
 ) error {
-	if err := p.insertOutboxMessage(ctx, model.MessageToOutboxMessage(msg)); err != nil {
+	dbOutbox, err := model.ToDBOutboxMessage(msg)
+	if err != nil {
+		return fmt.Errorf("make db outbox message: %w", err)
+	}
+
+	if err := p.insertOutboxMessage(ctx, dbOutbox); err != nil {
 		return fmt.Errorf("insert outbox message: %w", err)
 	}
 

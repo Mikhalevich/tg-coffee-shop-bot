@@ -4,9 +4,18 @@ import (
 	"database/sql/driver"
 	"encoding/json"
 	"fmt"
+	"strings"
 )
 
 type JSONB string
+
+func NewNull() JSONB {
+	return ""
+}
+
+func NewString(s string) JSONB {
+	return JSONB(s)
+}
 
 func NewFromMarshaler(s any) (JSONB, error) {
 	b, err := json.Marshal(s)
@@ -15,6 +24,14 @@ func NewFromMarshaler(s any) (JSONB, error) {
 	}
 
 	return JSONB(b), nil
+}
+
+func (j JSONB) IsEmpty() bool {
+	return j == ""
+}
+
+func (j JSONB) IsEmptyObject() bool {
+	return strings.TrimSpace(string(j)) == "{}"
 }
 
 func (j JSONB) Value() (driver.Value, error) {

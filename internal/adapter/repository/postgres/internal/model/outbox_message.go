@@ -2,10 +2,12 @@ package model
 
 import (
 	"database/sql"
+	"fmt"
 	"time"
 
 	"github.com/Mikhalevich/tg-coffee-shop-bot/internal/adapter/repository/postgres/internal/jsonb"
 	"github.com/Mikhalevich/tg-coffee-shop-bot/internal/domain/messageprocessor"
+	"github.com/Mikhalevich/tg-coffee-shop-bot/internal/domain/messageprocessor/button"
 	"github.com/Mikhalevich/tg-coffee-shop-bot/internal/domain/outboxprocessor"
 	"github.com/Mikhalevich/tg-coffee-shop-bot/internal/domain/port/msginfo"
 )
@@ -42,14 +44,33 @@ func intToNullInt64(value int) sql.NullInt64 {
 	}
 }
 
-func MessageToOutboxMessage(msg messageprocessor.Message) OutboxMessage {
+func ToDBOutboxMessage(msg messageprocessor.Message) (OutboxMessage, error) {
+	jbButtons, err := jsonbFromButtonRows(msg.Buttons)
+	if err != nil {
+		return OutboxMessage{}, fmt.Errorf("jsonb from buttons: %w", err)
+	}
+
 	return OutboxMessage{
 		ChatID:         msg.ChatID.Int64(),
 		ReplyMessageID: intToNullInt64(msg.ReplyMsgID.Int()),
 		Text:           msg.Text,
 		Type:           ToDBMessageType(msg.Type),
 		Payload:        msg.Payload,
+		Button:         jbButtons,
+	}, nil
+}
+
+func jsonbFromButtonRows(buttons []button.ButtonRow) (jsonb.JSONB, error) {
+	if buttons == nil {
+		return jsonb.NewString("[]"), nil
 	}
+
+	jbButtons, err := jsonb.NewFromMarshaler(buttons)
+	if err != nil {
+		return jsonb.NewNull(), fmt.Errorf("jsonb marshaler: %w", err)
+	}
+
+	return jbButtons, nil
 }
 
 func ToDBMessageType(msgType messageprocessor.MessageType) MessageType {
@@ -80,7 +101,12 @@ func ToMessageType(mt MessageType) messageprocessor.MessageType {
 	return 0
 }
 
-func ToOutboxMessage(msg OutboxMessage) outboxprocessor.OutboxMessage {
+func ToOutboxMessage(msg OutboxMessage) (outboxprocessor.OutboxMessage, error) {
+	var buttons []button.ButtonRow
+	if err := jsonb.ConvertTo(msg.Button, &buttons); err != nil {
+		return outboxprocessor.OutboxMessage{}, fmt.Errorf("convert jsonb to button rows: %w", err)
+	}
+
 	return outboxprocessor.OutboxMessage{
 		ID: msg.ID,
 		Message: messageprocessor.Message{
@@ -90,19 +116,24 @@ func ToOutboxMessage(msg OutboxMessage) outboxprocessor.OutboxMessage {
 			Type:       ToMessageType(msg.Type),
 			Payload:    msg.Payload,
 		},
-	}
+	}, nil
 }
 
-func ToOutboxMessages(dbMsgs []OutboxMessage) []outboxprocessor.OutboxMessage {
+func ToOutboxMessages(dbMsgs []OutboxMessage) ([]outboxprocessor.OutboxMessage, error) {
 	if len(dbMsgs) == 0 {
-		return nil
+		return nil, nil
 	}
 
 	outboxMsgs := make([]outboxprocessor.OutboxMessage, 0, len(dbMsgs))
 
 	for _, m := range dbMsgs {
-		outboxMsgs = append(outboxMsgs, ToOutboxMessage(m))
+		outboxMsg, err := ToOutboxMessage(m)
+		if err != nil {
+			return nil, fmt.Errorf("make outbox message: %w", err)
+		}
+
+		outboxMsgs = append(outboxMsgs, outboxMsg)
 	}
 
-	return outboxMsgs
+	return outboxMsgs, nil
 }

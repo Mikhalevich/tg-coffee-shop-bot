@@ -34,12 +34,17 @@ func (p *Postgres) OutboxSelectForDispatchMessages(
 			FOR UPDATE SKIP LOCKED
 		`
 
-		messages []model.OutboxMessage
+		outboxMsgs []model.OutboxMessage
 	)
 
-	if err := sqlx.SelectContext(ctx, p.transactor.ExtContext(ctx), &messages, query, limit); err != nil {
+	if err := sqlx.SelectContext(ctx, p.transactor.ExtContext(ctx), &outboxMsgs, query, limit); err != nil {
 		return nil, fmt.Errorf("select messages: %w", err)
 	}
 
-	return model.ToOutboxMessages(messages), nil
+	msgs, err := model.ToOutboxMessages(outboxMsgs)
+	if err != nil {
+		return nil, fmt.Errorf("convert to outbox messages: %w", err)
+	}
+
+	return msgs, nil
 }
