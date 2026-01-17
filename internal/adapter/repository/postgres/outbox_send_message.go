@@ -35,16 +35,14 @@ func (p *Postgres) insertOutboxMessage(ctx context.Context, msg model.OutboxMess
 				msg_text,
 				msg_type,
 				payload,
-				buttons,
-				created_at
+				buttons
 			) VALUES (
 				:chat_id,
 				:reply_msg_id,
 				:msg_text,
 				:msg_type,
 				:payload,
-				:buttons,
-				:created_at
+				:buttons
 			)
 		`
 	)
