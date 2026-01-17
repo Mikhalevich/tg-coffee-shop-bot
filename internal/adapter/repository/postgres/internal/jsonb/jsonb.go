@@ -39,7 +39,7 @@ func (j JSONB) Value() (driver.Value, error) {
 		return "{}", nil
 	}
 
-	return j, nil
+	return string(j), nil
 }
 
 func ConvertTo[T any](j JSONB, v *T) error {
