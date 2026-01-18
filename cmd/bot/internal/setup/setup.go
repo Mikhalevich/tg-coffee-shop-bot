@@ -14,7 +14,7 @@ import (
 	"github.com/Mikhalevich/tg-coffee-shop-bot/cmd/bot/internal/app"
 	"github.com/Mikhalevich/tg-coffee-shop-bot/cmd/bot/internal/config"
 	"github.com/Mikhalevich/tg-coffee-shop-bot/internal/adapter/buttonrespository"
-	"github.com/Mikhalevich/tg-coffee-shop-bot/internal/adapter/cart"
+	"github.com/Mikhalevich/tg-coffee-shop-bot/internal/adapter/cartprovider"
 	"github.com/Mikhalevich/tg-coffee-shop-bot/internal/adapter/dailypositiongenerator"
 	"github.com/Mikhalevich/tg-coffee-shop-bot/internal/adapter/messagesender"
 	"github.com/Mikhalevich/tg-coffee-shop-bot/internal/adapter/qrcodegenerator"
@@ -31,7 +31,6 @@ import (
 	orderhistoryv2 "github.com/Mikhalevich/tg-coffee-shop-bot/internal/domain/customer/orderhistory/v2"
 	"github.com/Mikhalevich/tg-coffee-shop-bot/internal/domain/customer/orderpayment"
 	"github.com/Mikhalevich/tg-coffee-shop-bot/internal/domain/messageprocessor"
-	"github.com/Mikhalevich/tg-coffee-shop-bot/internal/domain/port"
 	"github.com/Mikhalevich/tg-coffee-shop-bot/internal/infra/logger"
 )
 
@@ -119,7 +118,7 @@ func MakeRedisButtonRepository(
 	return buttonrespository.New(rdb, cfg.TTL), nil
 }
 
-func MakeRedisCart(ctx context.Context, cfg config.CartRedis) (port.Cart, error) {
+func MakeRedisCart(ctx context.Context, cfg config.CartRedis) (cartprocessing.CartProvider, error) {
 	rdb := redis.NewClient(&redis.Options{
 		Addr:     cfg.Addr,
 		Password: cfg.Pwd,
@@ -134,13 +133,13 @@ func MakeRedisCart(ctx context.Context, cfg config.CartRedis) (port.Cart, error)
 		return nil, fmt.Errorf("redis ping: %w", err)
 	}
 
-	return cart.New(rdb, cfg.TTL), nil
+	return cartprovider.New(rdb, cfg.TTL), nil
 }
 
 func MakeRedisDailyPositionGenerator(
 	ctx context.Context,
 	cfg config.DailyPositionRedis,
-) (port.DailyPositionGenerator, error) {
+) (orderpayment.DailyPositionGenerator, error) {
 	rdb := redis.NewClient(&redis.Options{
 		Addr:     cfg.Addr,
 		Password: cfg.Pwd,

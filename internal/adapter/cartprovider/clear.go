@@ -1,4 +1,4 @@
-package cart
+package cartprovider
 
 import (
 	"context"
@@ -9,7 +9,7 @@ import (
 	"github.com/redis/go-redis/v9"
 )
 
-func (c *Cart) Clear(ctx context.Context, chatID msginfo.ChatID, cartID cart.ID) error {
+func (c *CartProvider) Clear(ctx context.Context, chatID msginfo.ChatID, cartID cart.ID) error {
 	if _, err := c.client.Pipelined(ctx, func(pipeline redis.Pipeliner) error {
 		if err := c.client.Del(ctx, makeCartIDKey(chatID)).Err(); err != nil {
 			return fmt.Errorf("cart id del: %w", err)

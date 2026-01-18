@@ -7,10 +7,10 @@ import (
 
 	"github.com/redis/go-redis/v9"
 
-	"github.com/Mikhalevich/tg-coffee-shop-bot/internal/domain/port"
+	"github.com/Mikhalevich/tg-coffee-shop-bot/internal/domain/customer/orderpayment"
 )
 
-var _ port.DailyPositionGenerator = (*RedisDeilyPositionGenerator)(nil)
+var _ orderpayment.DailyPositionGenerator = (*RedisDeilyPositionGenerator)(nil)
 
 type RedisDeilyPositionGenerator struct {
 	client *redis.Client

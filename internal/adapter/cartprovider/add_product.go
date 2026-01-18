@@ -1,4 +1,4 @@
-package cart
+package cartprovider
 
 import (
 	"bytes"
@@ -14,7 +14,7 @@ import (
 	"github.com/Mikhalevich/tg-coffee-shop-bot/internal/domain/port/product"
 )
 
-func (c *Cart) AddProduct(ctx context.Context, cartID cart.ID, p cart.CartProduct) error {
+func (c *CartProvider) AddProduct(ctx context.Context, cartID cart.ID, p cart.CartProduct) error {
 	encodedProduct, err := encodeCartProduct(cartProduct{
 		ProductID:  p.ProductID,
 		CategoryID: p.CategoryID,
@@ -59,7 +59,7 @@ func decodeCartProduct(s string) (cartProduct, error) {
 }
 
 // addProductToExistingList returns false is the list is not exists and true otherwise.
-func (c *Cart) addProductToExistingList(ctx context.Context, key string, data string) (bool, error) {
+func (c *CartProvider) addProductToExistingList(ctx context.Context, key string, data string) (bool, error) {
 	newLen, err := c.client.RPushX(ctx, key, data).Result()
 	if err != nil {
 		if errors.Is(err, redis.Nil) {
@@ -77,7 +77,7 @@ func (c *Cart) addProductToExistingList(ctx context.Context, key string, data st
 }
 
 //nolint:unused
-func (c *Cart) addProductToNotExistingList(ctx context.Context, key string, id product.ProductID) error {
+func (c *CartProvider) addProductToNotExistingList(ctx context.Context, key string, id product.ProductID) error {
 	if _, err := c.client.Pipelined(ctx, func(pipline redis.Pipeliner) error {
 		if err := pipline.RPush(ctx, key, id.String()).Err(); err != nil {
 			return fmt.Errorf("rpush: %w", err)

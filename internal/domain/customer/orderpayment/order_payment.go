@@ -5,7 +5,6 @@ import (
 	"time"
 
 	"github.com/Mikhalevich/tg-coffee-shop-bot/internal/domain/messageprocessor"
-	"github.com/Mikhalevich/tg-coffee-shop-bot/internal/domain/port"
 	"github.com/Mikhalevich/tg-coffee-shop-bot/internal/domain/port/currency"
 	"github.com/Mikhalevich/tg-coffee-shop-bot/internal/domain/port/msginfo"
 	"github.com/Mikhalevich/tg-coffee-shop-bot/internal/domain/port/order"
@@ -25,6 +24,10 @@ type MessageSender interface {
 
 type MarkdownEscaper interface {
 	EscapeMarkdown(s string) string
+}
+
+type QRCodeGenerator interface {
+	GeneratePNG(content string) ([]byte, error)
 }
 
 type Transactor interface {
@@ -66,6 +69,10 @@ type StoreInfo interface {
 	GetStoreByID(ctx context.Context, id store.ID) (*store.Store, error)
 }
 
+type DailyPositionGenerator interface {
+	Position(ctx context.Context, t time.Time) (int, error)
+}
+
 type TimeProvider interface {
 	Now() time.Time
 }
@@ -78,11 +85,11 @@ type OrderPayment struct {
 	storeID       store.ID
 	sender        MessageSender
 	escaper       MarkdownEscaper
-	qrCode        port.QRCodeGenerator
+	qrCode        QRCodeGenerator
 	transactor    Transactor
 	repository    Repository
 	storeInfo     StoreInfo
-	dailyPosition port.DailyPositionGenerator
+	dailyPosition DailyPositionGenerator
 	codeGenerator VerificationCodeGenerator
 	timeProvider  TimeProvider
 }
@@ -91,11 +98,11 @@ func New(
 	storeID int,
 	sender MessageSender,
 	escaper MarkdownEscaper,
-	qrCode port.QRCodeGenerator,
+	qrCode QRCodeGenerator,
 	transactor Transactor,
 	repository Repository,
 	storeInfo StoreInfo,
-	dailyPosition port.DailyPositionGenerator,
+	dailyPosition DailyPositionGenerator,
 	codeGenerator VerificationCodeGenerator,
 	timeProvider TimeProvider,
 ) *OrderPayment {
