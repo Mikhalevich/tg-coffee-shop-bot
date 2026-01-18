@@ -9,7 +9,6 @@ import (
 	"github.com/jmoiron/sqlx"
 
 	"github.com/Mikhalevich/tg-coffee-shop-bot/internal/adapter/repository/postgres/internal/model"
-	"github.com/Mikhalevich/tg-coffee-shop-bot/internal/domain/port"
 	"github.com/Mikhalevich/tg-coffee-shop-bot/internal/domain/port/msginfo"
 	"github.com/Mikhalevich/tg-coffee-shop-bot/internal/domain/port/order"
 )
@@ -18,7 +17,7 @@ func (p *Postgres) UpdateOrderByChatAndID(
 	ctx context.Context,
 	orderID order.ID,
 	chatID msginfo.ChatID,
-	data port.UpdateOrderData,
+	data order.UpdateOrderData,
 	prevStatuses ...order.Status,
 ) (*order.Order, error) {
 	var (
@@ -72,7 +71,7 @@ func updateOrderDataByChatAndID(
 	ext sqlx.ExtContext,
 	orderID order.ID,
 	chatID msginfo.ChatID,
-	data port.UpdateOrderData,
+	data order.UpdateOrderData,
 	prevStatuses ...order.Status,
 ) (*model.Order, error) {
 	query, args, err := sqlx.Named(`

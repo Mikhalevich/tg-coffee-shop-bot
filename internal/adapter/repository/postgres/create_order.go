@@ -7,11 +7,11 @@ import (
 	"github.com/jmoiron/sqlx"
 
 	"github.com/Mikhalevich/tg-coffee-shop-bot/internal/adapter/repository/postgres/internal/model"
-	"github.com/Mikhalevich/tg-coffee-shop-bot/internal/domain/port"
+	"github.com/Mikhalevich/tg-coffee-shop-bot/internal/domain/customer/cartprocessing"
 	"github.com/Mikhalevich/tg-coffee-shop-bot/internal/domain/port/order"
 )
 
-func (p *Postgres) CreateOrder(ctx context.Context, coi port.CreateOrderInput) (*order.Order, error) {
+func (p *Postgres) CreateOrder(ctx context.Context, coi cartprocessing.CreateOrderInput) (*order.Order, error) {
 	var orderResult order.Order
 
 	if err := p.transactor.Transaction(ctx, func(ctx context.Context) error {
@@ -52,7 +52,7 @@ func (p *Postgres) CreateOrder(ctx context.Context, coi port.CreateOrderInput) (
 	return &orderResult, nil
 }
 
-func convertToOrder(id order.ID, input port.CreateOrderInput) order.Order {
+func convertToOrder(id order.ID, input cartprocessing.CreateOrderInput) order.Order {
 	return order.Order{
 		ID:               id,
 		ChatID:           input.ChatID,

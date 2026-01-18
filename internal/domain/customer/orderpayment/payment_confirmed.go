@@ -7,7 +7,6 @@ import (
 	"time"
 
 	"github.com/Mikhalevich/tg-coffee-shop-bot/internal/domain/messageprocessor"
-	"github.com/Mikhalevich/tg-coffee-shop-bot/internal/domain/port"
 	"github.com/Mikhalevich/tg-coffee-shop-bot/internal/domain/port/currency"
 	"github.com/Mikhalevich/tg-coffee-shop-bot/internal/domain/port/msginfo"
 	"github.com/Mikhalevich/tg-coffee-shop-bot/internal/domain/port/order"
@@ -34,7 +33,7 @@ func (p *OrderPayment) PaymentConfirmed(
 			ctx,
 			orderID,
 			chatID,
-			port.UpdateOrderData{
+			order.UpdateOrderData{
 				Status:              order.StatusConfirmed,
 				StatusOperationTime: now,
 				VerificationCode:    p.codeGenerator.Generate(),

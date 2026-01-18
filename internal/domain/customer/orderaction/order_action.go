@@ -5,8 +5,10 @@ import (
 	"time"
 
 	"github.com/Mikhalevich/tg-coffee-shop-bot/internal/domain/messageprocessor/button"
-	"github.com/Mikhalevich/tg-coffee-shop-bot/internal/domain/port"
+	"github.com/Mikhalevich/tg-coffee-shop-bot/internal/domain/port/currency"
 	"github.com/Mikhalevich/tg-coffee-shop-bot/internal/domain/port/msginfo"
+	"github.com/Mikhalevich/tg-coffee-shop-bot/internal/domain/port/order"
+	"github.com/Mikhalevich/tg-coffee-shop-bot/internal/domain/port/product"
 	"github.com/Mikhalevich/tg-coffee-shop-bot/internal/infra/logger"
 )
 
@@ -46,19 +48,54 @@ type MessageSender interface {
 	EscapeMarkdown(s string) string
 }
 
+type Repository interface {
+	GetOrderByID(ctx context.Context, id order.ID) (*order.Order, error)
+	GetOrderByChatIDAndStatus(ctx context.Context, id msginfo.ChatID, statuses ...order.Status) (*order.Order, error)
+	GetCurrencyByID(ctx context.Context, id currency.ID) (*currency.Currency, error)
+
+	GetProductsByIDs(
+		ctx context.Context,
+		ids []product.ProductID,
+		currencyID currency.ID,
+	) (map[product.ProductID]product.Product, error)
+
+	GetOrderPositionByStatus(ctx context.Context, id order.ID, statuses ...order.Status) (int, error)
+	GetOrdersCountByStatus(ctx context.Context, statuses ...order.Status) (int, error)
+
+	UpdateOrderByChatAndID(
+		ctx context.Context,
+		orderID order.ID,
+		chatID msginfo.ChatID,
+		data order.UpdateOrderData,
+		prevStatuses ...order.Status,
+	) (*order.Order, error)
+
+	UpdateOrderStatusByChatAndID(
+		ctx context.Context,
+		orderID order.ID,
+		chatID msginfo.ChatID,
+		operationTime time.Time,
+		newStatus order.Status,
+		prevStatuses ...order.Status,
+	) (*order.Order, error)
+
+	IsNotFoundError(err error) bool
+	IsNotUpdatedError(err error) bool
+}
+
 type TimeProvider interface {
 	Now() time.Time
 }
 
 type OrderAction struct {
 	sender       MessageSender
-	repository   port.CustomerOrderActionRepository
+	repository   Repository
 	timeProvider TimeProvider
 }
 
 func New(
 	sender MessageSender,
-	repository port.CustomerOrderActionRepository,
+	repository Repository,
 	timeProvider TimeProvider,
 ) *OrderAction {
 	return &OrderAction{

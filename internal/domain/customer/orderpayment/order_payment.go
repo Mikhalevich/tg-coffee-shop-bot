@@ -47,7 +47,7 @@ type Repository interface {
 		ctx context.Context,
 		orderID order.ID,
 		chatID msginfo.ChatID,
-		data port.UpdateOrderData,
+		data order.UpdateOrderData,
 		prevStatuses ...order.Status,
 	) (*order.Order, error)
 
