@@ -7,7 +7,6 @@ import (
 
 	"github.com/Mikhalevich/tg-coffee-shop-bot/internal/domain/internal/message"
 	"github.com/Mikhalevich/tg-coffee-shop-bot/internal/domain/messageprocessor/button"
-	"github.com/Mikhalevich/tg-coffee-shop-bot/internal/domain/port"
 	"github.com/Mikhalevich/tg-coffee-shop-bot/internal/domain/port/cart"
 	"github.com/Mikhalevich/tg-coffee-shop-bot/internal/domain/port/currency"
 	"github.com/Mikhalevich/tg-coffee-shop-bot/internal/domain/port/msginfo"
@@ -120,13 +119,13 @@ func (c *CartProcessing) makeCreateOrderInput(
 	chatID msginfo.ChatID,
 	orderedProducts []order.OrderedProduct,
 	currencyID currency.ID,
-) port.CreateOrderInput {
+) CreateOrderInput {
 	totalPrice := 0
 	for _, v := range orderedProducts {
 		totalPrice += v.Count * v.Price
 	}
 
-	return port.CreateOrderInput{
+	return CreateOrderInput{
 		ChatID:              chatID,
 		Status:              order.StatusWaitingPayment,
 		StatusOperationTime: c.timeProvider.Now(),

@@ -15,7 +15,10 @@ import (
 	time "time"
 
 	button "github.com/Mikhalevich/tg-coffee-shop-bot/internal/domain/messageprocessor/button"
+	currency "github.com/Mikhalevich/tg-coffee-shop-bot/internal/domain/port/currency"
 	msginfo "github.com/Mikhalevich/tg-coffee-shop-bot/internal/domain/port/msginfo"
+	order "github.com/Mikhalevich/tg-coffee-shop-bot/internal/domain/port/order"
+	product "github.com/Mikhalevich/tg-coffee-shop-bot/internal/domain/port/product"
 	gomock "go.uber.org/mock/gomock"
 )
 
@@ -145,6 +148,203 @@ func (mr *MockMessageSenderMockRecorder) SendTextPlain(ctx, chatID, text any, ro
 	mr.mock.ctrl.T.Helper()
 	varargs := append([]any{ctx, chatID, text}, rows...)
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SendTextPlain", reflect.TypeOf((*MockMessageSender)(nil).SendTextPlain), varargs...)
+}
+
+// MockRepository is a mock of Repository interface.
+type MockRepository struct {
+	ctrl     *gomock.Controller
+	recorder *MockRepositoryMockRecorder
+	isgomock struct{}
+}
+
+// MockRepositoryMockRecorder is the mock recorder for MockRepository.
+type MockRepositoryMockRecorder struct {
+	mock *MockRepository
+}
+
+// NewMockRepository creates a new mock instance.
+func NewMockRepository(ctrl *gomock.Controller) *MockRepository {
+	mock := &MockRepository{ctrl: ctrl}
+	mock.recorder = &MockRepositoryMockRecorder{mock}
+	return mock
+}
+
+// EXPECT returns an object that allows the caller to indicate expected use.
+func (m *MockRepository) EXPECT() *MockRepositoryMockRecorder {
+	return m.recorder
+}
+
+// GetCurrencyByID mocks base method.
+func (m *MockRepository) GetCurrencyByID(ctx context.Context, id currency.ID) (*currency.Currency, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetCurrencyByID", ctx, id)
+	ret0, _ := ret[0].(*currency.Currency)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetCurrencyByID indicates an expected call of GetCurrencyByID.
+func (mr *MockRepositoryMockRecorder) GetCurrencyByID(ctx, id any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetCurrencyByID", reflect.TypeOf((*MockRepository)(nil).GetCurrencyByID), ctx, id)
+}
+
+// GetOrderByChatIDAndStatus mocks base method.
+func (m *MockRepository) GetOrderByChatIDAndStatus(ctx context.Context, id msginfo.ChatID, statuses ...order.Status) (*order.Order, error) {
+	m.ctrl.T.Helper()
+	varargs := []any{ctx, id}
+	for _, a := range statuses {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "GetOrderByChatIDAndStatus", varargs...)
+	ret0, _ := ret[0].(*order.Order)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetOrderByChatIDAndStatus indicates an expected call of GetOrderByChatIDAndStatus.
+func (mr *MockRepositoryMockRecorder) GetOrderByChatIDAndStatus(ctx, id any, statuses ...any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]any{ctx, id}, statuses...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetOrderByChatIDAndStatus", reflect.TypeOf((*MockRepository)(nil).GetOrderByChatIDAndStatus), varargs...)
+}
+
+// GetOrderByID mocks base method.
+func (m *MockRepository) GetOrderByID(ctx context.Context, id order.ID) (*order.Order, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetOrderByID", ctx, id)
+	ret0, _ := ret[0].(*order.Order)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetOrderByID indicates an expected call of GetOrderByID.
+func (mr *MockRepositoryMockRecorder) GetOrderByID(ctx, id any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetOrderByID", reflect.TypeOf((*MockRepository)(nil).GetOrderByID), ctx, id)
+}
+
+// GetOrderPositionByStatus mocks base method.
+func (m *MockRepository) GetOrderPositionByStatus(ctx context.Context, id order.ID, statuses ...order.Status) (int, error) {
+	m.ctrl.T.Helper()
+	varargs := []any{ctx, id}
+	for _, a := range statuses {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "GetOrderPositionByStatus", varargs...)
+	ret0, _ := ret[0].(int)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetOrderPositionByStatus indicates an expected call of GetOrderPositionByStatus.
+func (mr *MockRepositoryMockRecorder) GetOrderPositionByStatus(ctx, id any, statuses ...any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]any{ctx, id}, statuses...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetOrderPositionByStatus", reflect.TypeOf((*MockRepository)(nil).GetOrderPositionByStatus), varargs...)
+}
+
+// GetOrdersCountByStatus mocks base method.
+func (m *MockRepository) GetOrdersCountByStatus(ctx context.Context, statuses ...order.Status) (int, error) {
+	m.ctrl.T.Helper()
+	varargs := []any{ctx}
+	for _, a := range statuses {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "GetOrdersCountByStatus", varargs...)
+	ret0, _ := ret[0].(int)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetOrdersCountByStatus indicates an expected call of GetOrdersCountByStatus.
+func (mr *MockRepositoryMockRecorder) GetOrdersCountByStatus(ctx any, statuses ...any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]any{ctx}, statuses...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetOrdersCountByStatus", reflect.TypeOf((*MockRepository)(nil).GetOrdersCountByStatus), varargs...)
+}
+
+// GetProductsByIDs mocks base method.
+func (m *MockRepository) GetProductsByIDs(ctx context.Context, ids []product.ProductID, currencyID currency.ID) (map[product.ProductID]product.Product, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetProductsByIDs", ctx, ids, currencyID)
+	ret0, _ := ret[0].(map[product.ProductID]product.Product)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetProductsByIDs indicates an expected call of GetProductsByIDs.
+func (mr *MockRepositoryMockRecorder) GetProductsByIDs(ctx, ids, currencyID any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetProductsByIDs", reflect.TypeOf((*MockRepository)(nil).GetProductsByIDs), ctx, ids, currencyID)
+}
+
+// IsNotFoundError mocks base method.
+func (m *MockRepository) IsNotFoundError(err error) bool {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "IsNotFoundError", err)
+	ret0, _ := ret[0].(bool)
+	return ret0
+}
+
+// IsNotFoundError indicates an expected call of IsNotFoundError.
+func (mr *MockRepositoryMockRecorder) IsNotFoundError(err any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "IsNotFoundError", reflect.TypeOf((*MockRepository)(nil).IsNotFoundError), err)
+}
+
+// IsNotUpdatedError mocks base method.
+func (m *MockRepository) IsNotUpdatedError(err error) bool {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "IsNotUpdatedError", err)
+	ret0, _ := ret[0].(bool)
+	return ret0
+}
+
+// IsNotUpdatedError indicates an expected call of IsNotUpdatedError.
+func (mr *MockRepositoryMockRecorder) IsNotUpdatedError(err any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "IsNotUpdatedError", reflect.TypeOf((*MockRepository)(nil).IsNotUpdatedError), err)
+}
+
+// UpdateOrderByChatAndID mocks base method.
+func (m *MockRepository) UpdateOrderByChatAndID(ctx context.Context, orderID order.ID, chatID msginfo.ChatID, data order.UpdateOrderData, prevStatuses ...order.Status) (*order.Order, error) {
+	m.ctrl.T.Helper()
+	varargs := []any{ctx, orderID, chatID, data}
+	for _, a := range prevStatuses {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "UpdateOrderByChatAndID", varargs...)
+	ret0, _ := ret[0].(*order.Order)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// UpdateOrderByChatAndID indicates an expected call of UpdateOrderByChatAndID.
+func (mr *MockRepositoryMockRecorder) UpdateOrderByChatAndID(ctx, orderID, chatID, data any, prevStatuses ...any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]any{ctx, orderID, chatID, data}, prevStatuses...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateOrderByChatAndID", reflect.TypeOf((*MockRepository)(nil).UpdateOrderByChatAndID), varargs...)
+}
+
+// UpdateOrderStatusByChatAndID mocks base method.
+func (m *MockRepository) UpdateOrderStatusByChatAndID(ctx context.Context, orderID order.ID, chatID msginfo.ChatID, operationTime time.Time, newStatus order.Status, prevStatuses ...order.Status) (*order.Order, error) {
+	m.ctrl.T.Helper()
+	varargs := []any{ctx, orderID, chatID, operationTime, newStatus}
+	for _, a := range prevStatuses {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "UpdateOrderStatusByChatAndID", varargs...)
+	ret0, _ := ret[0].(*order.Order)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// UpdateOrderStatusByChatAndID indicates an expected call of UpdateOrderStatusByChatAndID.
+func (mr *MockRepositoryMockRecorder) UpdateOrderStatusByChatAndID(ctx, orderID, chatID, operationTime, newStatus any, prevStatuses ...any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]any{ctx, orderID, chatID, operationTime, newStatus}, prevStatuses...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateOrderStatusByChatAndID", reflect.TypeOf((*MockRepository)(nil).UpdateOrderStatusByChatAndID), varargs...)
 }
 
 // MockTimeProvider is a mock of TimeProvider interface.

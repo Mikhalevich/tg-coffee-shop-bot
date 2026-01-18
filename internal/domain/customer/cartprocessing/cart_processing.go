@@ -6,12 +6,40 @@ import (
 
 	"github.com/Mikhalevich/tg-coffee-shop-bot/internal/domain/messageprocessor/button"
 	"github.com/Mikhalevich/tg-coffee-shop-bot/internal/domain/port"
+	"github.com/Mikhalevich/tg-coffee-shop-bot/internal/domain/port/currency"
 	"github.com/Mikhalevich/tg-coffee-shop-bot/internal/domain/port/msginfo"
 	"github.com/Mikhalevich/tg-coffee-shop-bot/internal/domain/port/order"
 	"github.com/Mikhalevich/tg-coffee-shop-bot/internal/domain/port/product"
 	"github.com/Mikhalevich/tg-coffee-shop-bot/internal/domain/port/store"
 	"github.com/Mikhalevich/tg-coffee-shop-bot/internal/infra/logger"
 )
+
+type CreateOrderInput struct {
+	ChatID              msginfo.ChatID
+	Status              order.Status
+	StatusOperationTime time.Time
+	VerificationCode    string
+	TotalPrice          int
+	Products            []order.OrderedProduct
+	CurrencyID          currency.ID
+}
+
+type Repository interface {
+	CreateOrder(ctx context.Context, coi CreateOrderInput) (*order.Order, error)
+	GetCategories(ctx context.Context) ([]product.Category, error)
+	GetProductsByCategoryID(
+		ctx context.Context,
+		categoryID product.CategoryID,
+		currencyID currency.ID,
+	) ([]product.Product, error)
+	GetProductsByIDs(
+		ctx context.Context,
+		ids []product.ProductID,
+		currencyID currency.ID,
+	) (map[product.ProductID]product.Product, error)
+	GetCurrencyByID(ctx context.Context, id currency.ID) (*currency.Currency, error)
+	IsAlreadyExistsError(err error) bool
+}
 
 type StoreInfo interface {
 	GetStoreByID(ctx context.Context, id store.ID) (*store.Store, error)
@@ -61,7 +89,7 @@ type TimeProvider interface {
 
 type CartProcessing struct {
 	storeID      store.ID
-	repository   port.CustomerCartRepository
+	repository   Repository
 	storeInfo    StoreInfo
 	cart         port.Cart
 	sender       MessageSender
@@ -70,7 +98,7 @@ type CartProcessing struct {
 
 func New(
 	storeID int,
-	repository port.CustomerCartRepository,
+	repository Repository,
 	storeInfo StoreInfo,
 	cart port.Cart,
 	sender MessageSender,

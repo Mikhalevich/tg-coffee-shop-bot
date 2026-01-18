@@ -7,7 +7,6 @@ import (
 	"go.uber.org/mock/gomock"
 
 	"github.com/Mikhalevich/tg-coffee-shop-bot/internal/domain/customer/orderaction"
-	"github.com/Mikhalevich/tg-coffee-shop-bot/internal/domain/port"
 )
 
 type OrderActionSuite struct {
@@ -16,7 +15,7 @@ type OrderActionSuite struct {
 	ctrl *gomock.Controller
 
 	sender     *orderaction.MockMessageSender
-	repository *port.MockCustomerOrderActionRepository
+	repository *orderaction.MockRepository
 
 	orderAction *orderaction.OrderAction
 }
@@ -32,7 +31,7 @@ func (s *OrderActionSuite) SetupSuite() {
 	s.ctrl = gomock.NewController(s.T())
 
 	s.sender = orderaction.NewMockMessageSender(s.ctrl)
-	s.repository = port.NewMockCustomerOrderActionRepository(s.ctrl)
+	s.repository = orderaction.NewMockRepository(s.ctrl)
 
 	s.orderAction = orderaction.New(s.sender, s.repository, nil)
 }

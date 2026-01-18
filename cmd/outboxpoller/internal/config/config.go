@@ -3,12 +3,13 @@ package config
 import "time"
 
 type Config struct {
-	LogLevel    string      `yaml:"log_level" required:"true"`
-	Tracing     Tracing     `yaml:"tracing" required:"true"`
-	Postgres    Postgres    `yaml:"postgres" required:"true"`
-	Bot         Bot         `yaml:"bot" required:"true"`
-	ButtonRedis ButtonRedis `yaml:"button_redis" required:"true"`
-	Worker      Worker      `yaml:"worker" required:"true"`
+	LogLevel            string      `yaml:"log_level" required:"true"`
+	Tracing             Tracing     `yaml:"tracing" required:"true"`
+	Postgres            Postgres    `yaml:"postgres" required:"true"`
+	Bot                 Bot         `yaml:"bot" required:"true"`
+	ButtonRedis         ButtonRedis `yaml:"button_redis" required:"true"`
+	MessageWorker       Worker      `yaml:"message_worker" required:"true"`
+	AnswerPaymentWorker Worker      `yaml:"answer_payment_worker" required:"true"`
 }
 
 type Tracing struct {
