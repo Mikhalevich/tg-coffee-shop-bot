@@ -1,4 +1,4 @@
-package cart
+package cartprovider
 
 import (
 	"context"
@@ -16,7 +16,7 @@ const (
 	emptyListPlaceholder = "empty_list_placeholder"
 )
 
-func (c *Cart) StartNewCart(ctx context.Context, chatID msginfo.ChatID) (cart.ID, error) {
+func (c *CartProvider) StartNewCart(ctx context.Context, chatID msginfo.ChatID) (cart.ID, error) {
 	var (
 		cartIDKey       = makeCartIDKey(chatID)
 		cartNewID       = generateID()
@@ -55,7 +55,7 @@ func (c *Cart) StartNewCart(ctx context.Context, chatID msginfo.ChatID) (cart.ID
 	return cart.IDFromString(cartNewID), nil
 }
 
-func (c *Cart) activeCartID(ctx context.Context, chatID msginfo.ChatID) (cart.ID, error) {
+func (c *CartProvider) activeCartID(ctx context.Context, chatID msginfo.ChatID) (cart.ID, error) {
 	cartID, err := c.client.Get(ctx, makeCartIDKey(chatID)).Result()
 	if err != nil {
 		if errors.Is(err, redis.Nil) {

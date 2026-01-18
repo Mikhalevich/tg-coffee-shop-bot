@@ -1,4 +1,4 @@
-package cart
+package cartprovider
 
 import (
 	"context"
@@ -9,7 +9,7 @@ import (
 	"github.com/Mikhalevich/tg-coffee-shop-bot/internal/domain/port/cart"
 )
 
-func (c *Cart) GetProducts(ctx context.Context, id cart.ID) ([]cart.CartProduct, error) {
+func (c *CartProvider) GetProducts(ctx context.Context, id cart.ID) ([]cart.CartProduct, error) {
 	items, err := c.client.LRange(ctx, makeCartProductsKey(id.String()), 0, -1).Result()
 	if err != nil {
 		return nil, fmt.Errorf("lrange: %w", err)

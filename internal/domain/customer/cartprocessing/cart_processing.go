@@ -5,7 +5,7 @@ import (
 	"time"
 
 	"github.com/Mikhalevich/tg-coffee-shop-bot/internal/domain/messageprocessor/button"
-	"github.com/Mikhalevich/tg-coffee-shop-bot/internal/domain/port"
+	"github.com/Mikhalevich/tg-coffee-shop-bot/internal/domain/port/cart"
 	"github.com/Mikhalevich/tg-coffee-shop-bot/internal/domain/port/currency"
 	"github.com/Mikhalevich/tg-coffee-shop-bot/internal/domain/port/msginfo"
 	"github.com/Mikhalevich/tg-coffee-shop-bot/internal/domain/port/order"
@@ -43,6 +43,14 @@ type Repository interface {
 
 type StoreInfo interface {
 	GetStoreByID(ctx context.Context, id store.ID) (*store.Store, error)
+}
+
+type CartProvider interface {
+	StartNewCart(ctx context.Context, chatID msginfo.ChatID) (cart.ID, error)
+	GetProducts(ctx context.Context, id cart.ID) ([]cart.CartProduct, error)
+	AddProduct(ctx context.Context, id cart.ID, p cart.CartProduct) error
+	Clear(ctx context.Context, chatID msginfo.ChatID, cartID cart.ID) error
+	IsNotFoundError(err error) bool
 }
 
 type MessageSender interface {
@@ -91,7 +99,7 @@ type CartProcessing struct {
 	storeID      store.ID
 	repository   Repository
 	storeInfo    StoreInfo
-	cart         port.Cart
+	cart         CartProvider
 	sender       MessageSender
 	timeProvider TimeProvider
 }
@@ -100,7 +108,7 @@ func New(
 	storeID int,
 	repository Repository,
 	storeInfo StoreInfo,
-	cart port.Cart,
+	cart CartProvider,
 	sender MessageSender,
 	timeProvider TimeProvider,
 ) *CartProcessing {
