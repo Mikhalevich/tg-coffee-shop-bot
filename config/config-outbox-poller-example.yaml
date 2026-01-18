@@ -12,7 +12,11 @@ button_redis:
   pwd: "redis123"
   db: 1
   ttl: 1h
-worker:
+message_worker:
   count: 4
   interval: 5s
+  batch_size: 100
+answer_payment_worker:
+  count: 2
+  interval: 1s
   batch_size: 100

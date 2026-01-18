@@ -6,6 +6,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/Mikhalevich/tg-coffee-shop-bot/internal/domain/messageprocessor"
 	"github.com/Mikhalevich/tg-coffee-shop-bot/internal/domain/port"
 	"github.com/Mikhalevich/tg-coffee-shop-bot/internal/domain/port/currency"
 	"github.com/Mikhalevich/tg-coffee-shop-bot/internal/domain/port/msginfo"
@@ -28,26 +29,32 @@ func (p *OrderPayment) PaymentConfirmed(
 		return fmt.Errorf("daily position: %w", err)
 	}
 
-	ord, err := p.repository.UpdateOrderByChatAndID(
-		ctx,
-		orderID,
-		chatID,
-		port.UpdateOrderData{
-			Status:              order.StatusConfirmed,
-			StatusOperationTime: now,
-			VerificationCode:    p.codeGenerator.Generate(),
-			DailyPosition:       position,
-		},
-		order.StatusPaymentInProgress,
-	)
-	if err != nil {
-		return fmt.Errorf("update order status: %w", err)
-	}
+	if err := p.transactor.Transaction(ctx, func(ctx context.Context) error {
+		ord, err := p.repository.UpdateOrderByChatAndID(
+			ctx,
+			orderID,
+			chatID,
+			port.UpdateOrderData{
+				Status:              order.StatusConfirmed,
+				StatusOperationTime: now,
+				VerificationCode:    p.codeGenerator.Generate(),
+				DailyPosition:       position,
+			},
+			order.StatusPaymentInProgress,
+		)
+		if err != nil {
+			return fmt.Errorf("update order status: %w", err)
+		}
 
-	queuePosition := p.orderQueuePosition(ctx, ord)
+		queuePosition := p.orderQueuePosition(ctx, ord)
 
-	if err := p.sendOrderQRImage(ctx, chatID, ord, queuePosition); err != nil {
-		return fmt.Errorf("send order qr: %w", err)
+		if err := p.sendOrderQRImage(ctx, chatID, ord, queuePosition); err != nil {
+			return fmt.Errorf("send order qr: %w", err)
+		}
+
+		return nil
+	}); err != nil {
+		return fmt.Errorf("transaction: %w", err)
 	}
 
 	return nil
@@ -74,11 +81,14 @@ func (p *OrderPayment) sendOrderQRImage(
 		return fmt.Errorf("get currency by id: %w", err)
 	}
 
-	if err := p.sender.SendPNG(
+	if err := p.sender.SendMessage(
 		ctx,
-		chatID,
-		formatOrder(ord, curr, productsInfo, queuePosition, p.sender.EscapeMarkdown),
-		png,
+		messageprocessor.Message{
+			ChatID:  chatID,
+			Text:    formatOrder(ord, curr, productsInfo, queuePosition, p.escaper.EscapeMarkdown),
+			Type:    messageprocessor.MessageTypePNG,
+			Payload: png,
+		},
 	); err != nil {
 		return fmt.Errorf("send png: %w", err)
 	}

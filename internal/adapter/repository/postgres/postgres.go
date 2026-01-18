@@ -9,6 +9,7 @@ import (
 	"github.com/Mikhalevich/tg-coffee-shop-bot/internal/domain/customer/orderhistory"
 	"github.com/Mikhalevich/tg-coffee-shop-bot/internal/domain/customer/orderpayment"
 	"github.com/Mikhalevich/tg-coffee-shop-bot/internal/domain/manager/orderprocessing"
+	"github.com/Mikhalevich/tg-coffee-shop-bot/internal/domain/outboxprocessor"
 	"github.com/Mikhalevich/tg-coffee-shop-bot/internal/domain/port"
 )
 
@@ -24,6 +25,8 @@ var (
 	_ orderhistory.CurrencyProvider               = (*Postgres)(nil)
 	_ orderprocessing.Repository                  = (*Postgres)(nil)
 	_ orderprocessing.CustomerOutboxMessageSender = (*Postgres)(nil)
+
+	_ outboxprocessor.Repository = (*Postgres)(nil)
 )
 
 type Driver interface {

@@ -29,13 +29,21 @@ func (p *OrderPayment) PaymentInProgress(
 		return nil
 	}
 
-	res, err := p.setOrderInProgress(ctx, orderID, totalAmount)
-	if err != nil {
-		return fmt.Errorf("set order in progress: %w", err)
-	}
+	if err := p.transactor.Transaction(ctx,
+		func(ctx context.Context) error {
+			res, err := p.setOrderInProgress(ctx, orderID, totalAmount)
+			if err != nil {
+				return fmt.Errorf("set order in progress: %w", err)
+			}
 
-	if err := p.sender.AnswerOrderPayment(ctx, paymentID, res.OK, res.ErrorMsg); err != nil {
-		return fmt.Errorf("answer order payment: %w", err)
+			if err := p.sender.AnswerOrderPayment(ctx, paymentID, res.OK, res.ErrorMsg); err != nil {
+				return fmt.Errorf("answer order payment: %w", err)
+			}
+
+			return nil
+		},
+	); err != nil {
+		return fmt.Errorf("transaction: %w", err)
 	}
 
 	return nil

@@ -55,7 +55,7 @@ func StartPoller(
 		)
 	)
 
-	app.New(outboxProcessor).Run(ctx, cfg.Worker.Count, cfg.Worker.Interval, cfg.Worker.BatchSize)
+	app.New(outboxProcessor).Run(ctx, cfg.MessageWorker, cfg.AnswerPaymentWorker)
 
 	return nil
 }

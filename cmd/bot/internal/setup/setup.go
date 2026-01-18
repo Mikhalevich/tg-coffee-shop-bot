@@ -71,13 +71,14 @@ func StartBot(ctx context.Context, cfg config.Config, logger logger.Logger) erro
 		sender              = messagesender.New(botAPI, cfg.Bot.PaymentToken)
 		msgProcessor        = messageprocessor.New(sender, sender, buttonRepository)
 		qrGenerator         = qrcodegenerator.New()
+		timeProvider        = timeprovider.New()
 		cartProcessor       = cartprocessing.New(cfg.StoreID, pgDB, pgDB, cartRedis, msgProcessor,
-			timeprovider.New())
-		actionProcessor    = orderaction.New(msgProcessor, pgDB, timeprovider.New())
+			timeProvider)
+		actionProcessor    = orderaction.New(msgProcessor, pgDB, timeProvider)
 		historyProcessor   = orderhistory.New(pgDB, pgOrderHistoryID, msgProcessor, cfg.OrderHistory.PageSize)
 		historyProcessorV2 = orderhistoryv2.New(pgOrderHistoryPage, pgDB, msgProcessor, cfg.OrderHistory.PageSize)
-		paymentProcessor   = orderpayment.New(cfg.StoreID, msgProcessor, qrGenerator, pgDB, pgDB,
-			dailyPosition, verificationcodegenerator.New(), timeprovider.New())
+		paymentProcessor   = orderpayment.New(cfg.StoreID, pgDB, msgProcessor, qrGenerator,
+			pgDB.Transactor(), pgDB, pgDB, dailyPosition, verificationcodegenerator.New(), timeProvider)
 	)
 
 	if err := app.Start(

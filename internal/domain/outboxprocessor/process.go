@@ -4,6 +4,8 @@ import (
 	"context"
 	"errors"
 	"fmt"
+
+	"github.com/Mikhalevich/tg-coffee-shop-bot/internal/infra/logger"
 )
 
 func (o *OutboxProcessor) Process(ctx context.Context, batchSize int) error {
@@ -19,6 +21,16 @@ func (o *OutboxProcessor) Process(ctx context.Context, batchSize int) error {
 		)
 
 		for _, msg := range msgs {
+			logger.FromContext(ctx).
+				WithFields(
+					logger.Fields{
+						"chat_id":  msg.ChatID,
+						"text":     msg.Text,
+						"msg_type": msg.Type,
+					},
+				).
+				Debug("send message")
+
 			if err := o.sender.SendMessage(ctx, msg.Message); err != nil {
 				errs = errors.Join(errs, fmt.Errorf("send message: %w", err))
 

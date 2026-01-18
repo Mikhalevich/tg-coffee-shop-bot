@@ -13,6 +13,13 @@ type OutboxMessage struct {
 	ID int
 }
 
+type OutboxAnswerPayment struct {
+	ID        int
+	PaymentID string
+	OK        bool
+	ErrorMsg  string
+}
+
 type Transactor interface {
 	Transaction(
 		ctx context.Context,
@@ -25,7 +32,19 @@ type Repository interface {
 		ctx context.Context,
 		limit int,
 	) ([]OutboxMessage, error)
+
 	OutboxSetDispatched(
+		ctx context.Context,
+		ids []int,
+		dispatchedAt time.Time,
+	) error
+
+	OutboxSelectForDispatchAnswerPayment(
+		ctx context.Context,
+		limit int,
+	) ([]OutboxAnswerPayment, error)
+
+	OutboxSetAnswerPaymentDispatched(
 		ctx context.Context,
 		ids []int,
 		dispatchedAt time.Time,
@@ -36,6 +55,13 @@ type Sender interface {
 	SendMessage(
 		ctx context.Context,
 		msg messageprocessor.Message,
+	) error
+
+	AnswerOrderPayment(
+		ctx context.Context,
+		paymentID string,
+		ok bool,
+		errorMsg string,
 	) error
 }
 
