@@ -10,7 +10,7 @@ import (
 )
 
 type Processor interface {
-	Process(ctx context.Context, batchSize int) error
+	ProcessMessage(ctx context.Context, batchSize int) error
 	ProcessAnswerPayment(ctx context.Context, batchSize int) error
 }
 
@@ -31,41 +31,42 @@ func (a *App) Run(
 ) {
 	var wgr sync.WaitGroup
 
-	for i := range messageCfg.Count {
-		wgr.Go(func() {
-			log := logger.FromContext(ctx).
-				WithFields(logger.Fields{
-					"worker_name":   "message",
-					"worker_number": i,
-				})
-			runPoller(
-				logger.WithLogger(ctx, log),
-				messageCfg.Interval,
-				func(ctx context.Context) error {
-					return a.processor.Process(ctx, messageCfg.BatchSize)
-				},
-			)
-		})
-	}
+	runWorkers(ctx, "message", messageCfg, &wgr,
+		func(ctx context.Context) error {
+			return a.processor.ProcessMessage(ctx, messageCfg.BatchSize)
+		},
+	)
 
-	for i := range answerPaymentCfg.Count {
-		wgr.Go(func() {
-			log := logger.FromContext(ctx).
-				WithFields(logger.Fields{
-					"worker_name":   "answer_payment",
-					"worker_number": i,
-				})
-			runPoller(
-				logger.WithLogger(ctx, log),
-				answerPaymentCfg.Interval,
-				func(ctx context.Context) error {
-					return a.processor.ProcessAnswerPayment(ctx, messageCfg.BatchSize)
-				},
-			)
-		})
-	}
+	runWorkers(ctx, "answer_payment", answerPaymentCfg, &wgr,
+		func(ctx context.Context) error {
+			return a.processor.ProcessAnswerPayment(ctx, messageCfg.BatchSize)
+		},
+	)
 
 	wgr.Wait()
+}
+
+func runWorkers(
+	ctx context.Context,
+	workerName string,
+	cfg config.Worker,
+	wgr *sync.WaitGroup,
+	processFn func(ctx context.Context) error,
+) {
+	for i := range cfg.Count {
+		wgr.Go(func() {
+			log := logger.FromContext(ctx).
+				WithFields(logger.Fields{
+					"worker_name":   workerName,
+					"worker_number": i,
+				})
+			runPoller(
+				logger.WithLogger(ctx, log),
+				cfg.Interval,
+				processFn,
+			)
+		})
+	}
 }
 
 func runPoller(
