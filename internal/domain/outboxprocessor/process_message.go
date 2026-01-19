@@ -8,7 +8,7 @@ import (
 	"github.com/Mikhalevich/tg-coffee-shop-bot/internal/infra/logger"
 )
 
-func (o *OutboxProcessor) Process(ctx context.Context, batchSize int) error {
+func (o *OutboxProcessor) ProcessMessage(ctx context.Context, batchSize int) error {
 	if err := o.transactor.Transaction(ctx, func(ctx context.Context) error {
 		msgs, err := o.repository.OutboxSelectForDispatchMessages(ctx, batchSize)
 		if err != nil {
