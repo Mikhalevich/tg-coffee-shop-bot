@@ -5,8 +5,6 @@ import (
 
 	"github.com/Mikhalevich/tg-coffee-shop-bot/internal/domain/messageprocessor/button"
 	"github.com/Mikhalevich/tg-coffee-shop-bot/internal/domain/port/msginfo"
-	"github.com/Mikhalevich/tg-coffee-shop-bot/internal/domain/port/order"
-	"github.com/Mikhalevich/tg-coffee-shop-bot/internal/domain/port/product"
 )
 
 type MessageType int
@@ -57,9 +55,9 @@ type Sender interface {
 		chatID msginfo.ChatID,
 		title string,
 		description string,
-		ord *order.Order,
-		productsInfo map[product.ProductID]product.Product,
 		currency string,
+		payload string,
+		labels []LabeledPrice,
 		rows ...button.InlineKeyboardButtonRow,
 	) error
 	AnswerOrderPayment(

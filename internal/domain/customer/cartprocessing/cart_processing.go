@@ -83,11 +83,9 @@ type MessageSender interface {
 		ctx context.Context,
 		chatID msginfo.ChatID,
 		title string,
-		description string,
 		ord *order.Order,
 		productsInfo map[product.ProductID]product.Product,
-		currency string,
-		rows ...button.ButtonRow,
+		curr *currency.Currency,
 	) error
 }
 
