@@ -3,10 +3,8 @@ package cartprocessing
 import (
 	"context"
 	"fmt"
-	"strings"
 
 	"github.com/Mikhalevich/tg-coffee-shop-bot/internal/domain/internal/message"
-	"github.com/Mikhalevich/tg-coffee-shop-bot/internal/domain/messageprocessor/button"
 	"github.com/Mikhalevich/tg-coffee-shop-bot/internal/domain/port/cart"
 	"github.com/Mikhalevich/tg-coffee-shop-bot/internal/domain/port/currency"
 	"github.com/Mikhalevich/tg-coffee-shop-bot/internal/domain/port/msginfo"
@@ -96,18 +94,13 @@ func (c *CartProcessing) sendOrderInvoice(
 		return fmt.Errorf("get currency by id: %w", err)
 	}
 
-	buttons, err := c.makeInvoiceButtons(chatID, createdOrder, curr)
-
-	if err != nil {
-		return fmt.Errorf("cancel order button: %w", err)
-	}
-
-	if err := c.sender.SendInvoice(ctx, chatID, message.OrderInvoice(),
-		makeOrderDescription(createdOrder.Products, productsInfo),
+	if err := c.sender.SendInvoice(
+		ctx,
+		chatID,
+		message.OrderInvoice(),
 		createdOrder,
 		productsInfo,
-		curr.Code,
-		buttons...,
+		curr,
 	); err != nil {
 		return fmt.Errorf("send order invoice: %w", err)
 	}
@@ -134,37 +127,6 @@ func (c *CartProcessing) makeCreateOrderInput(
 		Products:            orderedProducts,
 		CurrencyID:          currencyID,
 	}
-}
-
-func (c *CartProcessing) makeInvoiceButtons(
-	chatID msginfo.ChatID,
-	ord *order.Order,
-	curr *currency.Currency,
-) ([]button.ButtonRow, error) {
-	payBtn := button.Pay(fmt.Sprintf("%s, %s", message.Pay(), curr.FormatPrice(ord.TotalPrice)))
-
-	cancelBtn, err := button.CancelOrder(chatID, message.Cancel(), ord.ID, false)
-	if err != nil {
-		return nil, fmt.Errorf("cancel order button: %w", err)
-	}
-
-	return []button.ButtonRow{
-		button.Row(payBtn),
-		button.Row(cancelBtn),
-	}, nil
-}
-
-func makeOrderDescription(
-	orderedProducts []order.OrderedProduct,
-	productsInfo map[product.ProductID]product.Product,
-) string {
-	positions := make([]string, 0, len(orderedProducts))
-
-	for _, v := range orderedProducts {
-		positions = append(positions, fmt.Sprintf("%s x%d", productsInfo[v.ProductID].Title, v.Count))
-	}
-
-	return strings.Join(positions, ", ")
 }
 
 func (c *CartProcessing) orderedProductsFromCart(
