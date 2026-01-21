@@ -14,6 +14,7 @@ import (
 	"github.com/Mikhalevich/tg-coffee-shop-bot/internal/infra/logger"
 )
 
+//nolint:cyclop,funlen
 func (c *CartProcessing) Confirm(
 	ctx context.Context,
 	info msginfo.Info,
@@ -48,23 +49,29 @@ func (c *CartProcessing) Confirm(
 		return nil
 	}
 
-	createdOrder, err := c.repository.CreateOrder(ctx, c.makeCreateOrderInput(info.ChatID, orderedProducts, currencyID))
-	if err != nil {
+	if err := c.transactor.Transaction(ctx, func(ctx context.Context) error {
+		createdOrder, err := c.repository.CreateOrder(ctx, c.makeCreateOrderInput(info.ChatID, orderedProducts, currencyID))
+		if err != nil {
+			return fmt.Errorf("repository create order: %w", err)
+		}
+
+		if err := c.sendOrderInvoice(ctx, info.ChatID, currencyID, createdOrder, productsInfo); err != nil {
+			return fmt.Errorf("send order invoice: %w", err)
+		}
+
+		return nil
+	}); err != nil {
 		if c.repository.IsAlreadyExistsError(err) {
 			c.sendPlainText(ctx, info.ChatID, message.AlreadyHasActiveOrder())
 
 			return nil
 		}
 
-		return fmt.Errorf("repository create order: %w", err)
+		return fmt.Errorf("transaction: %w", err)
 	}
 
 	if err := c.cart.Clear(ctx, info.ChatID, cartID); err != nil {
 		return fmt.Errorf("clear cart: %w", err)
-	}
-
-	if err := c.sendOrderInvoice(ctx, info.ChatID, currencyID, createdOrder, productsInfo); err != nil {
-		return fmt.Errorf("send order invoice: %w", err)
 	}
 
 	c.deleteMessage(ctx, info.ChatID, info.MessageID)
@@ -94,7 +101,7 @@ func (c *CartProcessing) sendOrderInvoice(
 		return fmt.Errorf("get currency by id: %w", err)
 	}
 
-	if err := c.sender.SendInvoice(
+	if err := c.invoiceSender.SendInvoice(
 		ctx,
 		chatID,
 		message.OrderInvoice(),
