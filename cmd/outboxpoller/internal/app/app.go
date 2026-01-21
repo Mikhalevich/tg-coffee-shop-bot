@@ -12,6 +12,7 @@ import (
 type Processor interface {
 	ProcessMessage(ctx context.Context, batchSize int) error
 	ProcessAnswerPayment(ctx context.Context, batchSize int) error
+	ProcessInvoice(ctx context.Context, batchSize int) error
 }
 
 type App struct {
@@ -28,6 +29,7 @@ func (a *App) Run(
 	ctx context.Context,
 	messageCfg config.Worker,
 	answerPaymentCfg config.Worker,
+	invoiceCfg config.Worker,
 ) {
 	var wgr sync.WaitGroup
 
@@ -40,6 +42,12 @@ func (a *App) Run(
 	runWorkers(ctx, "answer_payment", answerPaymentCfg, &wgr,
 		func(ctx context.Context) error {
 			return a.processor.ProcessAnswerPayment(ctx, messageCfg.BatchSize)
+		},
+	)
+
+	runWorkers(ctx, "invoice", invoiceCfg, &wgr,
+		func(ctx context.Context) error {
+			return a.processor.ProcessInvoice(ctx, messageCfg.BatchSize)
 		},
 	)
 

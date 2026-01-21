@@ -19,4 +19,8 @@ message_worker:
 answer_payment_worker:
   count: 2
   interval: 1s
-  batch_size: 100
+  batch_size: 10
+invoice_worker:
+  count: 2
+  interval: 1s
+  batch_size: 10

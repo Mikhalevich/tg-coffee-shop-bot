@@ -10,6 +10,7 @@ type Config struct {
 	ButtonRedis         ButtonRedis `yaml:"button_redis" required:"true"`
 	MessageWorker       Worker      `yaml:"message_worker" required:"true"`
 	AnswerPaymentWorker Worker      `yaml:"answer_payment_worker" required:"true"`
+	InvoiceWorker       Worker      `yaml:"invoice_worker" required:"true"`
 }
 
 type Tracing struct {

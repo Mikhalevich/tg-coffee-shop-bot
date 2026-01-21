@@ -55,7 +55,12 @@ func StartPoller(
 		)
 	)
 
-	app.New(outboxProcessor).Run(ctx, cfg.MessageWorker, cfg.AnswerPaymentWorker)
+	app.New(outboxProcessor).Run(
+		ctx,
+		cfg.MessageWorker,
+		cfg.AnswerPaymentWorker,
+		cfg.InvoiceWorker,
+	)
 
 	return nil
 }

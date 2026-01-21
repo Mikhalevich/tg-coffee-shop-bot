@@ -24,6 +24,13 @@ type CreateOrderInput struct {
 	CurrencyID          currency.ID
 }
 
+type Transactor interface {
+	Transaction(
+		ctx context.Context,
+		trxFn func(ctx context.Context) error,
+	) error
+}
+
 type Repository interface {
 	CreateOrder(ctx context.Context, coi CreateOrderInput) (*order.Order, error)
 	GetCategories(ctx context.Context) ([]product.Category, error)
@@ -79,6 +86,9 @@ type MessageSender interface {
 		chatID msginfo.ChatID,
 		messageID msginfo.MessageID,
 	) error
+}
+
+type InvoiceSender interface {
 	SendInvoice(
 		ctx context.Context,
 		chatID msginfo.ChatID,
@@ -94,29 +104,35 @@ type TimeProvider interface {
 }
 
 type CartProcessing struct {
-	storeID      store.ID
-	repository   Repository
-	storeInfo    StoreInfo
-	cart         CartProvider
-	sender       MessageSender
-	timeProvider TimeProvider
+	storeID       store.ID
+	transactor    Transactor
+	repository    Repository
+	storeInfo     StoreInfo
+	cart          CartProvider
+	sender        MessageSender
+	invoiceSender InvoiceSender
+	timeProvider  TimeProvider
 }
 
 func New(
 	storeID int,
+	transactor Transactor,
 	repository Repository,
 	storeInfo StoreInfo,
 	cart CartProvider,
 	sender MessageSender,
+	invoiceSender InvoiceSender,
 	timeProvider TimeProvider,
 ) *CartProcessing {
 	return &CartProcessing{
-		storeID:      store.IDFromInt(storeID),
-		repository:   repository,
-		storeInfo:    storeInfo,
-		cart:         cart,
-		sender:       sender,
-		timeProvider: timeProvider,
+		storeID:       store.IDFromInt(storeID),
+		transactor:    transactor,
+		repository:    repository,
+		storeInfo:     storeInfo,
+		cart:          cart,
+		sender:        sender,
+		invoiceSender: invoiceSender,
+		timeProvider:  timeProvider,
 	}
 }
 

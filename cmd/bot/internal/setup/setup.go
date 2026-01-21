@@ -71,8 +71,8 @@ func StartBot(ctx context.Context, cfg config.Config, logger logger.Logger) erro
 		msgProcessor        = messageprocessor.New(sender, sender, buttonRepository)
 		qrGenerator         = qrcodegenerator.New()
 		timeProvider        = timeprovider.New()
-		cartProcessor       = cartprocessing.New(cfg.StoreID, pgDB, pgDB, cartRedis, msgProcessor,
-			timeProvider)
+		cartProcessor       = cartprocessing.New(cfg.StoreID, transactionProvider,
+			pgDB, pgDB, cartRedis, msgProcessor, pgDB, timeProvider)
 		actionProcessor    = orderaction.New(msgProcessor, pgDB, timeProvider)
 		historyProcessor   = orderhistory.New(pgDB, pgOrderHistoryID, msgProcessor, cfg.OrderHistory.PageSize)
 		historyProcessorV2 = orderhistoryv2.New(pgOrderHistoryPage, pgDB, msgProcessor, cfg.OrderHistory.PageSize)
