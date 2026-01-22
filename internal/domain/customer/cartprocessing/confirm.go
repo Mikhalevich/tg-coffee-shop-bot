@@ -14,7 +14,6 @@ import (
 	"github.com/Mikhalevich/tg-coffee-shop-bot/internal/infra/logger"
 )
 
-//nolint:cyclop,funlen
 func (c *CartProcessing) Confirm(
 	ctx context.Context,
 	info msginfo.Info,
@@ -49,25 +48,14 @@ func (c *CartProcessing) Confirm(
 		return nil
 	}
 
-	if err := c.transactor.Transaction(ctx, func(ctx context.Context) error {
-		createdOrder, err := c.repository.CreateOrder(ctx, c.makeCreateOrderInput(info.ChatID, orderedProducts, currencyID))
-		if err != nil {
-			return fmt.Errorf("repository create order: %w", err)
-		}
-
-		if err := c.sendOrderInvoice(ctx, info.ChatID, currencyID, createdOrder, productsInfo); err != nil {
-			return fmt.Errorf("send order invoice: %w", err)
-		}
-
-		return nil
-	}); err != nil {
-		if c.repository.IsAlreadyExistsError(err) {
+	if err := c.createOrder(ctx, info.ChatID, orderedProducts, productsInfo, currencyID); err != nil {
+		if perror.IsType(err, perror.TypeAlreadyExists) {
 			c.sendPlainText(ctx, info.ChatID, message.AlreadyHasActiveOrder())
 
 			return nil
 		}
 
-		return fmt.Errorf("transaction: %w", err)
+		return fmt.Errorf("create order: %w", err)
 	}
 
 	if err := c.cart.Clear(ctx, info.ChatID, cartID); err != nil {
@@ -75,6 +63,35 @@ func (c *CartProcessing) Confirm(
 	}
 
 	c.deleteMessage(ctx, info.ChatID, info.MessageID)
+
+	return nil
+}
+
+func (c *CartProcessing) createOrder(
+	ctx context.Context,
+	chatID msginfo.ChatID,
+	orderedProducts []order.OrderedProduct,
+	productsInfo map[product.ProductID]product.Product,
+	currencyID currency.ID,
+) error {
+	if err := c.transactor.Transaction(ctx, func(ctx context.Context) error {
+		createdOrder, err := c.repository.CreateOrder(ctx, c.makeCreateOrderInput(chatID, orderedProducts, currencyID))
+		if err != nil {
+			return fmt.Errorf("repository create order: %w", err)
+		}
+
+		if err := c.sendOrderInvoice(ctx, chatID, currencyID, createdOrder, productsInfo); err != nil {
+			return fmt.Errorf("send order invoice: %w", err)
+		}
+
+		return nil
+	}); err != nil {
+		if c.repository.IsAlreadyExistsError(err) {
+			return perror.AlreadyExists("order already exists")
+		}
+
+		return fmt.Errorf("transaction: %w", err)
+	}
 
 	return nil
 }
