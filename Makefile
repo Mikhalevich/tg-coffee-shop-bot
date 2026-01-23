@@ -7,7 +7,7 @@ ENV_PATH = PATH=$(GOBIN):$(PATH)
 BIN_PATH ?= $(ROOT)/bin
 
 LINTER_NAME := golangci-lint
-LINTER_VERSION := v2.7.2
+LINTER_VERSION := v2.8.0
 
 .PHONY: all build test compose-up compose-down debezium-compose-up debezium-compose-down load-test-data vendor install-linter lint fmt tools tools-update generate activate-python-venv install-admin-deps run-django-admin
 
