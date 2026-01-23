@@ -54,13 +54,13 @@ func decodeButton(b []byte) (*button.Button, error) {
 
 func parseButtonID(id button.ID) (string, string) {
 	var (
-		idStr          = id.String()
-		keySplitterIdx = strings.Index(idStr, "_")
+		idStr                = id.String()
+		before, after, found = strings.Cut(idStr, "_")
 	)
 
-	if keySplitterIdx == -1 {
-		return idStr, ""
+	if !found {
+		return before, ""
 	}
 
-	return idStr[:keySplitterIdx], idStr[keySplitterIdx+1:]
+	return before, after
 }
