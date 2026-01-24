@@ -31,10 +31,9 @@ import (
 	orderhistoryv2 "github.com/Mikhalevich/tg-coffee-shop-bot/internal/domain/customer/orderhistory/v2"
 	"github.com/Mikhalevich/tg-coffee-shop-bot/internal/domain/customer/orderpayment"
 	"github.com/Mikhalevich/tg-coffee-shop-bot/internal/domain/messageprocessor"
-	"github.com/Mikhalevich/tg-coffee-shop-bot/internal/infra/logger"
 )
 
-func StartBot(ctx context.Context, cfg config.Config, logger logger.Logger) error {
+func StartBot(ctx context.Context, cfg config.Config) error {
 	botAPI, err := bot.New(cfg.Bot.Token, bot.WithSkipGetMe())
 	if err != nil {
 		return fmt.Errorf("creating bot: %w", err)
@@ -83,7 +82,6 @@ func StartBot(ctx context.Context, cfg config.Config, logger logger.Logger) erro
 	if err := app.Start(
 		ctx,
 		cfg.Bot.Token,
-		logger,
 		cartProcessor,
 		actionProcessor,
 		historyProcessor,

@@ -12,7 +12,6 @@ import (
 func Start(
 	ctx context.Context,
 	token string,
-	logger logger.Logger,
 	cartProcessor tghandler.CartProcessor,
 	actionProcessor tghandler.OrderActionProcessor,
 	historyProcessor tghandler.OrderHistoryProcessor,
@@ -31,7 +30,7 @@ func Start(
 		)
 	)
 
-	tbot, err := tgbot.New(token, logger)
+	tbot, err := tgbot.New(token, logger.FromContext(ctx))
 	if err != nil {
 		return fmt.Errorf("creating bot: %w", err)
 	}
