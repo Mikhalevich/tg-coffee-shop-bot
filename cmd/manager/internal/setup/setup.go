@@ -22,7 +22,6 @@ import (
 func StartService(
 	ctx context.Context,
 	cfg config.Config,
-	logger logger.Logger,
 ) error {
 	botAPI, err := bot.New(cfg.Bot.Token, bot.WithSkipGetMe())
 	if err != nil {
@@ -40,7 +39,7 @@ func StartService(
 		orderProcessor = orderprocessing.New(pgDB.Transactor(), pgDB, pgDB, sender, timeprovider.New())
 	)
 
-	if err := app.New(orderProcessor, logger).Start(
+	if err := app.New(orderProcessor, logger.FromContext(ctx)).Start(
 		ctx,
 		cfg.HTTPPort,
 	); err != nil {

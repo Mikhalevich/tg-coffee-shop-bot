@@ -8,6 +8,18 @@ type Config struct {
 	HTTPPort int      `yaml:"http_port" required:"true"`
 }
 
+func (c *Config) Level() string {
+	return c.LogLevel
+}
+
+func (c *Config) ServiceName() string {
+	return c.Tracing.ServiceName
+}
+
+func (c *Config) TracingEndpoint() string {
+	return c.Tracing.Endpoint
+}
+
 type Bot struct {
 	Token        string `yaml:"token" required:"true"`
 	PaymentToken string `yaml:"payment_token" required:"true"`

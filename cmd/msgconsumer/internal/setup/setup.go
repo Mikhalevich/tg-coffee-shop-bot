@@ -14,13 +14,11 @@ import (
 	"github.com/Mikhalevich/tg-coffee-shop-bot/internal/adapter/buttonrespository"
 	"github.com/Mikhalevich/tg-coffee-shop-bot/internal/adapter/messagesender"
 	"github.com/Mikhalevich/tg-coffee-shop-bot/internal/domain/messageprocessor"
-	"github.com/Mikhalevich/tg-coffee-shop-bot/internal/infra/logger"
 )
 
 func StartConsumer(
 	ctx context.Context,
 	cfg config.Config,
-	logger logger.Logger,
 ) error {
 	botAPI, err := bot.New(cfg.Bot.Token, bot.WithSkipGetMe())
 	if err != nil {

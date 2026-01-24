@@ -16,6 +16,18 @@ type Config struct {
 	OrderHistory       OrderHistory       `yaml:"order_history" required:"true"`
 }
 
+func (c *Config) Level() string {
+	return c.LogLevel
+}
+
+func (c *Config) ServiceName() string {
+	return c.Tracing.ServiceName
+}
+
+func (c *Config) TracingEndpoint() string {
+	return c.Tracing.Endpoint
+}
+
 type Tracing struct {
 	Endpoint    string `yaml:"endpoint" required:"true"`
 	ServiceName string `yaml:"service_name" required:"true"`
