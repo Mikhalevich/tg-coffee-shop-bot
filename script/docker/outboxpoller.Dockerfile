@@ -13,6 +13,6 @@ EXPOSE 8080
 WORKDIR /app/
 
 COPY --from=builder /app/bin/outboxpoller /app/outboxpoller
-COPY --from=builder /app/config/config-outbox-poller.yaml /app/config-outbox-poller.yaml
+#COPY --from=builder /app/config/config-outbox-poller.yaml /app/config-outbox-poller.yaml
 
 ENTRYPOINT ["./outboxpoller", "-config", "config-outbox-poller.yaml"]

@@ -13,6 +13,6 @@ EXPOSE 8080
 WORKDIR /app/
 
 COPY --from=builder /app/bin/msgconsumer /app/msgconsumer
-COPY --from=builder /app/config/config-msgconsumer.yaml /app/config-msgconsumer.yaml
+#COPY --from=builder /app/config/config-msgconsumer.yaml /app/config-msgconsumer.yaml
 
 ENTRYPOINT ["./msgconsumer", "-config", "config-msgconsumer.yaml"]
