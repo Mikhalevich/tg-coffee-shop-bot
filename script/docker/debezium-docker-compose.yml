@@ -11,6 +11,8 @@ services:
         condition: service_completed_successfully
       redis:
         condition: service_healthy
+    volumes:
+      - ./../../config/config-bot.yaml:/app/config-bot.yaml
     networks:
       - bot-net
 
@@ -25,6 +27,8 @@ services:
         condition: service_completed_successfully
     ports:
       - 8080:8080
+    volumes:
+      - ./../../config/config-http-manager.yaml:/app/config-http-manager.yaml
     networks:
       - bot-net
 
@@ -37,6 +41,8 @@ services:
         condition: service_started
       kafka:
         condition: service_healthy
+    volumes:
+      - ./../../config/config-msgconsumer.yaml:/app/config-msgconsumer.yaml
     networks:
       - bot-net
 
