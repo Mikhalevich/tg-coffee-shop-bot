@@ -13,6 +13,6 @@ EXPOSE 8080
 WORKDIR /app/
 
 COPY --from=builder /app/bin/bot /app/bot
-#COPY --from=builder /app/config/config-bot.yaml /app/config-bot.yaml
+#COPY --from=builder /app/config/config-bot.yaml /app/config/config-bot.yaml
 
-ENTRYPOINT ["./bot", "-config", "config-bot.yaml"]
+ENTRYPOINT ["./bot", "-config", "./config/config-bot.yaml"]

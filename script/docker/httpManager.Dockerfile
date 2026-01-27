@@ -13,6 +13,6 @@ EXPOSE 8080
 WORKDIR /app/
 
 COPY --from=builder /app/bin/manager /app/manager
-#COPY --from=builder /app/config/config-http-manager.yaml /app/config-http-manager.yaml
+#COPY --from=builder /app/config/config-http-manager.yaml /app/config/config-http-manager.yaml
 
-ENTRYPOINT ["./manager", "-config", "config-http-manager.yaml"]
+ENTRYPOINT ["./manager", "-config", "./config/config-http-manager.yaml"]
