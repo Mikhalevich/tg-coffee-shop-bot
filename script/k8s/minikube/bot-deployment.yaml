@@ -15,15 +15,21 @@ spec:
       initContainers:
       - name: bot-db-migrations
         image: sqlmigrate:0.1.0
+        volumeMounts:
+        - name: db-migrate-config-volume
+          mountPath: /app/config
       containers:
       - name: bot
         image: bot:0.1.0
         command: ["/app/bot"]
-        args: ["-config", "/app/conf/config-bot.yaml"]
+        args: ["-config", "/app/config/config-bot.yaml"]
         volumeMounts:
         - name: config-volume
-          mountPath: /app/conf
+          mountPath: /app/config
       volumes:
       - name: config-volume
         configMap:
           name: bot-cm
+      - name: db-migrate-config-volume
+        configMap:
+          name: sqlmigrate-cm

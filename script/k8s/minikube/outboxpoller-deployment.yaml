@@ -15,15 +15,21 @@ spec:
       initContainers:
       - name: outboxpoller-db-migrations
         image: sqlmigrate:0.1.0
+        volumeMounts:
+        - name: db-migrate-config-volume
+          mountPath: /app/config
       containers:
       - name: outboxpoller
         image: outboxpoller:0.1.0
         command: ["/app/outboxpoller"]
-        args: ["-config", "/app/conf/config-outbox-poller.yaml"]
+        args: ["-config", "/app/config/config-outbox-poller.yaml"]
         volumeMounts:
         - name: config-volume
-          mountPath: /app/conf
+          mountPath: /app/config
       volumes:
       - name: config-volume
         configMap:
           name: outboxpoller-cm
+      - name: db-migrate-config-volume
+        configMap:
+          name: sqlmigrate-cm

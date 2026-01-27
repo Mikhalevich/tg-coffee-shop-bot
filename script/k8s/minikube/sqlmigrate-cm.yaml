@@ -1,0 +1,11 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: sqlmigrate-cm
+data:
+  dbconfig.yml: |
+    development:
+      dialect: postgres
+      datasource: "host=postgres-service port=5432 user=bot password=bot dbname=bot sslmode=disable"
+      dir: script/db/migrations
+      table: migrations

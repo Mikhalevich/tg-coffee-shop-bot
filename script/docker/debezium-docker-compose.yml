@@ -12,7 +12,7 @@ services:
       redis:
         condition: service_healthy
     volumes:
-      - ./../../config/config-bot.yaml:/app/config-bot.yaml
+      - ./../../config/config-bot.yaml:/app/config/config-bot.yaml
     networks:
       - bot-net
 
@@ -28,7 +28,7 @@ services:
     ports:
       - 8080:8080
     volumes:
-      - ./../../config/config-http-manager.yaml:/app/config-http-manager.yaml
+      - ./../../config/config-http-manager.yaml:/app/config/config-http-manager.yaml
     networks:
       - bot-net
 
@@ -42,7 +42,7 @@ services:
       kafka:
         condition: service_healthy
     volumes:
-      - ./../../config/config-msgconsumer.yaml:/app/config-msgconsumer.yaml
+      - ./../../config/config-msgconsumer.yaml:/app/config/config-msgconsumer.yaml
     networks:
       - bot-net
 
@@ -83,6 +83,8 @@ services:
     depends_on:
       postgres:
         condition: service_healthy
+    volumes:
+      - ./../../config/dbconfig.yml:/app/config/dbconfig.yml
     networks:
       - bot-net
 

@@ -1,5 +1,6 @@
 /bin
 /tools
+/config/dbconfig.yml
 /config/config-bot.yaml
 /config/config-http-manager.yaml
 /config/config-msgconsumer.yaml

@@ -9,7 +9,7 @@ FROM alpine:3.23
 WORKDIR /app/
 
 COPY --from=builder /app/sql-migrate /app/sql-migrate
-COPY config/dbconfig-example.yml /app/dbconfig-example.yml
 COPY script/db/migrations /app/script/db/migrations
+#COPY config/dbconfig.yml /app/config/dbconfig.yml
 
-ENTRYPOINT ["./sql-migrate", "up", "-config", "dbconfig-example.yml"]
+ENTRYPOINT ["./sql-migrate", "up", "-config", "./config/dbconfig.yml"]
