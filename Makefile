@@ -9,7 +9,9 @@ BIN_PATH ?= $(ROOT)/bin
 LINTER_NAME := golangci-lint
 LINTER_VERSION := v2.8.0
 
-.PHONY: all build test compose-up compose-down debezium-compose-up debezium-compose-down load-test-data vendor install-linter lint fmt tools tools-update generate activate-python-venv install-admin-deps run-django-admin
+APP_TAG = 0.1.0
+
+.PHONY: all build test compose-up compose-down debezium-compose-up debezium-compose-down load-test-data vendor install-linter lint fmt tools tools-update generate activate-python-venv install-admin-deps run-django-admin minikube-load-images minikube-apply minikube-delete
 
 all: build
 
@@ -86,3 +88,14 @@ run-django-admin: install-admin-deps
 	source $(BIN_PATH)/python_venv/bin/activate && \
 		python cmd/adminpanel/manage.py migrate && \
 		python cmd/adminpanel/manage.py runserver \
+
+minikube-load-images:
+	minikube image build -t bot:${APP_TAG} -f ./script/docker/bot.Dockerfile . \
+	minikube image build -t sqlmigrate:${APP_TAG} -f ./script/docker/sqlmigrate.Dockerfile . \
+	minikube image build -t outboxpoller:${APP_TAG} -f ./script/docker/outboxpoller.Dockerfile .
+
+minikube-apply:
+	kubectl apply -f ./script/k8s/minikube
+
+minikube-delete:
+	kubectl delete -f ./script/k8s/minikube

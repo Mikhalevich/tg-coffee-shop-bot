@@ -1,0 +1,29 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: bot-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: bot
+  template:
+    metadata:
+      labels:
+        app: bot
+    spec:
+      initContainers:
+      - name: bot-db-migrations
+        image: sqlmigrate:0.1.0
+      containers:
+      - name: bot
+        image: bot:0.1.0
+        command: ["/app/bot"]
+        args: ["-config", "/app/conf/config-bot.yaml"]
+        volumeMounts:
+        - name: config-volume
+          mountPath: /app/conf
+      volumes:
+      - name: config-volume
+        configMap:
+          name: bot-cm
