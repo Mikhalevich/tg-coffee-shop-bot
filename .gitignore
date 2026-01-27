@@ -6,3 +6,5 @@
 /config/config-outbox-poller.yaml
 /cmd/adminpanel/.env
 __pycache__
+/script/k8s/minikube/bot-cm.yaml
+/script/k8s/minikube/outboxpoller-cm.yaml

@@ -1,0 +1,29 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: outboxpoller-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: outboxpoller
+  template:
+    metadata:
+      labels:
+        app: outboxpoller
+    spec:
+      initContainers:
+      - name: outboxpoller-db-migrations
+        image: sqlmigrate:0.1.0
+      containers:
+      - name: outboxpoller
+        image: outboxpoller:0.1.0
+        command: ["/app/outboxpoller"]
+        args: ["-config", "/app/conf/config-outbox-poller.yaml"]
+        volumeMounts:
+        - name: config-volume
+          mountPath: /app/conf
+      volumes:
+      - name: config-volume
+        configMap:
+          name: outboxpoller-cm
