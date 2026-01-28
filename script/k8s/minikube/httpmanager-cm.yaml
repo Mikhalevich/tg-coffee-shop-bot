@@ -1,0 +1,16 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: httpmanager-cm
+data:
+  config-http-manager.yaml: |
+    log_level: "info"
+    tracing:
+      endpoint: "jaeger:4318"
+      service_name: "http_manager"
+    bot:
+      token: "7301255968:AAE0VvXaLUfv0Q8pAqX-ufsZZ_ggr-x601w"
+      payment_token: "payment_bot_token"
+    postgres:
+      connection: "host=postgres-service port=5432 user=bot password=bot dbname=bot sslmode=disable"
+    http_port: 8080
