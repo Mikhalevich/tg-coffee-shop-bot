@@ -9,3 +9,4 @@
 __pycache__
 /script/k8s/minikube/bot-cm.yaml
 /script/k8s/minikube/outboxpoller-cm.yaml
+/script/k8s/minikube/httpmanager-cm.yaml

@@ -1,0 +1,33 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: httpmanager-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: httpmanager
+  template:
+    metadata:
+      labels:
+        app: httpmanager
+    spec:
+      initContainers:
+      - name: httpmanger-db-migrations
+        image: sqlmigrate:0.1.0
+        volumeMounts:
+        - name: db-migrate-config-volume
+          mountPath: /app/config
+      containers:
+      - name: httpmanager
+        image: httpmanager:0.1.0
+        volumeMounts:
+        - name: config-volume
+          mountPath: /app/config
+      volumes:
+      - name: config-volume
+        configMap:
+          name: httpmanager-cm
+      - name: db-migrate-config-volume
+        configMap:
+          name: sqlmigrate-cm
