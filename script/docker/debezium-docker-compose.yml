@@ -19,7 +19,7 @@ services:
   httpmanager:
     build:
       context: ../../
-      dockerfile: script/docker/httpManager.Dockerfile
+      dockerfile: script/docker/httpmanager.Dockerfile
     depends_on:
       jaeger:
         condition: service_started
