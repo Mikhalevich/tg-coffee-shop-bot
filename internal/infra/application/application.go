@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/Mikhalevich/tg-coffee-shop-bot/internal/infra"
 	"github.com/Mikhalevich/tg-coffee-shop-bot/internal/infra/logger"
 	"github.com/Mikhalevich/tg-coffee-shop-bot/internal/infra/tracing"
 )
@@ -22,12 +21,12 @@ func Run(
 	cfg Configer,
 	runFn RunFn,
 ) {
-	if err := infra.LoadConfig(cfg); err != nil {
+	if err := LoadConfig(cfg); err != nil {
 		logger.StdLogger().WithError(err).Error("failed to load config")
 		os.Exit(1)
 	}
 
-	log, err := infra.SetupLogger(cfg.Level())
+	log, err := SetupLogger(cfg.Level())
 	if err != nil {
 		logger.StdLogger().WithError(err).Error("failed to setup logger")
 		os.Exit(1)
@@ -40,7 +39,7 @@ func Run(
 		os.Exit(1)
 	}
 
-	if err := infra.RunSignalInterruptionFunc(func(ctx context.Context) error {
+	if err := RunSignalInterruptionFunc(func(ctx context.Context) error {
 		serviceLogger.Info("service starting")
 		defer serviceLogger.Info("service stopped")
 
