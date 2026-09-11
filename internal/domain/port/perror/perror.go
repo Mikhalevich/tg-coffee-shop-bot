@@ -51,3 +51,7 @@ func AlreadyExists(msg string) Error {
 func InvalidParam(msg string) Error {
 	return New(TypeInvalidParam, msg)
 }
+
+func NoRowsUpdated() Error {
+	return New(TypeNoRowsUpdated, "no rows updated")
+}

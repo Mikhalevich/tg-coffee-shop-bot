@@ -87,3 +87,13 @@ type OrderedProduct struct {
 	Count      int
 	Price      int
 }
+
+type CreateOrderInfo struct {
+	ChatID              msginfo.ChatID
+	Status              Status
+	StatusOperationTime time.Time
+	VerificationCode    string
+	TotalPrice          int
+	Products            []OrderedProduct
+	CurrencyID          currency.ID
+}

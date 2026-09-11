@@ -7,4 +7,5 @@ const (
 	TypeNotFound
 	TypeAlreadyExists
 	TypeInvalidParam
+	TypeNoRowsUpdated
 )
