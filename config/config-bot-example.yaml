@@ -3,7 +3,8 @@ tracing:
   endpoint: "jaeger:4318"
   service_name: "bonus-points-bot"
 bot:
-  token: "bonus-points-bot-token"
+  token: "telegram-bot-token"
+  webhook_token: "webhook-token"
   payment_token: "payment_bot_token"
 postgres:
   connection: "host=postgres port=5432 user=bot password=bot dbname=bot sslmode=disable"

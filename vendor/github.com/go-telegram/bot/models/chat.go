@@ -44,16 +44,18 @@ type ChatAdministratorRights struct {
 	CanPostMessages         bool `json:"can_post_messages,omitempty"`
 	CanEditMessages         bool `json:"can_edit_messages,omitempty"`
 	CanPinMessages          bool `json:"can_pin_messages,omitempty"`
-	CanPostStories          bool `json:"can_post_stories,omitempty"`
-	CanEditStories          bool `json:"can_edit_stories,omitempty"`
-	CanDeleteStories        bool `json:"can_delete_stories,omitempty"`
+	CanPostStories          bool `json:"can_post_stories"`
+	CanEditStories          bool `json:"can_edit_stories"`
+	CanDeleteStories        bool `json:"can_delete_stories"`
 	CanManageTopics         bool `json:"can_manage_topics,omitempty"`
 	CanManageDirectMessages bool `json:"can_manage_direct_messages,omitempty"`
+	CanManageTags           bool `json:"can_manage_tags,omitempty"`
+	CanSendWelcomeMessages  bool `json:"can_send_welcome_messages"`
 }
 
 // ChatPermissions https://core.telegram.org/bots/api#chatpermissions
 type ChatPermissions struct {
-	CanSendMessages       bool `json:"can_send_messages,omitempty"`
+	CanSendMessages       bool `json:"can_send_messages"`
 	CanSendAudios         bool `json:"can_send_audios"`
 	CanSendDocuments      bool `json:"can_send_documents"`
 	CanSendPhotos         bool `json:"can_send_photos"`
@@ -67,6 +69,8 @@ type ChatPermissions struct {
 	CanInviteUsers        bool `json:"can_invite_users,omitempty"`
 	CanPinMessages        bool `json:"can_pin_messages,omitempty"`
 	CanManageTopics       bool `json:"can_manage_topics,omitempty"`
+	CanEditTag            bool `json:"can_edit_tag,omitempty"`
+	CanReactToMessages    bool `json:"can_react_to_messages,omitempty"`
 }
 
 // ChatLocation https://core.telegram.org/bots/api#chatlocation
@@ -112,6 +116,7 @@ type ChatFullInfo struct {
 	LastName                           string                `json:"last_name,omitempty"`
 	IsForum                            bool                  `json:"is_forum,omitempty"`
 	IsDirectMessages                   bool                  `json:"is_direct_messages,omitempty"`
+	Community                          *Community            `json:"community,omitempty"`
 	Photo                              *ChatPhoto            `json:"photo,omitempty"`
 	ActiveUsernames                    []string              `json:"active_usernames,omitempty"`
 	Birthdate                          Birthdate             `json:"birthdate,omitempty"`
@@ -128,6 +133,7 @@ type ChatFullInfo struct {
 	ProfileBackgroundCustomEmojiID     string                `json:"profile_background_custom_emoji_id,omitempty"`
 	EmojiStatusCustomEmojiID           string                `json:"emoji_status_custom_emoji_id,omitempty"`
 	EmojiStatusExpirationDate          int                   `json:"emoji_status_expiration_date,omitempty"`
+	UniqueGiftColors                   *UniqueGiftColors     `json:"unique_gift_colors,omitempty"`
 	Bio                                string                `json:"bio"`
 	HasPrivateForwards                 bool                  `json:"has_private_forwards,omitempty"`
 	HasRestrictedVoiceAndVideoMessages bool                  `json:"has_restricted_voice_and_video_messages,omitempty"`
@@ -151,4 +157,7 @@ type ChatFullInfo struct {
 	CustomEmojiStickerSetName          string                `json:"custom_emoji_sticker_set_name,omitempty"`
 	LinkedChatID                       int64                 `json:"linked_chat_id,omitempty"`
 	Location                           *ChatLocation         `json:"location,omitempty"`
+	PaidMessageStarCount               int                   `json:"paid_message_star_count,omitempty"`
+	Rating                             *UserRating           `json:"rating,omitempty"`
+	FirstProfileAudio                  *Audio                `json:"first_profile_audio,omitempty"`
 }

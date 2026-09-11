@@ -40,11 +40,13 @@ type ExternalReplyInfo struct {
 	Location           *Location           `json:"location,omitempty"`
 	Poll               *Poll               `json:"poll,omitempty"`
 	Venue              *Venue              `json:"venue,omitempty"`
+	LivePhoto          *LivePhoto          `json:"live_photo,omitempty"`
 }
 
 // ReplyParameters https://core.telegram.org/bots/api#replyparameters
 type ReplyParameters struct {
-	MessageID                int             `json:"message_id"`
+	MessageID                int             `json:"message_id,omitempty"`
+	EphemeralMessageID       int             `json:"ephemeral_message_id,omitempty"`
 	ChatID                   any             `json:"chat_id,omitempty"`
 	AllowSendingWithoutReply bool            `json:"allow_sending_without_reply,omitempty"`
 	Quote                    string          `json:"quote,omitempty"`
@@ -52,6 +54,7 @@ type ReplyParameters struct {
 	QuoteEntities            []MessageEntity `json:"quote_entities,omitempty"`
 	QuotePosition            int             `json:"quote_position,omitempty"`
 	ChecklistTaskID          int             `json:"checklist_task_id,omitempty"`
+	PollOptionID             string          `json:"poll_option_id,omitempty"`
 }
 
 // MessageOriginType https://core.telegram.org/bots/api#messageorigin

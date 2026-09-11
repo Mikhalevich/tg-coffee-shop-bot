@@ -1,7 +1,8 @@
 package app
 
 import (
-	"github.com/Mikhalevich/tg-coffee-shop-bot/cmd/bot/internal/app/tgbot"
+	"github.com/Mikhalevich/tgbot"
+
 	"github.com/Mikhalevich/tg-coffee-shop-bot/cmd/bot/internal/app/tghandler"
 )
 
@@ -15,5 +16,5 @@ func makeRoutes(tbot *tgbot.TGBot, handler *tghandler.TGHandler) {
 	tbot.AddMenuCommand("/history", "view history orders", handler.OrderHistoryV2)
 
 	tbot.AddDefaultHandler(handler.DefaultHandler)
-	tbot.AddDefaultCallbackQueryHander(handler.DefaultCallbackQuery)
+	tbot.AddDefaultCallbackQueryHandler(handler.DefaultCallbackQuery)
 }

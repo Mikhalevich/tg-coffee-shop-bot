@@ -81,7 +81,7 @@ func StartBot(ctx context.Context, cfg config.Config) error {
 
 	if err := app.Start(
 		ctx,
-		cfg.Bot.Token,
+		cfg.Bot,
 		cartProcessor,
 		actionProcessor,
 		historyProcessor,

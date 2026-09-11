@@ -3,7 +3,7 @@ package tghandler
 import (
 	"context"
 
-	"github.com/Mikhalevich/tg-coffee-shop-bot/cmd/bot/internal/app/tgbot"
+	"github.com/Mikhalevich/tgbot"
 )
 
 func (t *TGHandler) Start(ctx context.Context, msg tgbot.BotMessage, sender tgbot.MessageSender) error {

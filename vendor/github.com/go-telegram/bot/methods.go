@@ -1,7 +1,9 @@
 package bot
 
 import (
+	"bytes"
 	"context"
+	"encoding/json"
 
 	"github.com/go-telegram/bot/models"
 )
@@ -155,16 +157,12 @@ func (b *Bot) SendLocation(ctx context.Context, params *SendLocationParams) (*mo
 
 // EditMessageLiveLocation https://core.telegram.org/bots/api#editmessagelivelocation
 func (b *Bot) EditMessageLiveLocation(ctx context.Context, params *EditMessageLiveLocationParams) (*models.Message, error) {
-	result := &models.Message{}
-	err := b.rawRequest(ctx, "editMessageLiveLocation", params, result)
-	return result, err
+	return b.editMethodRequest(ctx, "editMessageLiveLocation", params)
 }
 
 // StopMessageLiveLocation https://core.telegram.org/bots/api#stopmessagelivelocation
 func (b *Bot) StopMessageLiveLocation(ctx context.Context, params *StopMessageLiveLocationParams) (*models.Message, error) {
-	result := &models.Message{}
-	err := b.rawRequest(ctx, "stopMessageLiveLocation", params, result)
-	return result, err
+	return b.editMethodRequest(ctx, "stopMessageLiveLocation", params)
 }
 
 // SendVenue https://core.telegram.org/bots/api#sendvenue
@@ -652,37 +650,27 @@ func (b *Bot) GetMyDefaultAdministratorRights(ctx context.Context, params *GetMy
 
 // EditMessageText https://core.telegram.org/bots/api#editmessagetext
 func (b *Bot) EditMessageText(ctx context.Context, params *EditMessageTextParams) (*models.Message, error) {
-	result := &models.Message{}
-	err := b.rawRequest(ctx, "editMessageText", params, result)
-	return result, err
+	return b.editMethodRequest(ctx, "editMessageText", params)
 }
 
 // EditMessageCaption https://core.telegram.org/bots/api#editmessagecaption
 func (b *Bot) EditMessageCaption(ctx context.Context, params *EditMessageCaptionParams) (*models.Message, error) {
-	result := &models.Message{}
-	err := b.rawRequest(ctx, "editMessageCaption", params, result)
-	return result, err
+	return b.editMethodRequest(ctx, "editMessageCaption", params)
 }
 
 // EditMessageMedia https://core.telegram.org/bots/api#editmessagemedia
 func (b *Bot) EditMessageMedia(ctx context.Context, params *EditMessageMediaParams) (*models.Message, error) {
-	result := &models.Message{}
-	err := b.rawRequest(ctx, "editMessageMedia", params, result)
-	return result, err
+	return b.editMethodRequest(ctx, "editMessageMedia", params)
 }
 
 // EditMessageChecklist https://core.telegram.org/bots/api#editmessagechecklist
 func (b *Bot) EditMessageChecklist(ctx context.Context, params *EditMessageChecklistParams) (*models.Message, error) {
-	result := &models.Message{}
-	err := b.rawRequest(ctx, "editMessageChecklist", params, result)
-	return result, err
+	return b.editMethodRequest(ctx, "editMessageChecklist", params)
 }
 
 // EditMessageReplyMarkup https://core.telegram.org/bots/api#editmessagereplymarkup
 func (b *Bot) EditMessageReplyMarkup(ctx context.Context, params *EditMessageReplyMarkupParams) (*models.Message, error) {
-	result := &models.Message{}
-	err := b.rawRequest(ctx, "editMessageReplyMarkup", params, result)
-	return result, err
+	return b.editMethodRequest(ctx, "editMessageReplyMarkup", params)
 }
 
 // StopPoll https://core.telegram.org/bots/api#stoppoll
@@ -717,6 +705,41 @@ func (b *Bot) DeleteMessage(ctx context.Context, params *DeleteMessageParams) (b
 func (b *Bot) DeleteMessages(ctx context.Context, params *DeleteMessagesParams) (bool, error) {
 	var result bool
 	err := b.rawRequest(ctx, "deleteMessages", params, &result)
+	return result, err
+}
+
+// EditEphemeralMessageText https://core.telegram.org/bots/api#editephemeralmessagetext
+func (b *Bot) EditEphemeralMessageText(ctx context.Context, params *EditEphemeralMessageTextParams) (bool, error) {
+	var result bool
+	err := b.rawRequest(ctx, "editEphemeralMessageText", params, &result)
+	return result, err
+}
+
+// EditEphemeralMessageMedia https://core.telegram.org/bots/api#editephemeralmessagemedia
+func (b *Bot) EditEphemeralMessageMedia(ctx context.Context, params *EditEphemeralMessageMediaParams) (bool, error) {
+	var result bool
+	err := b.rawRequest(ctx, "editEphemeralMessageMedia", params, &result)
+	return result, err
+}
+
+// EditEphemeralMessageCaption https://core.telegram.org/bots/api#editephemeralmessagecaption
+func (b *Bot) EditEphemeralMessageCaption(ctx context.Context, params *EditEphemeralMessageCaptionParams) (bool, error) {
+	var result bool
+	err := b.rawRequest(ctx, "editEphemeralMessageCaption", params, &result)
+	return result, err
+}
+
+// EditEphemeralMessageReplyMarkup https://core.telegram.org/bots/api#editephemeralmessagereplymarkup
+func (b *Bot) EditEphemeralMessageReplyMarkup(ctx context.Context, params *EditEphemeralMessageReplyMarkupParams) (bool, error) {
+	var result bool
+	err := b.rawRequest(ctx, "editEphemeralMessageReplyMarkup", params, &result)
+	return result, err
+}
+
+// DeleteEphemeralMessage https://core.telegram.org/bots/api#deleteephemeralmessage
+func (b *Bot) DeleteEphemeralMessage(ctx context.Context, params *DeleteEphemeralMessageParams) (bool, error) {
+	var result bool
+	err := b.rawRequest(ctx, "deleteEphemeralMessage", params, &result)
 	return result, err
 }
 
@@ -1102,5 +1125,153 @@ func (b *Bot) DeleteStory(ctx context.Context, params *DeleteStoryParams) (bool,
 func (b *Bot) GiftPremiumSubscription(ctx context.Context, params *GiftPremiumSubscriptionParams) (bool, error) {
 	var result bool
 	err := b.rawRequest(ctx, "giftPremiumSubscription", params, &result)
+	return result, err
+}
+
+// GetUserGifts https://core.telegram.org/bots/api#getusergifts
+func (b *Bot) GetUserGifts(ctx context.Context, params *GetUserGiftsParams) (*models.OwnedGifts, error) {
+	result := &models.OwnedGifts{}
+	err := b.rawRequest(ctx, "getUserGifts", params, &result)
+	return result, err
+}
+
+// GetChatGifts https://core.telegram.org/bots/api#getchatgifts
+func (b *Bot) GetChatGifts(ctx context.Context, params *GetChatGiftsParams) (*models.OwnedGifts, error) {
+	result := &models.OwnedGifts{}
+	err := b.rawRequest(ctx, "getChatGifts", params, &result)
+	return result, err
+}
+
+// SendMessageDraft https://core.telegram.org/bots/api#sendmessagedraft
+func (b *Bot) SendMessageDraft(ctx context.Context, params *SendMessageDraftParams) (bool, error) {
+	var result bool
+	err := b.rawRequest(ctx, "sendMessageDraft", params, &result)
+	return result, err
+}
+
+// SendRichMessage https://core.telegram.org/bots/api#sendrichmessage
+func (b *Bot) SendRichMessage(ctx context.Context, params *SendRichMessageParams) (*models.Message, error) {
+	result := &models.Message{}
+	err := b.rawRequest(ctx, "sendRichMessage", params, result)
+	return result, err
+}
+
+// SendRichMessageDraft https://core.telegram.org/bots/api#sendrichmessagedraft
+func (b *Bot) SendRichMessageDraft(ctx context.Context, params *SendRichMessageDraftParams) (bool, error) {
+	var result bool
+	err := b.rawRequest(ctx, "sendRichMessageDraft", params, &result)
+	return result, err
+}
+
+// RepostStory https://core.telegram.org/bots/api#repoststory
+func (b *Bot) RepostStory(ctx context.Context, params *RepostStoryParams) (*models.Story, error) {
+	result := &models.Story{}
+	err := b.rawRequest(ctx, "repostStory", params, &result)
+	return result, err
+}
+
+// SetMyProfilePhoto https://core.telegram.org/bots/api#setmyprofilephoto
+func (b *Bot) SetMyProfilePhoto(ctx context.Context, params *SetMyProfilePhotoParams) (bool, error) {
+	var result bool
+	err := b.rawRequest(ctx, "setMyProfilePhoto", params, &result)
+	return result, err
+}
+
+// RemoveMyProfilePhoto https://core.telegram.org/bots/api#removemyprofilephoto
+func (b *Bot) RemoveMyProfilePhoto(ctx context.Context) (bool, error) {
+	var result bool
+	err := b.rawRequest(ctx, "removeMyProfilePhoto", nil, &result)
+	return result, err
+}
+
+// GetUserProfileAudios https://core.telegram.org/bots/api#getuserprofileaudios
+func (b *Bot) GetUserProfileAudios(ctx context.Context, params *GetUserProfileAudiosParams) (*models.UserProfileAudios, error) {
+	result := &models.UserProfileAudios{}
+	err := b.rawRequest(ctx, "getUserProfileAudios", params, &result)
+	return result, err
+}
+
+// editMethodRequest is a helper for edit/stop methods that return *Message for regular messages
+// or true (bool) for inline messages. When the API returns a boolean, nil Message is returned.
+func (b *Bot) editMethodRequest(ctx context.Context, method string, params any) (*models.Message, error) {
+	var raw json.RawMessage
+	err := b.rawRequest(ctx, method, params, &raw)
+	if err != nil {
+		return nil, err
+	}
+	if bytes.Equal(raw, []byte("true")) {
+		return nil, nil
+	}
+	result := &models.Message{}
+	if err := json.Unmarshal(raw, result); err != nil {
+		return nil, err
+	}
+	return result, nil
+}
+
+// SetChatMemberTag https://core.telegram.org/bots/api#setchatmembertag
+func (b *Bot) SetChatMemberTag(ctx context.Context, params *SetChatMemberTagParams) (bool, error) {
+	var result bool
+	err := b.rawRequest(ctx, "setChatMemberTag", params, &result)
+	return result, err
+}
+
+func (b *Bot) GetManagedBotToken(ctx context.Context, params *GetManagedBotTokenParams) (string, error) {
+	var result string
+	err := b.rawRequest(ctx, "getManagedBotToken", params, &result)
+	return result, err
+}
+
+func (b *Bot) ReplaceManagedBotToken(ctx context.Context, params *ReplaceManagedBotTokenParams) (string, error) {
+	var result string
+	err := b.rawRequest(ctx, "replaceManagedBotToken", params, &result)
+	return result, err
+}
+
+func (b *Bot) SavePreparedKeyboardButton(ctx context.Context, params *SavePreparedKeyboardButtonParams) (*models.PreparedKeyboardButton, error) {
+	result := &models.PreparedKeyboardButton{}
+	err := b.rawRequest(ctx, "savePreparedKeyboardButton", params, result)
+	return result, err
+}
+
+func (b *Bot) AnswerGuestQuery(ctx context.Context, params *AnswerGuestQueryParams) (*models.SentGuestMessage, error) {
+	result := &models.SentGuestMessage{}
+	err := b.rawRequest(ctx, "answerGuestQuery", params, result)
+	return result, err
+}
+
+func (b *Bot) DeleteAllMessageReactions(ctx context.Context, params *DeleteAllMessageReactionsParams) (bool, error) {
+	var result bool
+	err := b.rawRequest(ctx, "deleteAllMessageReactions", params, &result)
+	return result, err
+}
+
+func (b *Bot) DeleteMessageReaction(ctx context.Context, params *DeleteMessageReactionParams) (bool, error) {
+	var result bool
+	err := b.rawRequest(ctx, "deleteMessageReaction", params, &result)
+	return result, err
+}
+
+func (b *Bot) SendLivePhoto(ctx context.Context, params *SendLivePhotoParams) (*models.Message, error) {
+	result := &models.Message{}
+	err := b.rawRequest(ctx, "sendLivePhoto", params, result)
+	return result, err
+}
+
+func (b *Bot) GetManagedBotAccessSettings(ctx context.Context, params *GetManagedBotAccessSettingsParams) (*models.BotAccessSettings, error) {
+	result := &models.BotAccessSettings{}
+	err := b.rawRequest(ctx, "getManagedBotAccessSettings", params, result)
+	return result, err
+}
+
+func (b *Bot) SetManagedBotAccessSettings(ctx context.Context, params *SetManagedBotAccessSettingsParams) (bool, error) {
+	var result bool
+	err := b.rawRequest(ctx, "setManagedBotAccessSettings", params, &result)
+	return result, err
+}
+
+func (b *Bot) GetUserPersonalChatMessages(ctx context.Context, params *GetUserPersonalChatMessagesParams) ([]models.Message, error) {
+	var result []models.Message
+	err := b.rawRequest(ctx, "getUserPersonalChatMessages", params, &result)
 	return result, err
 }
