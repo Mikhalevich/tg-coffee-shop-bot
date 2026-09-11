@@ -1,5 +1,193 @@
 # Changelog
 
+## v1.25.0 (2026-09-01)
+
+- Fix: attachments nested in a rich message are uploaded. `buildRequestForm` had
+  no case for `InputRichMessage`, so the field fell through to a plain
+  `json.Marshal` and the `attach://` references in `InputRichMessage.Media` and
+  in the media `InputRichBlock*` blocks were serialized without their file parts,
+  leaving Telegram nothing to resolve them against (#298).
+- Fix: the thumbnail of an `InputMedia` is uploaded. `InputFileUpload` nested in
+  an `InputMediaVideo`, `InputMediaAnimation`, `InputMediaAudio`,
+  `InputMediaDocument` or `InputPaidMediaVideo` was encoded as `"@<filename>"`,
+  which is not a Bot API reference, and no file part was written, so the
+  thumbnail was silently dropped by Telegram. It is now marshalled as
+  `attach://<filename>` and uploaded under that name. `InputFileUpload.MarshalJSON`
+  emits the same reference everywhere; at the top level of a request the field is
+  still sent as its own form part, so that path is unchanged.
+- Fix: a typed nil `InputFile` or `InputMedia` no longer panics while the form is
+  built. A typed nil in a top level `InputFile` field, in `InputMedia` /
+  `InputPaidMedia` (single or slice) or in `InputRichMessage.Media` is reported as
+  an error, and a typed nil thumbnail nested in an `InputMedia` is omitted from
+  the encoded media instead of being sent as a `null` the Bot API rejects.
+- Fix: a nested `InputFileUpload` with an empty `Filename` is rejected. `Filename`
+  is the `attach://` reference and the part name, so an empty one produced
+  `"thumbnail":"attach://"` and an opaque `Bad Request` from Telegram.
+- Fix: `InputFileUpload.MarshalJSON` and `InputFileString.MarshalJSON` escape
+  their value instead of concatenating it into a JSON string. A `Filename` or a
+  `file_id` containing a quote or a backslash produced invalid JSON, failing the
+  request after the file parts had already been streamed.
+- [BREAKING] Fix: two different files sharing a part name are rejected with an
+  error instead of both being written. The name of a part is what an `attach://`
+  reference resolves against, so a duplicate — most easily two thumbnails with
+  the same `Filename` — silently made Telegram resolve both references to the
+  first file. One file referenced from several entries under a single name still
+  works: the part is written once and reused. A file part and a form field of the
+  same name are the same ambiguity and are rejected too. A request that built
+  before can now fail early, most visibly when an `attach://` name matches the
+  name of a form field, e.g. `attach://media` in `sendMediaGroup`,
+  `editMessageMedia` or `sendPaidMedia`.
+
+## v1.24.0 (2026-08-26)
+
+- Support Bot API 10.3 (August 24, 2026 update):
+  - Rich Messages: new `RichMessageButton`; `RichTextButton` (via the `RichText`
+    union); `RichBlockButtons`, `RichBlockExpandableBlockQuotation`,
+    `RichBlockDocument` and their `InputRichBlock*` counterparts (via the
+    `RichBlock` / `InputRichBlock` unions); `is_compact` on `RichBlockTable` and
+    `InputRichBlockTable`; `tg://document?id=` links for `InputRichMessageMedia`.
+  - Ephemeral Messages: new `EphemeralMessageParameters` (with
+    `replace_callback_query_message`), sent as `ephemeral_message_parameters` by
+    the 13 send methods and `sendRichMessage`; `rich_message` on
+    `editEphemeralMessageText` (and `text` made optional);
+    `show_caption_above_media` on `editEphemeralMessageCaption`; upload of new
+    files in `editEphemeralMessageMedia`; `can_send_welcome_messages` on
+    `ChatAdministratorRights`, `ChatMemberAdministrator` and `promoteChatMember`.
+  - Reply markup: new `DisabledButton` with the `disabled` field on
+    `InlineKeyboardButton`; `force_reply` on `InlineKeyboardMarkup` and
+    `ReplyKeyboardMarkup`.
+  - General: `can_stop` and `keep_on_stop` on `sendMessageDraft` and
+    `sendRichMessageDraft`; new `MessageGenerationStopped` with the
+    `stopped_message_generation` field on `Update` (and the matching
+    allowed-update constant); new `CommunityChatJoined` with
+    `community_chat_joined` on `Message`; `text`, `entities` and `is_private` on
+    `UniqueGiftInfo`.
+- Fix: `attach://` with a nil reader returns an error instead of panicking.
+  `addFormFieldInputMediaItem` and `addFormFieldInputStickerSlice` copied the
+  reader without checking it, and since the form is built in a goroutine with no
+  recover, a missing `MediaAttachment` or `StickerAttachment` took the process
+  down instead of failing the call (#296).
+- Fix: `can_post_stories`, `can_edit_stories` and `can_delete_stories` are no
+  longer marked `omitempty` on `ChatAdministratorRights` and
+  `ChatMemberAdministrator`. They are required fields in the Bot API, so they
+  are now always sent, matching the rest of the required rights in those types.
+  The parameters of the same name on `promoteChatMember` are optional and are
+  unchanged.
+- Fix: the `getUpdates` loop honours `retry_after` on a 429 instead of its own
+  backoff, which starts at 100ms, doubles and caps at 5s. When Telegram asked
+  for a longer wait, the bot retried early and earned further 429s (#289).
+- [BREAKING] Fix: `Message.ReplyToStore` was tagged `reply_to_store`, a typo of
+  the Bot API field `reply_to_story`, so it was never unmarshalled. The field is
+  renamed to `ReplyToStory` (#287).
+- [BREAKING] Fix: `BusinessBotRights.CanDeleteOutgoingMessages` was tagged
+  `can_delete_outgoing_messages`, which does not exist in the Bot API. The right
+  was dropped on unmarshal and emitted under a key Telegram ignores. The field is
+  renamed to `CanDeleteSentMessages` with the correct
+  `can_delete_sent_messages` tag (#286).
+- [BREAKING] `ReceiverUserID` and `CallbackQueryID` are removed from the send
+  method params (`SendMessageParams`, `SendPhotoParams`, ...); Bot API 10.3
+  replaced them with `EphemeralMessageParameters`.
+
+## v1.23.0 (2026-08-03)
+
+- Support Bot API 10.2 (July 14, 2026 update):
+  - Rich Messages: new `InputRichMessageMedia`, `InputMediaVoiceNote`, the 21
+    `InputRichBlock*` block types (via the `InputRichBlock` tagged union) and
+    `InputRichBlockListItem`; added `blocks` and `media` fields to
+    `InputRichMessage`.
+  - Ephemeral Messages: new methods `editEphemeralMessageText`,
+    `editEphemeralMessageMedia`, `editEphemeralMessageCaption`,
+    `editEphemeralMessageReplyMarkup`, `deleteEphemeralMessage`; added
+    `receiver_user_id` and `callback_query_id` params to the 13 send methods;
+    `is_ephemeral` on `BotCommand`; `receiver_user` and `ephemeral_message_id`
+    on `Message`; `ephemeral_message_id` on `ReplyParameters` (and `message_id`
+    made optional).
+  - Communities: new `Community`, `CommunityChatAdded`, `CommunityChatRemoved`;
+    `community_chat_added` / `community_chat_removed` on `Message`; `community`
+    on `ChatFullInfo`.
+  - General: new `BotSubscriptionUpdated` with the `subscription` field on
+    `Update` (and `subscription` allowed-update constant).
+- Fix: `InputMedia` values now implement `json.Marshaler`, so the required `type`
+  discriminator is kept when they are encoded through a plain `json.Marshal`
+  (e.g. nested inside a rich message). Previously `type` was only emitted by
+  `MarshalInputMedia`, which nested values never reached.
+- Fix: `MarshalJSON` on the `InputRichBlock`, `RichBlock` and `RichText` tagged
+  unions returns an error instead of panicking when `Type` is set without its
+  matching variant pointer, and reports an unknown `Type` as unsupported rather
+  than as a missing variant.
+- Fix: marshaling those unions no longer writes the discriminator back into the
+  caller's variant. The `type` field is stamped on a copy, so encoding has no
+  side effects and the same value can be encoded from several goroutines.
+- Fix: `EditMessageCaptionParams.ShowCaptionAboveMedia` was sent under the field
+  name `k` instead of `show_caption_above_media`, so it never took effect.
+
+## v1.22.0 (2026-06-30)
+
+- Support Bot API 10.1 (June 11, 2026 update) — Rich Messages:
+  - Methods: `sendRichMessage`, `sendRichMessageDraft`, and a `rich_message`
+    parameter on `editMessageText`.
+  - Send types: `InputRichMessage` (carries `<tg-thinking>` for reasoning),
+    `InputRichMessageContent`.
+  - Receive types: `RichMessage` (+ `rich_message` field on `Message`), the
+    `RichBlock` union (21 blocks incl. `RichBlockThinking`) and the polymorphic
+    `RichText` union (string | array | 25 tagged variants), plus `RichBlockCaption`,
+    `RichBlockListItem`, `RichBlockTableCell`.
+
+## v1.21.0 (2026-05-22)
+
+- Support Bot API 9.6 & 10.0, multipart fixes — closes #279 #280, fixes #273 #274 #271 #277 (#281)
+
+## v1.20.0 (2026-03-19)
+
+- resolve issues #242, #245, #261, #262 
+- support Bot API 9.5 (#263) 
+
+## v1.19.0 (2026-02-12)
+
+- support API 9.4 (February 9, 2026 update)
+  - Bot Profile Management:
+    - Added `setMyProfilePhoto` and `removeMyProfilePhoto` methods
+  - Forum Topics in Private Chats:
+    - Added `allows_users_to_create_topics` field to User
+    - Added `is_name_implicit` field to ForumTopic and ForumTopicCreated
+  - Colored Buttons:
+    - Added `style` and `icon_custom_emoji_id` fields to KeyboardButton and InlineKeyboardButton
+  - Video Quality:
+    - Added VideoQuality type and `qualities` field to Video
+  - Chat Owner Events:
+    - Added ChatOwnerLeft and ChatOwnerChanged types
+    - Added `chat_owner_left` and `chat_owner_changed` fields to Message
+  - User Profile Audios:
+    - Added UserProfileAudios type and `getUserProfileAudios` method
+    - Added `first_profile_audio` field to ChatFullInfo
+  - Gifts:
+    - Added `rarity` field to UniqueGiftModel
+    - Added `is_burned` field to UniqueGift
+  - Miscellaneous:
+    - Added `repostStory` method
+    - Added UserRating type and `rating` field to ChatFullInfo
+    - Added `completed_by_chat` field to ChecklistTask
+    - Added `message_effect_id` to ForwardMessageParams and CopyMessageParams
+
+## v1.18.0 (2026-01-23)
+
+- support API 9.3 (December 31, 2025 update)
+  - Topics in private chats:
+    - Added `has_topics_enabled` field to User
+  - Gifts:
+    - Added `getUserGifts` and `getChatGifts` methods
+    - Replaced `last_resale_star_count` with `last_resale_currency` and `last_resale_amount` in UniqueGiftInfo
+    - Replaced `exclude_limited` with `exclude_limited_upgradable` and `exclude_limited_non_upgradable` in getBusinessAccountGifts
+    - Added `gift_upgrade_sent` field to Message
+    - Added `gift_id`, `is_from_blockchain`, `is_premium`, `colors` fields to UniqueGift
+    - Added `personal_total_count`, `personal_remaining_count`, `is_premium`, `has_colors`, `background`, `unique_gift_variant_count` fields to Gift
+    - Added `is_upgrade_separate`, `unique_gift_number` fields to GiftInfo and OwnedGiftRegular
+    - Added `gifts_from_channels` field to AcceptedGiftTypes
+    - Added GiftBackground and UniqueGiftColors types
+    - Added `unique_gift_colors`, `paid_message_star_count` fields to ChatFullInfo
+  - Streaming:
+    - Added `sendMessageDraft` method for streaming partial messages
+
 ## v1.17.0 (2025-08-18)
 
 - api 9.2 (#207) 

@@ -6,7 +6,7 @@
 
 > [Telegram Group](https://t.me/gotelegrambotui)
 
-> Supports Bot API version: [9.2](https://core.telegram.org/bots/api#august-15-2025) from August 15, 2025
+> Supports Bot API version: [10.3](https://core.telegram.org/bots/api#august-24-2026) from August 24, 2026
 
 It's a Go zero-dependencies telegram bot framework
 
@@ -146,7 +146,7 @@ You can use all these methods as bot funcs. All methods have name like in offici
 `bot.SendMessage`, `bot.GetMe`, `bot.SendPhoto`, etc
 
 All methods have signature `(ctx context.Context, params <PARAMS>) (<response>, error)`.
-Except `GetMe`, `Close` and `Logout` which are have not params
+Except `GetMe`, `Close` and `Logout` which have no params
 
 `<PARAMS>` is a struct with fields that corresponds to Telegram Bot API parameters.
 All Params structs have name like for corresponded methods, but with `Params` suffix.
@@ -320,6 +320,27 @@ bot.SendMediaGroup(ctx, params)
 ```
 
 [Demo in examples](examples/send_media_group/main.go)
+
+Telegram does not accept a reused file as a thumbnail, so a thumbnail is normally an
+`InputFileUpload`: it is sent as a separate part and referenced by `attach://`, with
+`Filename` as the part name. An `InputFileString` is passed through unchanged, so a
+`file_id` or an URL reaches the API as written.
+
+A part name identifies one file within a request. Referencing the same file from
+several entries under one name is fine — the part is written once and every reference
+resolves to it — but two different files sharing a name are rejected with an error,
+since Telegram would resolve both references to the first of them. A file part and a
+form field cannot share a name either.
+
+```go
+thumbContent, _ := os.ReadFile("/path/to/thumb.jpg")
+
+media := &models.InputMediaVideo{
+	Media:           "attach://video.mp4",
+	MediaAttachment: bytes.NewReader(videoContent),
+	Thumbnail:       &models.InputFileUpload{Filename: "thumb.jpg", Data: bytes.NewReader(thumbContent)},
+}
+```
 
 ## InputSticker
 

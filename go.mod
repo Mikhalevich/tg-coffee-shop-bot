@@ -1,10 +1,11 @@
 module github.com/Mikhalevich/tg-coffee-shop-bot
 
-go 1.25.0
+go 1.26.6
 
 require (
+	github.com/Mikhalevich/tgbot v0.1.2
 	github.com/danielgtaylor/huma/v2 v2.27.0
-	github.com/go-telegram/bot v1.17.0
+	github.com/go-telegram/bot v1.25.0
 	github.com/google/uuid v1.6.0
 	github.com/jackc/pgx/v5 v5.8.0
 	github.com/jinzhu/configor v1.2.2

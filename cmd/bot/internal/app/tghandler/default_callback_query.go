@@ -4,7 +4,8 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/Mikhalevich/tg-coffee-shop-bot/cmd/bot/internal/app/tgbot"
+	"github.com/Mikhalevich/tgbot"
+
 	"github.com/Mikhalevich/tg-coffee-shop-bot/internal/domain/messageprocessor/button"
 	"github.com/Mikhalevich/tg-coffee-shop-bot/internal/domain/port/msginfo"
 	"github.com/Mikhalevich/tg-coffee-shop-bot/internal/domain/port/perror"
