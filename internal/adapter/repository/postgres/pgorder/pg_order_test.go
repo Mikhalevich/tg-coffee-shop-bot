@@ -1,4 +1,4 @@
-package pgorder
+package pgorder_test
 
 import (
 	"context"
@@ -16,14 +16,16 @@ import (
 	"github.com/stretchr/testify/suite"
 
 	"github.com/Mikhalevich/tg-coffee-shop-bot/internal/adapter/repository/postgres/driver"
+	"github.com/Mikhalevich/tg-coffee-shop-bot/internal/adapter/repository/postgres/pgorder"
 	"github.com/Mikhalevich/tg-coffee-shop-bot/internal/adapter/repository/postgres/transaction"
 )
 
 type PgOrderSuit struct {
 	*suite.Suite
 
-	dbCleanup func() error
-	pgOrder   *PgOrder
+	transactor pgorder.Transactor
+	dbCleanup  func() error
+	pgOrder    *pgorder.PgOrder
 }
 
 func TestPgOrderSuit(t *testing.T) {
@@ -49,9 +51,10 @@ func (s *PgOrderSuit) SetupSuite() {
 	var (
 		sqlxDBConn          = sqlx.NewDb(dbConn, dbDriver.Name())
 		transactionProvider = transaction.New(transaction.NewSqlxDB(sqlxDBConn))
-		pgOrder             = New(dbDriver, transactionProvider)
+		pgOrder             = pgorder.New(dbDriver, transactionProvider)
 	)
 
+	s.transactor = transactionProvider
 	s.dbCleanup = cleanup
 	s.pgOrder = pgOrder
 }
@@ -71,12 +74,14 @@ func (s *PgOrderSuit) TearDownSubTest() {
 }
 
 func (s *PgOrderSuit) cleanup() {
-	ctx := context.Background()
-	trx := s.pgOrder.transactor
+	var (
+		ctx = context.Background()
+		trx = s.transactor.ExtContext(ctx)
+	)
 
-	sqlx.MustExecContext(ctx, trx.ExtContext(ctx), "DELETE FROM order_status_timeline")
-	sqlx.MustExecContext(ctx, trx.ExtContext(ctx), "DELETE FROM order_products")
-	sqlx.MustExecContext(ctx, trx.ExtContext(ctx), "DELETE FROM orders")
+	sqlx.MustExecContext(ctx, trx, "DELETE FROM order_status_timeline")
+	sqlx.MustExecContext(ctx, trx, "DELETE FROM order_products")
+	sqlx.MustExecContext(ctx, trx, "DELETE FROM orders")
 }
 
 func connectToDatabase(ctx context.Context, driverName string) (*sql.DB, func() error, error) {
@@ -142,6 +147,7 @@ func connectToDatabase(ctx context.Context, driverName string) (*sql.DB, func() 
 }
 
 func migrationsUp(dbConn *sql.DB, pathToMigrations string) error {
+	//nolint:dogsled
 	_, filename, _, _ := runtime.Caller(0)
 	migrationDir, err := filepath.Abs(filepath.Join(path.Dir(filename), pathToMigrations))
 
