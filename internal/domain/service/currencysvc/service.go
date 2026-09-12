@@ -4,6 +4,11 @@ import (
 	"context"
 
 	"github.com/Mikhalevich/tg-coffee-shop-bot/internal/domain/port/currency"
+	"github.com/Mikhalevich/tg-coffee-shop-bot/internal/domain/usecase/customer/cart/create"
+)
+
+var (
+	_ create.CurrencyService = (*Service)(nil)
 )
 
 type Repository interface {

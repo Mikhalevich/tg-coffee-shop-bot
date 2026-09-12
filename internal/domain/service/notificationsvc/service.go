@@ -4,6 +4,11 @@ import (
 	"context"
 
 	"github.com/Mikhalevich/tg-coffee-shop-bot/internal/domain/port/msginfo"
+	"github.com/Mikhalevich/tg-coffee-shop-bot/internal/domain/usecase/customer/cart/create"
+)
+
+var (
+	_ create.NotificationService = (*Service)(nil)
 )
 
 type Sender interface {
