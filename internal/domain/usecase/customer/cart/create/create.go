@@ -6,11 +6,16 @@ import (
 	"time"
 
 	"github.com/Mikhalevich/tg-coffee-shop-bot/internal/domain/port/msginfo"
+	"github.com/Mikhalevich/tg-coffee-shop-bot/internal/domain/port/product"
 	"github.com/Mikhalevich/tg-coffee-shop-bot/internal/domain/port/store"
 )
 
 type StoreService interface {
 	GetStoreInfo(ctx context.Context) (store.StoreInfo, error)
+}
+
+type ProductService interface {
+	GetCategories(ctx context.Context) ([]product.Category, error)
 }
 
 type NotificationService interface {
@@ -24,6 +29,7 @@ type NotificationService interface {
 
 type Create struct {
 	storeService        StoreService
+	productService      ProductService
 	notificationService NotificationService
 }
 

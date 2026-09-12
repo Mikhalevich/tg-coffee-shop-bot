@@ -47,6 +47,16 @@ type Order struct {
 	Products         []OrderedProduct
 }
 
+type CreateOrderInfo struct {
+	ChatID              msginfo.ChatID
+	Status              Status
+	StatusOperationTime time.Time
+	VerificationCode    string
+	TotalPrice          int
+	Products            []OrderedProduct
+	CurrencyID          currency.ID
+}
+
 func (o *Order) IsSameChat(id msginfo.ChatID) bool {
 	return o.ChatID == id
 }
@@ -86,14 +96,4 @@ type OrderedProduct struct {
 	CategoryID product.CategoryID // available only for cart products.
 	Count      int
 	Price      int
-}
-
-type CreateOrderInfo struct {
-	ChatID              msginfo.ChatID
-	Status              Status
-	StatusOperationTime time.Time
-	VerificationCode    string
-	TotalPrice          int
-	Products            []OrderedProduct
-	CurrencyID          currency.ID
 }
