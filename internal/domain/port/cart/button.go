@@ -15,6 +15,7 @@ func CartCancel(caption string, cartID ID) (button.Button, error) {
 	return button.CreateButton(
 		caption,
 		button.OperationCartCancel,
+		button.WithDeleteAfterProcess(),
 		button.WithPayload(
 			CartCancelPayload{
 				CartID: cartID,

@@ -53,7 +53,7 @@ type NotificationService interface {
 	) error
 }
 
-type Create struct {
+type CreateCart struct {
 	storeService        StoreService
 	productService      ProductService
 	cartService         CartService
@@ -67,8 +67,8 @@ func New(
 	cartService CartService,
 	currencyService CurrencyService,
 	notificationService NotificationService,
-) *Create {
-	return &Create{
+) *CreateCart {
+	return &CreateCart{
 		storeService:        storeService,
 		productService:      productService,
 		cartService:         cartService,
@@ -77,7 +77,7 @@ func New(
 	}
 }
 
-func (c *Create) Create(
+func (c *CreateCart) Create(
 	ctx context.Context,
 	info msginfo.Info,
 ) error {
