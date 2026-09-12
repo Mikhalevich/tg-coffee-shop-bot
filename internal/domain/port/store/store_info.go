@@ -11,5 +11,6 @@ type StoreInfo struct {
 	Description       string
 	DefaultCurrencyID currency.ID
 	IsActive          bool
+	CurrentTime       time.Time
 	NextWorkingTime   time.Time
 }

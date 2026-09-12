@@ -13,13 +13,16 @@ func (s *Service) GetStoreInfo(ctx context.Context) (store.StoreInfo, error) {
 		return store.StoreInfo{}, fmt.Errorf("get store by id %d: %w", s.storeID.Int(), err)
 	}
 
-	nextWorkingTime, isActive := stor.Schedule.NextWorkingTime(s.timePrivider.Now())
+	now := s.timePrivider.Now()
+
+	nextWorkingTime, isActive := stor.Schedule.NextWorkingTime(now)
 
 	return store.StoreInfo{
 		ID:                stor.ID,
 		Description:       stor.Description,
 		DefaultCurrencyID: stor.DefaultCurrencyID,
 		IsActive:          isActive,
+		CurrentTime:       now,
 		NextWorkingTime:   nextWorkingTime,
 	}, nil
 }
