@@ -1,4 +1,4 @@
-package cancel
+package cartorder
 
 import (
 	"context"
@@ -9,33 +9,7 @@ import (
 	"github.com/Mikhalevich/tg-coffee-shop-bot/internal/domain/port/perror"
 )
 
-type CartService interface {
-	Clear(ctx context.Context, chatID msginfo.ChatID, cartID cart.ID) error
-}
-
-type NotificationService interface {
-	CartOrderUnavailable(
-		ctx context.Context,
-		chatID msginfo.ChatID,
-	) error
-}
-
-type CancelCart struct {
-	cartService         CartService
-	notificationService NotificationService
-}
-
-func New(
-	cartService CartService,
-	notificationService NotificationService,
-) *CancelCart {
-	return &CancelCart{
-		cartService:         cartService,
-		notificationService: notificationService,
-	}
-}
-
-func (c *CancelCart) Cancel(
+func (c *CartOrder) Cancel(
 	ctx context.Context,
 	chatID msginfo.ChatID,
 	cartID cart.ID,

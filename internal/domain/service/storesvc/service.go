@@ -5,11 +5,11 @@ import (
 	"time"
 
 	"github.com/Mikhalevich/tg-coffee-shop-bot/internal/domain/port/store"
-	"github.com/Mikhalevich/tg-coffee-shop-bot/internal/domain/usecase/customer/cart/create"
+	"github.com/Mikhalevich/tg-coffee-shop-bot/internal/domain/usecase/customer/cartorder"
 )
 
 var (
-	_ create.StoreService = (*Service)(nil)
+	_ cartorder.StoreService = (*Service)(nil)
 )
 
 type Repository interface {
