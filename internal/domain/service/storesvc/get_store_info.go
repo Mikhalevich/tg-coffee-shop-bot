@@ -10,7 +10,7 @@ import (
 func (s *Service) GetStoreInfo(ctx context.Context) (store.StoreInfo, error) {
 	stor, err := s.repo.GetStoreByID(ctx, s.storeID)
 	if err != nil {
-		return store.StoreInfo{}, fmt.Errorf("get store by id %d: %w", s.storeID.IntID.Int(), err)
+		return store.StoreInfo{}, fmt.Errorf("get store by id %d: %w", s.storeID.Int(), err)
 	}
 
 	nextWorkingTime, isActive := stor.Schedule.NextWorkingTime(s.timePrivider.Now())
