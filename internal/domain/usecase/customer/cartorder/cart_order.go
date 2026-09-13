@@ -18,6 +18,11 @@ type StoreService interface {
 
 type ProductService interface {
 	GetCategories(ctx context.Context) ([]product.Category, error)
+	GetProductsByCategoryID(
+		ctx context.Context,
+		categoryID product.CategoryID,
+		currencyID currency.ID,
+	) ([]product.Product, error)
 }
 
 type CartService interface {
@@ -31,6 +36,7 @@ type CartService interface {
 		id cart.ID,
 		p cart.CartProduct,
 	) error
+	GetProducts(ctx context.Context, id cart.ID) ([]cart.CartProduct, error)
 }
 
 type CurrencyService interface {
@@ -54,6 +60,16 @@ type NotificationService interface {
 		cartID cart.ID,
 		categories []product.Category,
 		orderedProducts []order.OrderedProduct,
+		curr *currency.Currency,
+	) error
+	ViewCategoryProducts(
+		ctx context.Context,
+		chatID msginfo.ChatID,
+		messageID msginfo.MessageID,
+		cartID cart.ID,
+		categoryID product.CategoryID,
+		categoryProducts []product.Product,
+		cartProducts []cart.CartProduct,
 		curr *currency.Currency,
 	) error
 	CartOrderUnavailable(

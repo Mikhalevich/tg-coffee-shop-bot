@@ -11,36 +11,50 @@ import (
 	"github.com/Mikhalevich/tg-coffee-shop-bot/internal/domain/port/product"
 )
 
-func (c *CartOrder) Add(
+func (c *CartOrder) ViewCategoryProducts(
 	ctx context.Context,
 	info msginfo.Info,
 	cartID cart.ID,
 	categoryID product.CategoryID,
-	productID product.ProductID,
 	currencyID currency.ID,
 ) error {
-	if err := c.cartService.AddProduct(ctx, cartID, cart.CartProduct{
-		ProductID:  productID,
-		CategoryID: categoryID,
-		Count:      1,
-	}); err != nil {
+	cartProducts, err := c.cartService.GetProducts(ctx, cartID)
+	if err != nil {
 		if !perror.IsType(err, perror.TypeNotFound) {
-			return fmt.Errorf("add cart product: %w", err)
+			return fmt.Errorf("get cart products: %w", err)
 		}
 
 		if err := c.notificationService.CartOrderUnavailable(ctx, info.ChatID); err != nil {
 			return fmt.Errorf("order unavailable msg: %w", err)
 		}
+	}
 
-		if err := c.ViewCategoryProducts(
-			ctx,
-			info,
-			cartID,
-			categoryID,
-			currencyID,
-		); err != nil {
-			return fmt.Errorf("view category products: %w", err)
-		}
+	categoryProducts, err := c.productService.GetProductsByCategoryID(
+		ctx,
+		categoryID,
+		currencyID,
+	)
+
+	if err != nil {
+		return fmt.Errorf("get products by category id: %w", err)
+	}
+
+	curr, err := c.currencyService.GetCurrencyByID(ctx, currencyID)
+	if err != nil {
+		return fmt.Errorf("get currency by id: %w", err)
+	}
+
+	if err := c.notificationService.ViewCategoryProducts(
+		ctx,
+		info.ChatID,
+		info.MessageID,
+		cartID,
+		categoryID,
+		categoryProducts,
+		cartProducts,
+		curr,
+	); err != nil {
+		return fmt.Errorf("view category products msg: %w", err)
 	}
 
 	return nil
