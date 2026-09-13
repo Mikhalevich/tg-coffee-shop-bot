@@ -16,6 +16,7 @@ type Repository interface {
 	StartNewCart(ctx context.Context, chatID msginfo.ChatID) (cart.ID, error)
 	Clear(ctx context.Context, chatID msginfo.ChatID, cartID cart.ID) error
 	AddProduct(ctx context.Context, id cart.ID, p cart.CartProduct) error
+	GetProducts(ctx context.Context, id cart.ID) ([]cart.CartProduct, error)
 }
 
 type Service struct {

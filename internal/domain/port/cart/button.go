@@ -72,3 +72,55 @@ func CartViewCategoryProducts(
 		),
 	)
 }
+
+type CartAddProductPayload struct {
+	CartID     ID
+	ProductID  product.ProductID
+	CategoryID product.CategoryID
+	CurrencyID currency.ID
+}
+
+func CartAddProduct(
+	caption string,
+	cartID ID,
+	productID product.ProductID,
+	categoryID product.CategoryID,
+	currencyID currency.ID,
+) (button.Button, error) {
+	//nolint:wrapcheck
+	return button.CreateButton(
+		caption,
+		button.OperationCartAddProduct,
+		button.WithPayload(
+			CartAddProductPayload{
+				CartID:     cartID,
+				ProductID:  productID,
+				CategoryID: categoryID,
+				CurrencyID: currencyID,
+			},
+		),
+	)
+}
+
+type CartViewCategoriesPayload struct {
+	CartID     ID
+	CurrencyID currency.ID
+}
+
+func CartViewCategories(
+	caption string,
+	cartID ID,
+	currencyID currency.ID,
+) (button.Button, error) {
+	//nolint:wrapcheck
+	return button.CreateButton(
+		caption,
+		button.OperationCartViewCategories,
+		button.WithPayload(
+			CartViewCategoriesPayload{
+				CartID:     cartID,
+				CurrencyID: currencyID,
+			},
+		),
+	)
+}
