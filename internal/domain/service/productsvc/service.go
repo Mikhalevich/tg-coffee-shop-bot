@@ -19,6 +19,11 @@ type Repository interface {
 		categoryID product.CategoryID,
 		currencyID currency.ID,
 	) ([]product.Product, error)
+	GetProductsByIDs(
+		ctx context.Context,
+		ids []product.ProductID,
+		currencyID currency.ID,
+	) (map[product.ProductID]product.Product, error)
 }
 
 type Service struct {
