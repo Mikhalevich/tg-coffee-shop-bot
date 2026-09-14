@@ -27,6 +27,8 @@ func (c *CartOrder) ViewCategoryProducts(
 		if err := c.notificationService.CartOrderUnavailable(ctx, info.ChatID); err != nil {
 			return fmt.Errorf("order unavailable msg: %w", err)
 		}
+
+		return nil
 	}
 
 	categoryProducts, err := c.productService.GetProductsByCategoryID(
