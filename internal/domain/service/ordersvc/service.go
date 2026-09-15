@@ -5,6 +5,11 @@ import (
 	"time"
 
 	"github.com/Mikhalevich/tg-coffee-shop-bot/internal/domain/port/order"
+	"github.com/Mikhalevich/tg-coffee-shop-bot/internal/domain/usecase/customer/cartorder"
+)
+
+var (
+	_ cartorder.OrderService = (*Service)(nil)
 )
 
 type Transactor interface {
