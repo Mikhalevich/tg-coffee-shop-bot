@@ -12,6 +12,10 @@ import (
 	"github.com/Mikhalevich/tg-coffee-shop-bot/internal/domain/port/store"
 )
 
+type Transactor interface {
+	Transaction(ctx context.Context, trxFn func(ctx context.Context) error) error
+}
+
 type StoreService interface {
 	GetStoreInfo(ctx context.Context) (store.StoreInfo, error)
 }
@@ -42,6 +46,13 @@ type CartService interface {
 		p cart.CartProduct,
 	) error
 	GetProducts(ctx context.Context, id cart.ID) ([]cart.CartProduct, error)
+}
+
+type OrderService interface {
+	CreateOrder(
+		ctx context.Context,
+		info order.CreateOrderInfo,
+	) (order.Order, error)
 }
 
 type CurrencyService interface {
@@ -81,27 +92,42 @@ type NotificationService interface {
 		ctx context.Context,
 		chatID msginfo.ChatID,
 	) error
+	NoProductsForOrder(ctx context.Context, chatID msginfo.ChatID) error
+	OrderAlreadyExists(ctx context.Context, chatID msginfo.ChatID) error
+	SendInvoice(
+		ctx context.Context,
+		chatID msginfo.ChatID,
+		ord order.Order,
+		productsInfo map[product.ProductID]product.Product,
+		curr currency.Currency,
+	) error
 }
 
 type CartOrder struct {
+	transactor          Transactor
 	storeService        StoreService
 	productService      ProductService
 	cartService         CartService
+	orderService        OrderService
 	currencyService     CurrencyService
 	notificationService NotificationService
 }
 
 func New(
+	transator Transactor,
 	storeService StoreService,
 	productService ProductService,
 	cartService CartService,
+	orderService OrderService,
 	currencyService CurrencyService,
 	notificationService NotificationService,
 ) *CartOrder {
 	return &CartOrder{
+		transactor:          transator,
 		storeService:        storeService,
 		productService:      productService,
 		cartService:         cartService,
+		orderService:        orderService,
 		currencyService:     currencyService,
 		notificationService: notificationService,
 	}
