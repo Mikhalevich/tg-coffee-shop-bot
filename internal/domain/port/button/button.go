@@ -31,6 +31,7 @@ type Button struct {
 	Style                Style
 	URL                  string
 	Payload              []byte
+	Pay                  bool
 }
 
 type ButtonRow []Button
@@ -127,4 +128,11 @@ func MustShareButton(
 
 func generateID() string {
 	return uuid.NewString()
+}
+
+func Pay(caption string) Button {
+	return Button{
+		Caption: caption,
+		Pay:     true,
+	}
 }

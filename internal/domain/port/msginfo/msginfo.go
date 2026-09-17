@@ -56,3 +56,18 @@ type Message struct {
 	Buttons      []button.ButtonRow
 	VisibilityAt time.Time
 }
+
+type LabeledPrice struct {
+	Label  string
+	Amount int
+}
+
+type Invoice struct {
+	ChatID      ChatID
+	Title       string
+	Description string
+	Currency    string
+	Payload     string
+	Labels      []LabeledPrice
+	Buttons     []button.ButtonRow
+}

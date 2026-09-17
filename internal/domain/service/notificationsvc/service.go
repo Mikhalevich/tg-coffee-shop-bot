@@ -13,6 +13,7 @@ var (
 
 type Sender interface {
 	SendMessage(ctx context.Context, msg msginfo.Message) error
+	SendInvoice(ctx context.Context, invoice msginfo.Invoice) error
 }
 
 type MarkdownEscaper interface {
