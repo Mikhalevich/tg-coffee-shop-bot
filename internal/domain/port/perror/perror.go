@@ -17,8 +17,7 @@ func New(t Type, msg string) Error {
 }
 
 func ParseError(err error) Error {
-	var perr Error
-	if errors.As(err, &perr) {
+	if perr, ok := errors.AsType[Error](err); ok {
 		return perr
 	}
 
@@ -26,8 +25,7 @@ func ParseError(err error) Error {
 }
 
 func IsType(err error, t Type) bool {
-	var perr Error
-	if errors.As(err, &perr) {
+	if perr, ok := errors.AsType[Error](err); ok {
 		if perr.Type == t {
 			return true
 		}

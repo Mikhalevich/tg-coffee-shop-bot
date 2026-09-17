@@ -28,6 +28,7 @@ linters:
     - noinlineerr
     - goconst
     - gomodguard
+    - exhaustruct_v5
 
   settings:
     misspell:
