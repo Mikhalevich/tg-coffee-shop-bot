@@ -13,7 +13,7 @@ func (t *TGHandler) OrderHistoryV2(ctx context.Context, msg tgbot.BotMessage, se
 	if err := t.historyProcessorV2.Show(
 		ctx,
 		msginfo.Info{
-			ChatID:    msginfo.ChatIDFromInt(msg.ChatID),
+			ChatID:    msginfo.ChatIDFromInt64(msg.ChatID),
 			MessageID: msginfo.MessageIDFromInt(msg.MessageID),
 		},
 	); err != nil {

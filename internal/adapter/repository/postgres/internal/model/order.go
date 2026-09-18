@@ -123,7 +123,7 @@ func ToPortOrder(
 
 	return &order.Order{
 		ID:               order.IDFromInt(dbOrder.ID),
-		ChatID:           msginfo.ChatIDFromInt(dbOrder.ChatID),
+		ChatID:           msginfo.ChatIDFromInt64(dbOrder.ChatID),
 		Status:           orderStatus,
 		VerificationCode: dbOrder.VerificationCode.String,
 		CurrencyID:       currency.IDFromInt(dbOrder.CurrencyID),

@@ -13,7 +13,7 @@ func (t *TGHandler) Order(ctx context.Context, msg tgbot.BotMessage, sender tgbo
 	if err := t.cartProcessor.Create(
 		ctx,
 		msginfo.Info{
-			ChatID:    msginfo.ChatIDFromInt(msg.ChatID),
+			ChatID:    msginfo.ChatIDFromInt64(msg.ChatID),
 			MessageID: msginfo.MessageIDFromInt(msg.MessageID),
 		},
 	); err != nil {

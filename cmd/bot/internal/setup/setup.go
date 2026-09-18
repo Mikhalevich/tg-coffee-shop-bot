@@ -30,7 +30,7 @@ import (
 	"github.com/Mikhalevich/tg-coffee-shop-bot/internal/domain/customer/orderhistory"
 	orderhistoryv2 "github.com/Mikhalevich/tg-coffee-shop-bot/internal/domain/customer/orderhistory/v2"
 	"github.com/Mikhalevich/tg-coffee-shop-bot/internal/domain/customer/orderpayment"
-	"github.com/Mikhalevich/tg-coffee-shop-bot/internal/domain/messageprocessor"
+	"github.com/Mikhalevich/tg-coffee-shop-bot/internal/domain/service/messagesvc"
 )
 
 func StartBot(ctx context.Context, cfg config.Config) error {
@@ -67,7 +67,7 @@ func StartBot(ctx context.Context, cfg config.Config) error {
 		pgOrderHistoryID    = orderhistoryid.New(dbConn, driver)
 		pgOrderHistoryPage  = orderhistoryoffset.New(dbConn, driver)
 		sender              = messagesender.New(botAPI, cfg.Bot.PaymentToken)
-		msgProcessor        = messageprocessor.New(sender, sender, buttonRepository)
+		messageService      = messagesvc.New(sender, sender, buttonRepository)
 		qrGenerator         = qrcodegenerator.New()
 		timeProvider        = timeprovider.New()
 		cartProcessor       = cartprocessing.New(cfg.StoreID, transactionProvider,

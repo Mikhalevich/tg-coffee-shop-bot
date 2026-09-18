@@ -16,7 +16,7 @@ type OutboxInvoice struct {
 func ToOutboxInvoice(dbInvoice OutboxInvoice) outboxprocessor.OutboxInvoice {
 	return outboxprocessor.OutboxInvoice{
 		ID:      dbInvoice.ID,
-		ChatID:  msginfo.ChatIDFromInt(dbInvoice.ChatID),
+		ChatID:  msginfo.ChatIDFromInt64(dbInvoice.ChatID),
 		Text:    dbInvoice.Text,
 		OrderID: order.IDFromInt(dbInvoice.OrderID),
 	}

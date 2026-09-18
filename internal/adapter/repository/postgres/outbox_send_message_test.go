@@ -15,7 +15,7 @@ import (
 func (s *PostgresSuit) TestSendMessageWitoutPayloadAndButtons() {
 	s.Run("store empty text", func() {
 		inputMsg := messageprocessor.Message{
-			ChatID: msginfo.ChatIDFromInt(1),
+			ChatID: msginfo.ChatIDFromInt64(1),
 			Type:   messageprocessor.MessageTypePlain,
 		}
 
@@ -42,7 +42,7 @@ func (s *PostgresSuit) TestSendMessageWitoutPayloadAndButtons() {
 
 	s.Run("store plain text", func() {
 		inputMsg := messageprocessor.Message{
-			ChatID:     msginfo.ChatIDFromInt(1),
+			ChatID:     msginfo.ChatIDFromInt64(1),
 			ReplyMsgID: msginfo.MessageIDFromInt(1),
 			Text:       "test text",
 			Type:       messageprocessor.MessageTypePlain,
@@ -72,7 +72,7 @@ func (s *PostgresSuit) TestSendMessageWitoutPayloadAndButtons() {
 
 	s.Run("store markdown text", func() {
 		inputMsg := messageprocessor.Message{
-			ChatID:     msginfo.ChatIDFromInt(2),
+			ChatID:     msginfo.ChatIDFromInt64(2),
 			ReplyMsgID: msginfo.MessageIDFromInt(2),
 			Text:       "*test text*",
 			Type:       messageprocessor.MessageTypeMarkdown,
@@ -104,7 +104,7 @@ func (s *PostgresSuit) TestSendMessageWitoutPayloadAndButtons() {
 func (s *PostgresSuit) TestSendMessageWithButtons() {
 	s.Run("store plain text with empty buttons", func() {
 		inputMsg := messageprocessor.Message{
-			ChatID:     msginfo.ChatIDFromInt(7),
+			ChatID:     msginfo.ChatIDFromInt64(7),
 			ReplyMsgID: msginfo.MessageIDFromInt(7),
 			Text:       "test text",
 			Type:       messageprocessor.MessageTypePlain,
@@ -135,7 +135,7 @@ func (s *PostgresSuit) TestSendMessageWithButtons() {
 
 	s.Run("store plain text with one button without payload", func() {
 		inputMsg := messageprocessor.Message{
-			ChatID:     msginfo.ChatIDFromInt(8),
+			ChatID:     msginfo.ChatIDFromInt64(8),
 			ReplyMsgID: msginfo.MessageIDFromInt(8),
 			Text:       "test text",
 			Type:       messageprocessor.MessageTypePlain,
@@ -143,7 +143,7 @@ func (s *PostgresSuit) TestSendMessageWithButtons() {
 				{
 					{
 						ID:        button.IDFromString("button id"),
-						ChatID:    msginfo.ChatIDFromInt(8),
+						ChatID:    msginfo.ChatIDFromInt64(8),
 						Caption:   "button caption",
 						Operation: button.OperationCartCancel,
 						Pay:       true,
@@ -177,14 +177,14 @@ func (s *PostgresSuit) TestSendMessageWithButtons() {
 
 	s.Run("store plain text with one button with payload", func() {
 		cartCancelBtn, err := button.CartCancel(
-			msginfo.ChatIDFromInt(9),
+			msginfo.ChatIDFromInt64(9),
 			"cart button caption",
 			cart.IDFromString("cart id"),
 		)
 		s.Require().NoError(err)
 
 		inputMsg := messageprocessor.Message{
-			ChatID:     msginfo.ChatIDFromInt(9),
+			ChatID:     msginfo.ChatIDFromInt64(9),
 			ReplyMsgID: msginfo.MessageIDFromInt(9),
 			Text:       "test text",
 			Type:       messageprocessor.MessageTypePlain,
@@ -223,14 +223,14 @@ func (s *PostgresSuit) TestSendMessageWithButtons() {
 
 	s.Run("store plain text with two buttons with payload", func() {
 		cartCancelBtn, err := button.CartCancel(
-			msginfo.ChatIDFromInt(10),
+			msginfo.ChatIDFromInt64(10),
 			"cart cancel caption",
 			cart.IDFromString("cart cancel id"),
 		)
 		s.Require().NoError(err)
 
 		cartConfirmBtn, err := button.CartConfirm(
-			msginfo.ChatIDFromInt(10),
+			msginfo.ChatIDFromInt64(10),
 			"cart confirm caption",
 			cart.IDFromString("cart cancel id"),
 			currency.IDFromInt(1),
@@ -238,7 +238,7 @@ func (s *PostgresSuit) TestSendMessageWithButtons() {
 		s.Require().NoError(err)
 
 		inputMsg := messageprocessor.Message{
-			ChatID:     msginfo.ChatIDFromInt(10),
+			ChatID:     msginfo.ChatIDFromInt64(10),
 			ReplyMsgID: msginfo.MessageIDFromInt(10),
 			Text:       "test text",
 			Type:       messageprocessor.MessageTypePlain,

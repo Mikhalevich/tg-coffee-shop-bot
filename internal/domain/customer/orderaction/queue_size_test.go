@@ -14,7 +14,7 @@ func (s *OrderActionSuite) TestQueueSizeGetOrdersCountByStatusError() {
 	var (
 		ctx  = context.Background()
 		info = msginfo.Info{
-			ChatID:    msginfo.ChatIDFromInt(207),
+			ChatID:    msginfo.ChatIDFromInt64(207),
 			MessageID: msginfo.MessageIDFromInt(100),
 		}
 	)
@@ -32,7 +32,7 @@ func (s *OrderActionSuite) TestQueueSizeSuccess() {
 	var (
 		ctx  = context.Background()
 		info = msginfo.Info{
-			ChatID:    msginfo.ChatIDFromInt(207),
+			ChatID:    msginfo.ChatIDFromInt64(207),
 			MessageID: msginfo.MessageIDFromInt(100),
 		}
 	)
