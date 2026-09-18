@@ -13,7 +13,7 @@ func (t *TGHandler) GetActiveOrder(ctx context.Context, msg tgbot.BotMessage, se
 	if err := t.actionProcessor.GetActiveOrder(
 		ctx,
 		msginfo.Info{
-			ChatID:    msginfo.ChatIDFromInt(msg.ChatID),
+			ChatID:    msginfo.ChatIDFromInt64(msg.ChatID),
 			MessageID: msginfo.MessageIDFromInt(msg.MessageID),
 		},
 	); err != nil {

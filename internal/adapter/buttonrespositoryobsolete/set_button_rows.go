@@ -1,4 +1,4 @@
-package buttonrespository
+package buttonrespositoryobsolete
 
 import (
 	"context"
@@ -6,7 +6,7 @@ import (
 
 	"github.com/redis/go-redis/v9"
 
-	"github.com/Mikhalevich/tg-coffee-shop-bot/internal/domain/port/button"
+	"github.com/Mikhalevich/tg-coffee-shop-bot/internal/domain/messageprocessor/button"
 )
 
 func (r *ButtonRepository) SetButtonRows(

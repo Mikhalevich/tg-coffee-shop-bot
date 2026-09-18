@@ -13,10 +13,10 @@ import (
 
 	"github.com/Mikhalevich/tg-coffee-shop-bot/cmd/bot/internal/app"
 	"github.com/Mikhalevich/tg-coffee-shop-bot/cmd/bot/internal/config"
-	"github.com/Mikhalevich/tg-coffee-shop-bot/internal/adapter/buttonrespository"
+	"github.com/Mikhalevich/tg-coffee-shop-bot/internal/adapter/buttonrespositoryobsolete"
 	"github.com/Mikhalevich/tg-coffee-shop-bot/internal/adapter/cartprovider"
 	"github.com/Mikhalevich/tg-coffee-shop-bot/internal/adapter/dailypositiongenerator"
-	"github.com/Mikhalevich/tg-coffee-shop-bot/internal/adapter/messagesender"
+	"github.com/Mikhalevich/tg-coffee-shop-bot/internal/adapter/messagesenderobsolete"
 	"github.com/Mikhalevich/tg-coffee-shop-bot/internal/adapter/qrcodegenerator"
 	"github.com/Mikhalevich/tg-coffee-shop-bot/internal/adapter/repository/postgres"
 	"github.com/Mikhalevich/tg-coffee-shop-bot/internal/adapter/repository/postgres/driver"
@@ -66,7 +66,7 @@ func StartBot(ctx context.Context, cfg config.Config) error {
 		pgDB                = postgres.New(driver, transactionProvider)
 		pgOrderHistoryID    = orderhistoryid.New(dbConn, driver)
 		pgOrderHistoryPage  = orderhistoryoffset.New(dbConn, driver)
-		sender              = messagesender.New(botAPI, cfg.Bot.PaymentToken)
+		sender              = messagesenderobsolete.New(botAPI, cfg.Bot.PaymentToken)
 		msgProcessor        = messageprocessor.New(sender, sender, buttonRepository)
 		qrGenerator         = qrcodegenerator.New()
 		timeProvider        = timeprovider.New()
@@ -98,7 +98,7 @@ func StartBot(ctx context.Context, cfg config.Config) error {
 func MakeRedisButtonRepository(
 	ctx context.Context,
 	cfg config.ButtonRedis,
-) (*buttonrespository.ButtonRepository, error) {
+) (*buttonrespositoryobsolete.ButtonRepository, error) {
 	rdb := redis.NewClient(&redis.Options{
 		Addr:     cfg.Addr,
 		Password: cfg.Pwd,
@@ -113,7 +113,7 @@ func MakeRedisButtonRepository(
 		return nil, fmt.Errorf("redis ping: %w", err)
 	}
 
-	return buttonrespository.New(rdb, cfg.TTL), nil
+	return buttonrespositoryobsolete.New(rdb, cfg.TTL), nil
 }
 
 func MakeRedisCart(ctx context.Context, cfg config.CartRedis) (cartprocessing.CartProvider, error) {

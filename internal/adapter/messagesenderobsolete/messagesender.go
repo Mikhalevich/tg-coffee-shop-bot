@@ -1,16 +1,16 @@
-package messagesender
+package messagesenderobsolete
 
 import (
 	"github.com/go-telegram/bot"
 	"github.com/go-telegram/bot/models"
 
-	"github.com/Mikhalevich/tg-coffee-shop-bot/internal/domain/port/button"
-	"github.com/Mikhalevich/tg-coffee-shop-bot/internal/domain/service/messagesvc"
+	"github.com/Mikhalevich/tg-coffee-shop-bot/internal/domain/messageprocessor"
+	"github.com/Mikhalevich/tg-coffee-shop-bot/internal/domain/messageprocessor/button"
 )
 
 var (
-	_ messagesvc.Sender          = (*messageSender)(nil)
-	_ messagesvc.MarkdownEscaper = (*messageSender)(nil)
+	_ messageprocessor.Sender          = (*messageSender)(nil)
+	_ messageprocessor.MarkdownEscaper = (*messageSender)(nil)
 )
 
 type messageSender struct {
@@ -39,8 +39,7 @@ func makeButtonsMarkup(rows ...button.InlineKeyboardButtonRow) models.ReplyMarku
 			buttonRow = append(buttonRow, models.InlineKeyboardButton{
 				Text:         b.Caption,
 				CallbackData: b.ID.String(),
-				Style:        b.Style.String(),
-				URL:          b.URL,
+				Pay:          b.Pay,
 			})
 		}
 

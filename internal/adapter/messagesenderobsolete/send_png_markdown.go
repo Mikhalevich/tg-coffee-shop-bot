@@ -1,4 +1,4 @@
-package messagesender
+package messagesenderobsolete
 
 import (
 	"bytes"

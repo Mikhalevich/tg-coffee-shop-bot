@@ -110,7 +110,7 @@ func ToOutboxMessage(msg OutboxMessage) (outboxprocessor.OutboxMessage, error) {
 	return outboxprocessor.OutboxMessage{
 		ID: msg.ID,
 		Message: messageprocessor.Message{
-			ChatID:     msginfo.ChatIDFromInt(msg.ChatID),
+			ChatID:     msginfo.ChatIDFromInt64(msg.ChatID),
 			ReplyMsgID: msginfo.MessageIDFromInt(int(msg.ReplyMessageID.Int64)),
 			Text:       msg.Text,
 			Type:       ToMessageType(msg.Type),

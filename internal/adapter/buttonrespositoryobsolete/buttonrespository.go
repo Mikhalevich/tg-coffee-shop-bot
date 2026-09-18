@@ -1,4 +1,4 @@
-package buttonrespository
+package buttonrespositoryobsolete
 
 import (
 	"bytes"
@@ -10,12 +10,12 @@ import (
 
 	"github.com/redis/go-redis/v9"
 
-	"github.com/Mikhalevich/tg-coffee-shop-bot/internal/domain/port/button"
-	"github.com/Mikhalevich/tg-coffee-shop-bot/internal/domain/service/messagesvc"
+	"github.com/Mikhalevich/tg-coffee-shop-bot/internal/domain/messageprocessor"
+	"github.com/Mikhalevich/tg-coffee-shop-bot/internal/domain/messageprocessor/button"
 )
 
 var (
-	_ messagesvc.ButtonRepository = (*ButtonRepository)(nil)
+	_ messageprocessor.ButtonRepository = (*ButtonRepository)(nil)
 )
 
 type ButtonRepository struct {

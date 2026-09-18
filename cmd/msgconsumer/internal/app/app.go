@@ -47,7 +47,7 @@ func (a *App) Start(ctx context.Context) error {
 		}
 
 		if err := a.sender.SendMessage(ctx, messageprocessor.Message{
-			ChatID: msginfo.ChatIDFromInt(msg.ChatID),
+			ChatID: msginfo.ChatIDFromInt64(msg.ChatID),
 			Text:   msg.MessageText,
 			Type:   event.ToMessageType(msg.MessageType),
 		}); err != nil {

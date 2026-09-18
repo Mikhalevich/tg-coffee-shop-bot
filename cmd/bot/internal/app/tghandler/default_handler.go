@@ -18,7 +18,7 @@ func (t *TGHandler) DefaultHandler(ctx context.Context, msg tgbot.BotMessage, se
 	}
 
 	if msg.Payment.IsSuccessful {
-		if err := t.processSuccessfulPayment(ctx, msginfo.ChatIDFromInt(msg.ChatID), msg.Payment); err != nil {
+		if err := t.processSuccessfulPayment(ctx, msginfo.ChatIDFromInt64(msg.ChatID), msg.Payment); err != nil {
 			return fmt.Errorf("process payment: %w", err)
 		}
 	}

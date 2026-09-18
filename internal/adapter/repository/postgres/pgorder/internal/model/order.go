@@ -39,7 +39,7 @@ func (o Order) ToDom(
 
 	return &order.Order{
 		ID:               order.IDFromInt(o.ID),
-		ChatID:           msginfo.ChatIDFromInt(o.ChatID),
+		ChatID:           msginfo.ChatIDFromInt64(o.ChatID),
 		Status:           orderStatus,
 		VerificationCode: o.VerificationCode.String,
 		CurrencyID:       currency.IDFromInt(o.CurrencyID),
