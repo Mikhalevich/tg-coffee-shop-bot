@@ -26,18 +26,18 @@ type Order struct {
 func (o Order) ToDom(
 	dbOrderProducts []OrderProduct,
 	dbTimeline []OrderTimeline,
-) (*order.Order, error) {
+) (order.Order, error) {
 	orderStatus, err := order.StatusFromString(o.Status)
 	if err != nil {
-		return nil, fmt.Errorf("status from string: %w", err)
+		return order.Order{}, fmt.Errorf("status from string: %w", err)
 	}
 
 	portTimeline, err := toDomTimeline(dbTimeline)
 	if err != nil {
-		return nil, fmt.Errorf("timeline: %w", err)
+		return order.Order{}, fmt.Errorf("timeline: %w", err)
 	}
 
-	return &order.Order{
+	return order.Order{
 		ID:               order.IDFromInt(o.ID),
 		ChatID:           msginfo.ChatIDFromInt64(o.ChatID),
 		Status:           orderStatus,
