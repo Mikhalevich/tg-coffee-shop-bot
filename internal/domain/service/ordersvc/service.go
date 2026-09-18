@@ -6,10 +6,12 @@ import (
 
 	"github.com/Mikhalevich/tg-coffee-shop-bot/internal/domain/port/order"
 	"github.com/Mikhalevich/tg-coffee-shop-bot/internal/domain/usecase/customer/cartorder"
+	"github.com/Mikhalevich/tg-coffee-shop-bot/internal/domain/usecase/customer/order/orderbyid"
 )
 
 var (
 	_ cartorder.OrderService = (*Service)(nil)
+	_ orderbyid.OrderService = (*Service)(nil)
 )
 
 type Transactor interface {
@@ -32,6 +34,7 @@ type Repository interface {
 		status order.Status,
 		createdAt time.Time,
 	) error
+	GetOrderByID(ctx context.Context, id order.ID) (order.Order, error)
 }
 
 type Service struct {
