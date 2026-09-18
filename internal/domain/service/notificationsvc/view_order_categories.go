@@ -20,7 +20,7 @@ func (s *Service) ViewOrderCategories(
 	cartID cart.ID,
 	categories []product.Category,
 	orderedProducts []order.OrderedProduct,
-	curr *currency.Currency,
+	curr currency.Currency,
 ) error {
 	btns, err := s.makeCartCategoriesButtons(
 		cartID,
@@ -53,7 +53,7 @@ func (s *Service) makeCartCategoriesButtons(
 	cartID cart.ID,
 	categories []product.Category,
 	orderedProducts []order.OrderedProduct,
-	curr *currency.Currency,
+	curr currency.Currency,
 ) ([]button.ButtonRow, error) {
 	buttons := make([]button.ButtonRow, 0, len(categories)+1)
 
@@ -93,7 +93,7 @@ func (s *Service) makeCartCategoriesButtons(
 func makeViewCategoryButtonTitle(
 	category product.Category,
 	orderedProducts []order.OrderedProduct,
-	curr *currency.Currency,
+	curr currency.Currency,
 ) string {
 	var (
 		count int
@@ -116,7 +116,7 @@ func makeViewCategoryButtonTitle(
 
 func makePriceButtonTitle(
 	orderedProducts []order.OrderedProduct,
-	curr *currency.Currency,
+	curr currency.Currency,
 ) string {
 	price := 0
 	for _, v := range orderedProducts {

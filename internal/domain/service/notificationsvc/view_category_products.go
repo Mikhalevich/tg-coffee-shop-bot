@@ -20,7 +20,7 @@ func (s *Service) ViewCategoryProducts(
 	categoryID product.CategoryID,
 	categoryProducts []product.Product,
 	cartProducts []cart.CartProduct,
-	curr *currency.Currency,
+	curr currency.Currency,
 ) error {
 	btns, err := s.makeCartProductsButtons(
 		cartID,
@@ -55,7 +55,7 @@ func (s *Service) makeCartProductsButtons(
 	categoryID product.CategoryID,
 	categoryProducts []product.Product,
 	cartProducts []cart.CartProduct,
-	curr *currency.Currency,
+	curr currency.Currency,
 ) ([]button.ButtonRow, error) {
 	buttons := make([]button.ButtonRow, 0, len(categoryProducts)+1)
 
@@ -80,7 +80,11 @@ func (s *Service) makeCartProductsButtons(
 	return buttons, nil
 }
 
-func makeProductButtonTitle(prod product.Product, cartProducts []cart.CartProduct, curr *currency.Currency) string {
+func makeProductButtonTitle(
+	prod product.Product,
+	cartProducts []cart.CartProduct,
+	curr currency.Currency,
+) string {
 	for _, cartProduct := range cartProducts {
 		if cartProduct.ProductID == prod.ID {
 			return fmt.Sprintf("%s %s [x%d %s]",

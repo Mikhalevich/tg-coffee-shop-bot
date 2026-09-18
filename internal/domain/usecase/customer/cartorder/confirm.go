@@ -74,7 +74,7 @@ func (c *CartOrder) Confirm(
 		info.ChatID,
 		orderedProducts,
 		productsInfo,
-		*curr,
+		curr,
 		storeInfo.CurrentTime,
 	); err != nil {
 		if !perror.IsType(err, perror.TypeAlreadyExists) {

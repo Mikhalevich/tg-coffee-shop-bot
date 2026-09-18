@@ -14,8 +14,8 @@ type Currency struct {
 	IsEnabled  bool   `db:"is_enabled"`
 }
 
-func (c *Currency) ToDom() *currency.Currency {
-	return &currency.Currency{
+func (c Currency) ToDom() currency.Currency {
+	return currency.Currency{
 		ID:         currency.IDFromInt(c.ID),
 		Code:       c.Code,
 		Exp:        c.Exp,

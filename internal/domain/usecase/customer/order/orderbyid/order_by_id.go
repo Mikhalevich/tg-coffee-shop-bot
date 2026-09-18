@@ -32,7 +32,7 @@ type CurrencyService interface {
 	GetCurrencyByID(
 		ctx context.Context,
 		id currency.ID,
-	) (*currency.Currency, error)
+	) (currency.Currency, error)
 }
 
 type NotificationService interface {
@@ -116,7 +116,7 @@ func (o *OrderByID) GetOrderByID(
 		chatID,
 		ord,
 		productsInfo,
-		*curr,
+		curr,
 		o.orderQueuePosition(ctx, ord),
 	); err != nil {
 		return fmt.Errorf("view order msg: %w", err)

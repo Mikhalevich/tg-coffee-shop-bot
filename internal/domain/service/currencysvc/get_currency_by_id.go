@@ -10,10 +10,10 @@ import (
 func (s *Service) GetCurrencyByID(
 	ctx context.Context,
 	id currency.ID,
-) (*currency.Currency, error) {
+) (currency.Currency, error) {
 	curr, err := s.repo.GetCurrencyByID(ctx, id)
 	if err != nil {
-		return nil, fmt.Errorf("get currency by id: %w", err)
+		return currency.Currency{}, fmt.Errorf("get currency by id: %w", err)
 	}
 
 	return curr, nil
