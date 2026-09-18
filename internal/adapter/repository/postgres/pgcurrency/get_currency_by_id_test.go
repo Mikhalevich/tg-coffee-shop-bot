@@ -10,7 +10,7 @@ func (s *CurrencySuit) TestGetCurrencyByID() {
 	s.Run("success", func() {
 		var (
 			ctx      = s.T().Context()
-			expected = &currency.Currency{
+			expected = currency.Currency{
 				ID:         currency.IDFromInt(1),
 				Code:       "USD",
 				Exp:        2,
@@ -61,7 +61,7 @@ func (s *CurrencySuit) TestGetCurrencyByID() {
 		actual, err := s.pgCurrency.GetCurrencyByID(ctx, id)
 
 		s.Require().Error(err)
-		s.Require().Nil(actual)
+		s.Require().Equal(currency.Currency{}, actual)
 		s.Require().EqualError(err, "currency not found")
 	})
 }
