@@ -12,8 +12,8 @@ import (
 
 	"github.com/Mikhalevich/tg-coffee-shop-bot/cmd/outboxpoller/internal/app"
 	"github.com/Mikhalevich/tg-coffee-shop-bot/cmd/outboxpoller/internal/config"
-	"github.com/Mikhalevich/tg-coffee-shop-bot/internal/adapter/buttonrespository"
-	"github.com/Mikhalevich/tg-coffee-shop-bot/internal/adapter/messagesender"
+	"github.com/Mikhalevich/tg-coffee-shop-bot/internal/adapter/buttonrespositoryobsolete"
+	"github.com/Mikhalevich/tg-coffee-shop-bot/internal/adapter/messagesenderobsolete"
 	"github.com/Mikhalevich/tg-coffee-shop-bot/internal/adapter/repository/postgres"
 	"github.com/Mikhalevich/tg-coffee-shop-bot/internal/adapter/repository/postgres/driver"
 	"github.com/Mikhalevich/tg-coffee-shop-bot/internal/adapter/repository/postgres/transaction"
@@ -44,7 +44,7 @@ func StartPoller(
 	defer cleanup()
 
 	var (
-		sender          = messagesender.New(botAPI, cfg.Bot.PaymentToken)
+		sender          = messagesenderobsolete.New(botAPI, cfg.Bot.PaymentToken)
 		msgProcessor    = messageprocessor.New(sender, sender, buttonRepository)
 		timeProvider    = timeprovider.New()
 		outboxProcessor = outboxprocessor.New(
@@ -68,7 +68,7 @@ func StartPoller(
 func MakeRedisButtonRepository(
 	ctx context.Context,
 	cfg config.ButtonRedis,
-) (*buttonrespository.ButtonRepository, error) {
+) (*buttonrespositoryobsolete.ButtonRepository, error) {
 	rdb := redis.NewClient(&redis.Options{
 		Addr:     cfg.Addr,
 		Password: cfg.Pwd,
@@ -83,7 +83,7 @@ func MakeRedisButtonRepository(
 		return nil, fmt.Errorf("redis ping: %w", err)
 	}
 
-	return buttonrespository.New(rdb, cfg.TTL), nil
+	return buttonrespositoryobsolete.New(rdb, cfg.TTL), nil
 }
 
 func MakePostgres(cfg config.Postgres) (*postgres.Postgres, func(), error) {
