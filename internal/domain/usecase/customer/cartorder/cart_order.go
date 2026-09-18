@@ -59,7 +59,7 @@ type CurrencyService interface {
 	GetCurrencyByID(
 		ctx context.Context,
 		id currency.ID,
-	) (*currency.Currency, error)
+	) (currency.Currency, error)
 }
 
 type NotificationService interface {
@@ -76,7 +76,7 @@ type NotificationService interface {
 		cartID cart.ID,
 		categories []product.Category,
 		orderedProducts []order.OrderedProduct,
-		curr *currency.Currency,
+		curr currency.Currency,
 	) error
 	ViewCategoryProducts(
 		ctx context.Context,
@@ -86,7 +86,7 @@ type NotificationService interface {
 		categoryID product.CategoryID,
 		categoryProducts []product.Product,
 		cartProducts []cart.CartProduct,
-		curr *currency.Currency,
+		curr currency.Currency,
 	) error
 	CartOrderUnavailable(
 		ctx context.Context,

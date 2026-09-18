@@ -16,7 +16,7 @@ import (
 func (p *PgCurrency) GetCurrencyByID(
 	ctx context.Context,
 	currencyID currency.ID,
-) (*currency.Currency, error) {
+) (currency.Currency, error) {
 	var (
 		query = `
 			SELECT
@@ -41,7 +41,7 @@ func (p *PgCurrency) GetCurrencyByID(
 	})
 
 	if err != nil {
-		return nil, fmt.Errorf("sqlx named: %w", err)
+		return currency.Currency{}, fmt.Errorf("sqlx named: %w", err)
 	}
 
 	var curr model.Currency
@@ -53,10 +53,10 @@ func (p *PgCurrency) GetCurrencyByID(
 		args...,
 	); err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
-			return nil, perror.NotFound("currency not found")
+			return currency.Currency{}, perror.NotFound("currency not found")
 		}
 
-		return nil, fmt.Errorf("get context: %w", err)
+		return currency.Currency{}, fmt.Errorf("get context: %w", err)
 	}
 
 	return curr.ToDom(), nil
