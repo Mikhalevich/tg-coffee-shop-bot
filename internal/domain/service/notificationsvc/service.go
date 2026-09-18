@@ -5,12 +5,14 @@ import (
 
 	"github.com/Mikhalevich/tg-coffee-shop-bot/internal/domain/port/msginfo"
 	"github.com/Mikhalevich/tg-coffee-shop-bot/internal/domain/usecase/customer/cartorder"
+	"github.com/Mikhalevich/tg-coffee-shop-bot/internal/domain/usecase/customer/order/activeorder"
 	"github.com/Mikhalevich/tg-coffee-shop-bot/internal/domain/usecase/customer/order/orderbyid"
 )
 
 var (
-	_ cartorder.NotificationService = (*Service)(nil)
-	_ orderbyid.NotificationService = (*Service)(nil)
+	_ cartorder.NotificationService   = (*Service)(nil)
+	_ orderbyid.NotificationService   = (*Service)(nil)
+	_ activeorder.NotificationService = (*Service)(nil)
 )
 
 type Sender interface {

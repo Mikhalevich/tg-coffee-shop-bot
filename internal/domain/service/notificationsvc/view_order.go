@@ -6,6 +6,8 @@ import (
 	"strings"
 	"time"
 
+	"github.com/Mikhalevich/tg-coffee-shop-bot/internal/domain/internal/message"
+	"github.com/Mikhalevich/tg-coffee-shop-bot/internal/domain/port/button"
 	"github.com/Mikhalevich/tg-coffee-shop-bot/internal/domain/port/currency"
 	"github.com/Mikhalevich/tg-coffee-shop-bot/internal/domain/port/msginfo"
 	"github.com/Mikhalevich/tg-coffee-shop-bot/internal/domain/port/order"
@@ -18,7 +20,13 @@ func (s *Service) ViewOrder(
 	ord order.Order,
 	products map[product.ProductID]product.Product,
 	curr currency.Currency,
+	pos int,
 ) error {
+	btns, err := makeViewOrderButtons(ord)
+	if err != nil {
+		return fmt.Errorf("make order buttons: %w", err)
+	}
+
 	if err := s.sender.SendMessage(
 		ctx,
 		msginfo.Message{
@@ -28,8 +36,9 @@ func (s *Service) ViewOrder(
 				ord,
 				products,
 				curr,
-				0,
+				pos,
 			),
+			Buttons: btns,
 		},
 	); err != nil {
 		return fmt.Errorf("send message: %w", err)
@@ -72,4 +81,17 @@ func (s *Service) formatOrder(
 	}
 
 	return strings.Join(format, "\n")
+}
+
+func makeViewOrderButtons(ord order.Order) ([]button.ButtonRow, error) {
+	if !ord.CanCancel() {
+		return nil, nil
+	}
+
+	cancelBtn, err := order.CancelOrder(message.Cancel(), ord.ID, true)
+	if err != nil {
+		return nil, fmt.Errorf("create cancel order button: %w", err)
+	}
+
+	return []button.ButtonRow{button.Row(cancelBtn)}, nil
 }

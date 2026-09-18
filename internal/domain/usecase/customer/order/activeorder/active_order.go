@@ -1,4 +1,4 @@
-package orderbyid
+package activeorder
 
 import (
 	"context"
@@ -13,7 +13,7 @@ import (
 )
 
 type OrderService interface {
-	GetOrderByID(ctx context.Context, id order.ID) (order.Order, error)
+	GetActiveOrder(ctx context.Context, chatID msginfo.ChatID) (order.Order, error)
 	GetActiveOrderPosition(
 		ctx context.Context,
 		orderID order.ID,
@@ -36,7 +36,7 @@ type CurrencyService interface {
 }
 
 type NotificationService interface {
-	InvalidOrder(
+	NoActiveOrder(
 		ctx context.Context,
 		chatID msginfo.ChatID,
 	) error
@@ -46,11 +46,11 @@ type NotificationService interface {
 		ord order.Order,
 		products map[product.ProductID]product.Product,
 		curr currency.Currency,
-		pos int,
+		position int,
 	) error
 }
 
-type OrderByID struct {
+type ActiveOrder struct {
 	orderService        OrderService
 	productService      ProductService
 	currencyService     CurrencyService
@@ -62,8 +62,8 @@ func New(
 	productService ProductService,
 	currencyService CurrencyService,
 	notificationService NotificationService,
-) *OrderByID {
-	return &OrderByID{
+) *ActiveOrder {
+	return &ActiveOrder{
 		orderService:        orderService,
 		productService:      productService,
 		currencyService:     currencyService,
@@ -71,53 +71,44 @@ func New(
 	}
 }
 
-func (o *OrderByID) GetOrderByID(
+func (a *ActiveOrder) ViewActiveOrder(
 	ctx context.Context,
 	chatID msginfo.ChatID,
-	orderID order.ID,
 ) error {
-	ord, err := o.orderService.GetOrderByID(ctx, orderID)
+	activeOrder, err := a.orderService.GetActiveOrder(ctx, chatID)
 	if err != nil {
 		if !perror.IsType(err, perror.TypeNotFound) {
-			return fmt.Errorf("get order: %w", err)
+			return fmt.Errorf("get active order: %w", err)
 		}
 
-		if err := o.notificationService.InvalidOrder(ctx, chatID); err != nil {
-			return fmt.Errorf("send invalid order: %w", err)
-		}
-
-		return nil
-	}
-
-	if !ord.IsSameChat(chatID) {
-		if err := o.notificationService.InvalidOrder(ctx, chatID); err != nil {
-			return fmt.Errorf("send invalid order: %w", err)
+		if err := a.notificationService.NoActiveOrder(ctx, chatID); err != nil {
+			return fmt.Errorf("no active order msg: %w", err)
 		}
 
 		return nil
 	}
 
-	productsInfo, err := o.productService.GetProductsByIDs(
+	productsInfo, err := a.productService.GetProductsByIDs(
 		ctx,
-		ord.ProductIDs(),
-		ord.CurrencyID,
+		activeOrder.ProductIDs(),
+		activeOrder.CurrencyID,
 	)
 	if err != nil {
 		return fmt.Errorf("get products by ids: %w", err)
 	}
 
-	curr, err := o.currencyService.GetCurrencyByID(ctx, ord.CurrencyID)
+	curr, err := a.currencyService.GetCurrencyByID(ctx, activeOrder.CurrencyID)
 	if err != nil {
 		return fmt.Errorf("get currency by id: %w", err)
 	}
 
-	if err := o.notificationService.ViewOrder(
+	if err := a.notificationService.ViewOrder(
 		ctx,
 		chatID,
-		ord,
+		activeOrder,
 		productsInfo,
 		*curr,
-		o.orderQueuePosition(ctx, ord),
+		a.orderQueuePosition(ctx, activeOrder),
 	); err != nil {
 		return fmt.Errorf("view order msg: %w", err)
 	}
@@ -125,7 +116,7 @@ func (o *OrderByID) GetOrderByID(
 	return nil
 }
 
-func (o *OrderByID) orderQueuePosition(
+func (a *ActiveOrder) orderQueuePosition(
 	ctx context.Context,
 	activeOrder order.Order,
 ) int {
@@ -133,7 +124,7 @@ func (o *OrderByID) orderQueuePosition(
 		return 0
 	}
 
-	pos, err := o.orderService.GetActiveOrderPosition(
+	pos, err := a.orderService.GetActiveOrderPosition(
 		ctx,
 		activeOrder.ID,
 	)
