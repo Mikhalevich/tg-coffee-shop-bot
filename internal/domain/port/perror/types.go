@@ -8,4 +8,5 @@ const (
 	TypeAlreadyExists
 	TypeInvalidParam
 	TypeNoRowsUpdated
+	TypeUnableToCancel
 )
