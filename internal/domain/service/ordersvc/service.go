@@ -8,13 +8,15 @@ import (
 	"github.com/Mikhalevich/tg-coffee-shop-bot/internal/domain/port/order"
 	"github.com/Mikhalevich/tg-coffee-shop-bot/internal/domain/usecase/customer/cartorder"
 	"github.com/Mikhalevich/tg-coffee-shop-bot/internal/domain/usecase/customer/order/orderbyid"
+	"github.com/Mikhalevich/tg-coffee-shop-bot/internal/domain/usecase/customer/order/ordercancel"
 	"github.com/Mikhalevich/tg-coffee-shop-bot/internal/domain/usecase/customer/order/queuesize"
 )
 
 var (
-	_ cartorder.OrderService = (*Service)(nil)
-	_ orderbyid.OrderService = (*Service)(nil)
-	_ queuesize.OrderService = (*Service)(nil)
+	_ cartorder.OrderService   = (*Service)(nil)
+	_ orderbyid.OrderService   = (*Service)(nil)
+	_ queuesize.OrderService   = (*Service)(nil)
+	_ ordercancel.OrderService = (*Service)(nil)
 )
 
 type Transactor interface {
@@ -52,19 +54,34 @@ type Repository interface {
 		ctx context.Context,
 		statuses ...order.Status,
 	) (int, error)
+	UpdateOrderStatusByChatAndID(
+		ctx context.Context,
+		orderID order.ID,
+		chatID msginfo.ChatID,
+		operationTime time.Time,
+		newStatus order.Status,
+		prevStatuses ...order.Status,
+	) error
+}
+
+type TimeProvider interface {
+	Now() time.Time
 }
 
 type Service struct {
-	transactor Transactor
-	repo       Repository
+	transactor   Transactor
+	repo         Repository
+	timeProvider TimeProvider
 }
 
 func New(
 	transactor Transactor,
 	repo Repository,
+	timeProvider TimeProvider,
 ) *Service {
 	return &Service{
-		transactor: transactor,
-		repo:       repo,
+		transactor:   transactor,
+		repo:         repo,
+		timeProvider: timeProvider,
 	}
 }

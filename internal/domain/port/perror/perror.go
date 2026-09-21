@@ -53,3 +53,7 @@ func InvalidParam(msg string) Error {
 func NoRowsUpdated() Error {
 	return New(TypeNoRowsUpdated, "no rows updated")
 }
+
+func UnableToCancel(msg string) Error {
+	return New(TypeUnableToCancel, msg)
+}
