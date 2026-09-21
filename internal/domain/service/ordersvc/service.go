@@ -8,11 +8,13 @@ import (
 	"github.com/Mikhalevich/tg-coffee-shop-bot/internal/domain/port/order"
 	"github.com/Mikhalevich/tg-coffee-shop-bot/internal/domain/usecase/customer/cartorder"
 	"github.com/Mikhalevich/tg-coffee-shop-bot/internal/domain/usecase/customer/order/orderbyid"
+	"github.com/Mikhalevich/tg-coffee-shop-bot/internal/domain/usecase/customer/order/queuesize"
 )
 
 var (
 	_ cartorder.OrderService = (*Service)(nil)
 	_ orderbyid.OrderService = (*Service)(nil)
+	_ queuesize.OrderService = (*Service)(nil)
 )
 
 type Transactor interface {
@@ -44,6 +46,10 @@ type Repository interface {
 	GetOrderPositionByStatus(
 		ctx context.Context,
 		orderID order.ID,
+		statuses ...order.Status,
+	) (int, error)
+	GetOrdersCountByStatus(
+		ctx context.Context,
 		statuses ...order.Status,
 	) (int, error)
 }
