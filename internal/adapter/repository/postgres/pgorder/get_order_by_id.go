@@ -62,6 +62,7 @@ func selectOrderByID(
 			orders
 		WHERE
 			id = $1
+		FOR UPDATE
 	`, orderID.Int(),
 	); err != nil {
 		if errors.Is(err, sql.ErrNoRows) {

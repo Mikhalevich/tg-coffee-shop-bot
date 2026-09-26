@@ -7,15 +7,13 @@ import (
 
 	"github.com/jmoiron/sqlx"
 
-	"github.com/Mikhalevich/tg-coffee-shop-bot/internal/domain/port/msginfo"
 	"github.com/Mikhalevich/tg-coffee-shop-bot/internal/domain/port/order"
 	"github.com/Mikhalevich/tg-coffee-shop-bot/internal/domain/port/perror"
 )
 
-func (p *PgOrder) UpdateOrderStatusByChatAndID(
+func (p *PgOrder) UpdateOrderStatus(
 	ctx context.Context,
 	orderID order.ID,
-	chatID msginfo.ChatID,
 	operationTime time.Time,
 	newStatus order.Status,
 	prevStatuses ...order.Status,
@@ -27,7 +25,6 @@ func (p *PgOrder) UpdateOrderStatusByChatAndID(
 				updated_at = :updated_at
 			WHERE
 				id = :id AND
-				chat_id = :chat_id AND
 				status IN (?)
 		`
 		trx = p.transactor.ExtContext(ctx)
@@ -39,8 +36,8 @@ func (p *PgOrder) UpdateOrderStatusByChatAndID(
 			"status":     newStatus,
 			"updated_at": operationTime,
 			"id":         orderID.Int(),
-			"chat_id":    chatID.Int64(),
-		})
+		},
+	)
 
 	if err != nil {
 		return fmt.Errorf("named: %w", err)
@@ -53,14 +50,9 @@ func (p *PgOrder) UpdateOrderStatusByChatAndID(
 		return fmt.Errorf("in statement %w", err)
 	}
 
-	res, err := trx.ExecContext(
-		ctx,
-		trx.Rebind(query),
-		args...,
-	)
-
+	res, err := trx.ExecContext(ctx, trx.Rebind(query), args...)
 	if err != nil {
-		return fmt.Errorf("get context: %w", err)
+		return fmt.Errorf("exec context: %w", err)
 	}
 
 	rows, err := res.RowsAffected()
