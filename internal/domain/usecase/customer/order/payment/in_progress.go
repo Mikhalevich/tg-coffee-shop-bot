@@ -35,7 +35,7 @@ func (p *Payment) InProgress(
 	}
 
 	if err := p.transactor.Transaction(ctx, func(ctx context.Context) error {
-		err := p.orderService.SerOrderPaymentInProgress(
+		err := p.orderService.SetOrderPaymentInProgress(
 			ctx,
 			orderID,
 			totalAmount,

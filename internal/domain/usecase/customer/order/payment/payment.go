@@ -17,7 +17,7 @@ type StoreService interface {
 }
 
 type OrderService interface {
-	SerOrderPaymentInProgress(
+	SetOrderPaymentInProgress(
 		ctx context.Context,
 		orderID order.ID,
 		totalAmount int,

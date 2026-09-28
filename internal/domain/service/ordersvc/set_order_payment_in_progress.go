@@ -9,7 +9,7 @@ import (
 	"github.com/Mikhalevich/tg-coffee-shop-bot/internal/domain/port/perror"
 )
 
-func (s *Service) SerOrderPaymentInProgress(
+func (s *Service) SetOrderPaymentInProgress(
 	ctx context.Context,
 	orderID order.ID,
 	totalAmount int,
