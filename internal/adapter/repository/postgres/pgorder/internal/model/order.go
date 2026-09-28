@@ -57,10 +57,10 @@ func ToDBOrder(domOrder order.Order) Order {
 		ID:               domOrder.ID.Int(),
 		ChatID:           domOrder.ChatID.Int64(),
 		Status:           domOrder.Status.String(),
-		VerificationCode: null.NullString(domOrder.VerificationCode),
+		VerificationCode: null.String(domOrder.VerificationCode),
 		CurrencyID:       domOrder.CurrencyID.Int(),
 		//nolint:gosec
-		DailyPosition: null.NullIntPositive(int32(domOrder.DailyPosition)),
+		DailyPosition: null.IntPositive(int32(domOrder.DailyPosition)),
 		TotalPrice:    domOrder.TotalPrice,
 		CreatedAt:     domOrder.CreatedAt,
 		UpdatedAt:     domOrder.UpdatedAt,

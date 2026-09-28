@@ -4,7 +4,7 @@ import (
 	"database/sql"
 )
 
-func NullString(value string) sql.NullString {
+func String(value string) sql.NullString {
 	if value == "" {
 		return sql.NullString{}
 	}
@@ -15,13 +15,24 @@ func NullString(value string) sql.NullString {
 	}
 }
 
-func NullIntPositive(value int32) sql.NullInt32 {
+func IntPositive(value int32) sql.NullInt32 {
 	if value <= 0 {
 		return sql.NullInt32{}
 	}
 
 	return sql.NullInt32{
 		Int32: value,
+		Valid: true,
+	}
+}
+
+func Int64Positive(value int64) sql.NullInt64 {
+	if value == 0 {
+		return sql.NullInt64{}
+	}
+
+	return sql.NullInt64{
+		Int64: value,
 		Valid: true,
 	}
 }

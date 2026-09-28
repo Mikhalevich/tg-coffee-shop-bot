@@ -6,10 +6,12 @@ import (
 
 	"github.com/Mikhalevich/tg-coffee-shop-bot/internal/domain/port/store"
 	"github.com/Mikhalevich/tg-coffee-shop-bot/internal/domain/usecase/customer/cartorder"
+	"github.com/Mikhalevich/tg-coffee-shop-bot/internal/domain/usecase/customer/order/payment"
 )
 
 var (
 	_ cartorder.StoreService = (*Service)(nil)
+	_ payment.StoreService   = (*Service)(nil)
 )
 
 type Repository interface {
