@@ -92,15 +92,6 @@ type NotificationService interface {
 		queuePosition int,
 		qrCodeImage []byte,
 	) error
-	SendOrderConfirmed(
-		ctx context.Context,
-		chatID msginfo.ChatID,
-		ord order.Order,
-		productsInfo map[product.ProductID]product.Product,
-		curr currency.Currency,
-		queuePosition int,
-		imagePayload []byte,
-	) error
 }
 
 type Payment struct {
