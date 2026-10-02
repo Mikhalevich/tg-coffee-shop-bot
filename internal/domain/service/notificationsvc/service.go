@@ -8,6 +8,7 @@ import (
 	"github.com/Mikhalevich/tg-coffee-shop-bot/internal/domain/usecase/customer/order/activeorder"
 	"github.com/Mikhalevich/tg-coffee-shop-bot/internal/domain/usecase/customer/order/orderbyid"
 	"github.com/Mikhalevich/tg-coffee-shop-bot/internal/domain/usecase/customer/order/ordercancel"
+	"github.com/Mikhalevich/tg-coffee-shop-bot/internal/domain/usecase/customer/order/payment"
 )
 
 var (
@@ -15,11 +16,18 @@ var (
 	_ orderbyid.NotificationService   = (*Service)(nil)
 	_ activeorder.NotificationService = (*Service)(nil)
 	_ ordercancel.NotificationService = (*Service)(nil)
+	_ payment.NotificationService     = (*Service)(nil)
 )
 
 type Sender interface {
 	SendMessage(ctx context.Context, msg msginfo.Message) error
 	SendInvoice(ctx context.Context, invoice msginfo.Invoice) error
+	AnswerPayment(
+		ctx context.Context,
+		paymentID string,
+		success bool,
+		errorMsg string,
+	) error
 }
 
 type MarkdownEscaper interface {

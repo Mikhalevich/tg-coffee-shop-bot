@@ -71,6 +71,13 @@ type Repository interface {
 		newStatus order.Status,
 		prevStatuses ...order.Status,
 	) error
+	UpdateOrderByChatAndID(
+		ctx context.Context,
+		orderID order.ID,
+		chatID msginfo.ChatID,
+		data order.UpdateOrderData,
+		prevStatuses ...order.Status,
+	) error
 }
 
 type TimeProvider interface {
