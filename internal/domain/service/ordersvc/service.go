@@ -7,6 +7,7 @@ import (
 	"github.com/Mikhalevich/tg-coffee-shop-bot/internal/domain/port/msginfo"
 	"github.com/Mikhalevich/tg-coffee-shop-bot/internal/domain/port/order"
 	"github.com/Mikhalevich/tg-coffee-shop-bot/internal/domain/usecase/customer/cartorder"
+	"github.com/Mikhalevich/tg-coffee-shop-bot/internal/domain/usecase/customer/order/history"
 	"github.com/Mikhalevich/tg-coffee-shop-bot/internal/domain/usecase/customer/order/orderbyid"
 	"github.com/Mikhalevich/tg-coffee-shop-bot/internal/domain/usecase/customer/order/ordercancel"
 	"github.com/Mikhalevich/tg-coffee-shop-bot/internal/domain/usecase/customer/order/payment"
@@ -19,12 +20,14 @@ var (
 	_ queuesize.OrderService   = (*Service)(nil)
 	_ ordercancel.OrderService = (*Service)(nil)
 	_ payment.OrderService     = (*Service)(nil)
+	_ history.OrderService     = (*Service)(nil)
 )
 
 type Transactor interface {
 	Transaction(ctx context.Context, trxFn func(ctx context.Context) error) error
 }
 
+//nolint:interfacebloat
 type Repository interface {
 	InsertOrder(
 		ctx context.Context,
@@ -78,6 +81,16 @@ type Repository interface {
 		data order.UpdateOrderData,
 		prevStatuses ...order.Status,
 	) error
+	HistoryOrdersByOffset(
+		ctx context.Context,
+		chatID msginfo.ChatID,
+		offset int,
+		limit int,
+	) ([]order.HistoryOrder, error)
+	HistoryOrdersCount(
+		ctx context.Context,
+		chatID msginfo.ChatID,
+	) (int, error)
 }
 
 type TimeProvider interface {
