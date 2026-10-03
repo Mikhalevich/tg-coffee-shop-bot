@@ -12,6 +12,7 @@ import (
 	"github.com/Mikhalevich/tg-coffee-shop-bot/internal/domain/usecase/customer/order/ordercancel"
 	"github.com/Mikhalevich/tg-coffee-shop-bot/internal/domain/usecase/customer/order/payment"
 	"github.com/Mikhalevich/tg-coffee-shop-bot/internal/domain/usecase/customer/order/queuesize"
+	"github.com/Mikhalevich/tg-coffee-shop-bot/internal/domain/usecase/manager/order/nextpending"
 )
 
 var (
@@ -21,6 +22,7 @@ var (
 	_ ordercancel.OrderService = (*Service)(nil)
 	_ payment.OrderService     = (*Service)(nil)
 	_ history.OrderService     = (*Service)(nil)
+	_ nextpending.OrderService = (*Service)(nil)
 )
 
 type Transactor interface {
@@ -91,6 +93,11 @@ type Repository interface {
 		ctx context.Context,
 		chatID msginfo.ChatID,
 	) (int, error)
+	UpdateOrderStatusForMinID(
+		ctx context.Context,
+		operationTime time.Time,
+		newStatus, prevStatus order.Status,
+	) (order.ID, error)
 }
 
 type TimeProvider interface {
