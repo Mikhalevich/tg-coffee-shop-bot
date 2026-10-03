@@ -9,6 +9,10 @@ import (
 	"github.com/Mikhalevich/tg-coffee-shop-bot/internal/domain/port/perror"
 )
 
+const (
+	lastPageMarker = -1
+)
+
 func (s *Service) GetHistoryOrderPage(
 	ctx context.Context,
 	chatID msginfo.ChatID,
@@ -25,6 +29,10 @@ func (s *Service) GetHistoryOrderPage(
 	}
 
 	pagesCount := calculatePageCount(ordersCount, pageSize)
+
+	if page == lastPageMarker {
+		page = pagesCount
+	}
 
 	if page > pagesCount {
 		return nil, order.Page{}, fmt.Errorf("invalid page number: %d, pages total: %d", page, pagesCount)
