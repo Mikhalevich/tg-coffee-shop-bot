@@ -10,15 +10,19 @@ import (
 	"github.com/Mikhalevich/tg-coffee-shop-bot/internal/domain/usecase/customer/order/orderbyid"
 	"github.com/Mikhalevich/tg-coffee-shop-bot/internal/domain/usecase/customer/order/ordercancel"
 	"github.com/Mikhalevich/tg-coffee-shop-bot/internal/domain/usecase/customer/order/payment"
+	"github.com/Mikhalevich/tg-coffee-shop-bot/internal/domain/usecase/manager/order/nextpending"
+	"github.com/Mikhalevich/tg-coffee-shop-bot/internal/domain/usecase/manager/order/updatestatus"
 )
 
 var (
-	_ cartorder.NotificationService   = (*Service)(nil)
-	_ orderbyid.NotificationService   = (*Service)(nil)
-	_ activeorder.NotificationService = (*Service)(nil)
-	_ ordercancel.NotificationService = (*Service)(nil)
-	_ payment.NotificationService     = (*Service)(nil)
-	_ history.NotificationService     = (*Service)(nil)
+	_ cartorder.NotificationService    = (*Service)(nil)
+	_ orderbyid.NotificationService    = (*Service)(nil)
+	_ activeorder.NotificationService  = (*Service)(nil)
+	_ ordercancel.NotificationService  = (*Service)(nil)
+	_ payment.NotificationService      = (*Service)(nil)
+	_ history.NotificationService      = (*Service)(nil)
+	_ nextpending.NotificationService  = (*Service)(nil)
+	_ updatestatus.NotificationService = (*Service)(nil)
 )
 
 type Sender interface {
