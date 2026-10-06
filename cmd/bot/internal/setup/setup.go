@@ -23,6 +23,7 @@ import (
 	"github.com/Mikhalevich/tg-coffee-shop-bot/internal/adapter/repository/postgres/orderhistoryoffset"
 	"github.com/Mikhalevich/tg-coffee-shop-bot/internal/adapter/repository/postgres/pgcurrency"
 	"github.com/Mikhalevich/tg-coffee-shop-bot/internal/adapter/repository/postgres/pgorder"
+	"github.com/Mikhalevich/tg-coffee-shop-bot/internal/adapter/repository/postgres/pgoutbox"
 	"github.com/Mikhalevich/tg-coffee-shop-bot/internal/adapter/repository/postgres/pgproduct"
 	"github.com/Mikhalevich/tg-coffee-shop-bot/internal/adapter/repository/postgres/pgstore"
 	"github.com/Mikhalevich/tg-coffee-shop-bot/internal/adapter/repository/postgres/transaction"
@@ -77,7 +78,7 @@ func StartBot(ctx context.Context, cfg config.Config) error {
 		pgOrderHistoryPage  = orderhistoryoffset.New(dbConn, driver)
 		sender              = messagesender.New(botAPI, cfg.Bot.PaymentToken)
 		timeProvider        = timeprovider.New()
-		msgService          = messagesvc.New(
+		messageService      = messagesvc.New(
 			sender,
 			sender,
 			buttonRepository,
@@ -102,7 +103,7 @@ func StartBot(ctx context.Context, cfg config.Config) error {
 			pgcurrency.New(transactionProvider),
 		)
 		notificationService = notificationsvc.New(
-			nil, //todo: SEND INVOICE
+			pgoutbox.New(transactionProvider),
 			sender,
 		)
 		cartOrderUsecase = cartorder.New(

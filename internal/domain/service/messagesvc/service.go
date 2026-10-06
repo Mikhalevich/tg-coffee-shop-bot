@@ -5,6 +5,7 @@ import (
 
 	"github.com/Mikhalevich/tg-coffee-shop-bot/internal/domain/port/button"
 	"github.com/Mikhalevich/tg-coffee-shop-bot/internal/domain/port/msginfo"
+	"github.com/Mikhalevich/tg-coffee-shop-bot/internal/domain/port/order"
 )
 
 type SenderMessage struct {
@@ -17,13 +18,13 @@ type SenderMessage struct {
 }
 
 type SenderInvoice struct {
-	ChatID      msginfo.ChatID
-	Title       string
-	Description string
-	Currency    string
-	Payload     string
-	Labels      []msginfo.LabeledPrice
-	Buttons     []button.InlineKeyboardButtonRow
+	ChatID       msginfo.ChatID
+	Title        string
+	Description  string
+	CurrencyCode string
+	OrderID      order.ID
+	Labels       []order.LabeledPrice
+	Buttons      []button.InlineKeyboardButtonRow
 }
 
 type Sender interface {

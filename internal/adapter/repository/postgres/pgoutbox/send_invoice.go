@@ -2,51 +2,51 @@ package pgoutbox
 
 import (
 	"context"
-	"errors"
 	"fmt"
 
 	"github.com/jmoiron/sqlx"
 
-	"github.com/Mikhalevich/tg-coffee-shop-bot/internal/adapter/repository/postgres/internal/model"
-	"github.com/Mikhalevich/tg-coffee-shop-bot/internal/domain/port/currency"
-	"github.com/Mikhalevich/tg-coffee-shop-bot/internal/domain/port/msginfo"
+	"github.com/Mikhalevich/tg-coffee-shop-bot/internal/adapter/repository/postgres/pgoutbox/internal/model"
 	"github.com/Mikhalevich/tg-coffee-shop-bot/internal/domain/port/order"
-	"github.com/Mikhalevich/tg-coffee-shop-bot/internal/domain/port/product"
+	"github.com/Mikhalevich/tg-coffee-shop-bot/internal/domain/port/perror"
 )
 
 func (p *PgOutbox) SendInvoice(
 	ctx context.Context,
-	chatID msginfo.ChatID,
-	title string,
-	ord order.Order,
-	productsInfo map[product.ProductID]product.Product,
-	curr currency.Currency,
+	invoice order.Invoice,
 ) error {
 	var (
 		query = `
 			INSERT INTO outbox_order_invoice(
 				chat_id,
-				msg_text,
-				order_id
+				title,
+				description,
+				currency_code,
+				order_id,
+				labels,
+				buttons
 			) VALUES (
 				:chat_id,
-				:msg_text,
-				:order_id
+				:title,
+				:description,
+				:currency_code,
+				:order_id,
+				:labels,
+				:buttons
 			)
 		`
-
-		invoice = model.OutboxInvoice{
-			ChatID:  chatID.Int64(),
-			Text:    title,
-			OrderID: ord.ID.Int(),
-		}
 	)
+
+	dbInvoice, err := model.ToDBInvoice(invoice)
+	if err != nil {
+		return fmt.Errorf("convert to db invoice: %w", err)
+	}
 
 	res, err := sqlx.NamedExecContext(
 		ctx,
 		p.transactor.ExtContext(ctx),
 		query,
-		invoice,
+		dbInvoice,
 	)
 	if err != nil {
 		return fmt.Errorf("named exec: %w", err)
@@ -58,7 +58,7 @@ func (p *PgOutbox) SendInvoice(
 	}
 
 	if affected == 0 {
-		return errors.New("no rows affected")
+		return perror.NoRowsUpdated()
 	}
 
 	return nil

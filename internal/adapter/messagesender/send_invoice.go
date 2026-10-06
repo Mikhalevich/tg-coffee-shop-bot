@@ -7,7 +7,7 @@ import (
 	"github.com/go-telegram/bot"
 	"github.com/go-telegram/bot/models"
 
-	"github.com/Mikhalevich/tg-coffee-shop-bot/internal/domain/port/msginfo"
+	"github.com/Mikhalevich/tg-coffee-shop-bot/internal/domain/port/order"
 	"github.com/Mikhalevich/tg-coffee-shop-bot/internal/domain/service/messagesvc"
 )
 
@@ -19,9 +19,9 @@ func (m *messageSender) SendInvoice(
 		ChatID:        invoice.ChatID.Int64(),
 		Title:         invoice.Title,
 		Description:   invoice.Description,
-		Payload:       invoice.Payload,
+		Payload:       invoice.OrderID.String(),
 		ProviderToken: m.paymentToken,
-		Currency:      invoice.Currency,
+		Currency:      invoice.CurrencyCode,
 		Prices:        toLabeledPrices(invoice.Labels),
 		ReplyMarkup:   makeButtonsMarkup(invoice.Buttons...),
 	}); err != nil {
@@ -31,7 +31,7 @@ func (m *messageSender) SendInvoice(
 	return nil
 }
 
-func toLabeledPrices(labels []msginfo.LabeledPrice) []models.LabeledPrice {
+func toLabeledPrices(labels []order.LabeledPrice) []models.LabeledPrice {
 	prices := make([]models.LabeledPrice, 0, len(labels))
 
 	for _, v := range labels {

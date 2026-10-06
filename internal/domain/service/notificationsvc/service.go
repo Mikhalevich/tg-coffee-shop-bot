@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"github.com/Mikhalevich/tg-coffee-shop-bot/internal/domain/port/msginfo"
+	"github.com/Mikhalevich/tg-coffee-shop-bot/internal/domain/port/order"
 	"github.com/Mikhalevich/tg-coffee-shop-bot/internal/domain/usecase/customer/cartorder"
 	"github.com/Mikhalevich/tg-coffee-shop-bot/internal/domain/usecase/customer/order/activeorder"
 	"github.com/Mikhalevich/tg-coffee-shop-bot/internal/domain/usecase/customer/order/history"
@@ -27,7 +28,7 @@ var (
 
 type Sender interface {
 	SendMessage(ctx context.Context, msg msginfo.Message) error
-	SendInvoice(ctx context.Context, invoice msginfo.Invoice) error
+	SendInvoice(ctx context.Context, invoice order.Invoice) error
 	AnswerPayment(
 		ctx context.Context,
 		paymentID string,
