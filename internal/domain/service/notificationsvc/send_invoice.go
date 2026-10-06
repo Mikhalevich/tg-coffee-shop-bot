@@ -27,14 +27,14 @@ func (s *Service) SendInvoice(
 
 	if err := s.sender.SendInvoice(
 		ctx,
-		msginfo.Invoice{
-			ChatID:      chatID,
-			Title:       message.OrderInvoice(),
-			Description: makeOrderDescription(ord.Products, productsInfo),
-			Currency:    curr.Code,
-			Payload:     ord.ID.String(),
-			Labels:      makeLabeledPrices(ord.Products, productsInfo),
-			Buttons:     btns,
+		order.Invoice{
+			ChatID:       chatID,
+			Title:        message.OrderInvoice(),
+			Description:  makeOrderDescription(ord.Products, productsInfo),
+			CurrencyCode: curr.Code,
+			OrderID:      ord.ID,
+			Labels:       makeLabeledPrices(ord.Products, productsInfo),
+			Buttons:      btns,
 		},
 	); err != nil {
 		return fmt.Errorf("send invoice: %w", err)
@@ -83,11 +83,11 @@ func makeOrderDescription(
 func makeLabeledPrices(
 	orderedProducts []order.OrderedProduct,
 	productsInfo map[product.ProductID]product.Product,
-) []msginfo.LabeledPrice {
-	prices := make([]msginfo.LabeledPrice, 0, len(orderedProducts))
+) []order.LabeledPrice {
+	prices := make([]order.LabeledPrice, 0, len(orderedProducts))
 
 	for _, v := range orderedProducts {
-		prices = append(prices, msginfo.LabeledPrice{
+		prices = append(prices, order.LabeledPrice{
 			Label:  fmt.Sprintf("%s x%d", productsInfo[v.ProductID].Title, v.Count),
 			Amount: v.Count * v.Price,
 		})

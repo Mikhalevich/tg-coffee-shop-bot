@@ -34,7 +34,7 @@ type Message struct {
 }
 
 func ToDBOutboxMessage(msg msginfo.Message) (Message, error) {
-	jbButtons, err := jsonbFromButtonRows(msg.Buttons)
+	jbButtons, err := jsonbFromSlice(msg.Buttons)
 	if err != nil {
 		return Message{}, fmt.Errorf("jsonb from buttons: %w", err)
 	}
@@ -49,12 +49,12 @@ func ToDBOutboxMessage(msg msginfo.Message) (Message, error) {
 	}, nil
 }
 
-func jsonbFromButtonRows(buttons []button.ButtonRow) (jsonb.JSONB, error) {
-	if buttons == nil {
+func jsonbFromSlice[T any](elements []T) (jsonb.JSONB, error) {
+	if len(elements) == 0 {
 		return jsonb.NewString("[]"), nil
 	}
 
-	jbButtons, err := jsonb.NewFromMarshaler(buttons)
+	jbButtons, err := jsonb.NewFromMarshaler(elements)
 	if err != nil {
 		return jsonb.NewNull(), fmt.Errorf("jsonb marshaler: %w", err)
 	}

@@ -17,7 +17,6 @@ type NotificationService interface {
 	ShowOrderCount(
 		ctx context.Context,
 		chatID msginfo.ChatID,
-		messageID msginfo.MessageID,
 		count int,
 	) error
 }
@@ -39,7 +38,7 @@ func New(
 
 func (q *QueueSize) Size(
 	ctx context.Context,
-	info msginfo.Info,
+	chatID msginfo.ChatID,
 ) error {
 	count, err := q.orderService.GetOrdersCount(ctx)
 	if err != nil {
@@ -48,8 +47,7 @@ func (q *QueueSize) Size(
 
 	if err := q.notificationService.ShowOrderCount(
 		ctx,
-		info.ChatID,
-		info.MessageID,
+		chatID,
 		count,
 	); err != nil {
 		return fmt.Errorf("show order count msg: %w", err)

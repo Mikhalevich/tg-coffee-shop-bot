@@ -19,8 +19,12 @@ func (p *PgOutbox) SelectForDispatchInvoice(
 			SELECT
 				id,
 				chat_id,
-				msg_text,
-				order_id
+				title,
+				description,
+				currency_code,
+				order_id,
+				labels,
+				buttons
 			FROM
 				outbox_order_invoice
 			WHERE
@@ -45,5 +49,10 @@ func (p *PgOutbox) SelectForDispatchInvoice(
 		return nil, fmt.Errorf("select messages: %w", err)
 	}
 
-	return model.ToDomInvoices(outboxMsgs), nil
+	outboxInvoices, err := model.ToOutboxInvoices(outboxMsgs)
+	if err != nil {
+		return nil, fmt.Errorf("convert to outbox invoices: %w", err)
+	}
+
+	return outboxInvoices, nil
 }

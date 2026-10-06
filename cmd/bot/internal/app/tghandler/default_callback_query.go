@@ -6,8 +6,10 @@ import (
 
 	"github.com/Mikhalevich/tgbot"
 
-	"github.com/Mikhalevich/tg-coffee-shop-bot/internal/domain/messageprocessor/button"
+	"github.com/Mikhalevich/tg-coffee-shop-bot/internal/domain/port/button"
+	"github.com/Mikhalevich/tg-coffee-shop-bot/internal/domain/port/cart"
 	"github.com/Mikhalevich/tg-coffee-shop-bot/internal/domain/port/msginfo"
+	"github.com/Mikhalevich/tg-coffee-shop-bot/internal/domain/port/order"
 	"github.com/Mikhalevich/tg-coffee-shop-bot/internal/domain/port/perror"
 )
 
@@ -21,10 +23,6 @@ func (t *TGHandler) DefaultCallbackQuery(ctx context.Context, msg tgbot.BotMessa
 		}
 
 		return fmt.Errorf("get button: %w", err)
-	}
-
-	if btn.ChatID.Int64() != msg.ChatID {
-		return fmt.Errorf("chat not match button: %d msg: %d", btn.ChatID.Int64(), msg.ChatID)
 	}
 
 	info := msginfo.Info{
@@ -45,17 +43,15 @@ func (t *TGHandler) DefaultCallbackQuery(ctx context.Context, msg tgbot.BotMessa
 }
 
 func (t *TGHandler) cancelOrder(ctx context.Context, info msginfo.Info, btn button.Button) error {
-	payload, err := button.GetPayload[button.CancelOrderPayload](btn)
+	payload, err := button.GetPayload[order.CancelOrderPayload](btn)
 	if err != nil {
 		return fmt.Errorf("invalid payload: %w", err)
 	}
 
-	if err := t.actionProcessor.Cancel(
+	if err := t.cancelOrderUsecase.Cancel(
 		ctx,
-		info.ChatID,
-		info.MessageID,
+		info,
 		payload.OrderID,
-		payload.IsTextMessage,
 	); err != nil {
 		return fmt.Errorf("cancel order: %w", err)
 	}
@@ -64,12 +60,12 @@ func (t *TGHandler) cancelOrder(ctx context.Context, info msginfo.Info, btn butt
 }
 
 func (t *TGHandler) confirmCart(ctx context.Context, info msginfo.Info, btn button.Button) error {
-	payload, err := button.GetPayload[button.CartConfirmPayload](btn)
+	payload, err := button.GetPayload[cart.CartConfirmPayload](btn)
 	if err != nil {
 		return fmt.Errorf("invalid payload: %w", err)
 	}
 
-	if err := t.cartProcessor.Confirm(ctx, info, payload.CartID, payload.CurrencyID); err != nil {
+	if err := t.cartUsecase.Confirm(ctx, info, payload.CartID, payload.CurrencyID); err != nil {
 		return fmt.Errorf("create order: %w", err)
 	}
 
@@ -77,12 +73,16 @@ func (t *TGHandler) confirmCart(ctx context.Context, info msginfo.Info, btn butt
 }
 
 func (t *TGHandler) cancelCart(ctx context.Context, info msginfo.Info, btn button.Button) error {
-	payload, err := button.GetPayload[button.CartCancelPayload](btn)
+	payload, err := button.GetPayload[cart.CartCancelPayload](btn)
 	if err != nil {
 		return fmt.Errorf("invalid payload: %w", err)
 	}
 
-	if err := t.cartProcessor.Cancel(ctx, info, payload.CartID); err != nil {
+	if err := t.cartUsecase.Cancel(
+		ctx,
+		info.ChatID,
+		payload.CartID,
+	); err != nil {
 		return fmt.Errorf("cart cancel: %w", err)
 	}
 
@@ -90,12 +90,12 @@ func (t *TGHandler) cancelCart(ctx context.Context, info msginfo.Info, btn butto
 }
 
 func (t *TGHandler) viewCategoryProducts(ctx context.Context, info msginfo.Info, btn button.Button) error {
-	payload, err := button.GetPayload[button.CartViewCategoryProductsPayload](btn)
+	payload, err := button.GetPayload[cart.CartViewCategoryProductsPayload](btn)
 	if err != nil {
 		return fmt.Errorf("invalid payload: %w", err)
 	}
 
-	if err := t.cartProcessor.ViewCategoryProducts(
+	if err := t.cartUsecase.ViewCategoryProducts(
 		ctx,
 		info,
 		payload.CartID,
@@ -109,12 +109,12 @@ func (t *TGHandler) viewCategoryProducts(ctx context.Context, info msginfo.Info,
 }
 
 func (t *TGHandler) viewCategories(ctx context.Context, info msginfo.Info, btn button.Button) error {
-	payload, err := button.GetPayload[button.CartViewCategoriesPayload](btn)
+	payload, err := button.GetPayload[cart.CartViewCategoriesPayload](btn)
 	if err != nil {
 		return fmt.Errorf("invalid payload: %w", err)
 	}
 
-	if err := t.cartProcessor.ViewCategories(ctx, info, payload.CartID, payload.CurrencyID); err != nil {
+	if err := t.cartUsecase.ViewCategories(ctx, info, payload.CartID, payload.CurrencyID); err != nil {
 		return fmt.Errorf("cart view categories: %w", err)
 	}
 
@@ -122,12 +122,12 @@ func (t *TGHandler) viewCategories(ctx context.Context, info msginfo.Info, btn b
 }
 
 func (t *TGHandler) addProduct(ctx context.Context, info msginfo.Info, btn button.Button) error {
-	payload, err := button.GetPayload[button.CartAddProductPayload](btn)
+	payload, err := button.GetPayload[cart.CartAddProductPayload](btn)
 	if err != nil {
 		return fmt.Errorf("invalid payload: %w", err)
 	}
 
-	if err := t.cartProcessor.AddProduct(
+	if err := t.cartUsecase.Add(
 		ctx,
 		info,
 		payload.CartID,
@@ -141,64 +141,8 @@ func (t *TGHandler) addProduct(ctx context.Context, info msginfo.Info, btn butto
 	return nil
 }
 
-func (t *TGHandler) historyPrevious(ctx context.Context, info msginfo.Info, btn button.Button) error {
-	payload, err := button.GetPayload[button.OrderHistoryByID](btn)
-	if err != nil {
-		return fmt.Errorf("invalid payload: %w", err)
-	}
-
-	if err := t.historyProcessor.Previous(
-		ctx,
-		info,
-		payload.OrderID,
-	); err != nil {
-		return fmt.Errorf("history previous: %w", err)
-	}
-
-	return nil
-}
-
-func (t *TGHandler) historyNext(ctx context.Context, info msginfo.Info, btn button.Button) error {
-	payload, err := button.GetPayload[button.OrderHistoryByID](btn)
-	if err != nil {
-		return fmt.Errorf("invalid payload: %w", err)
-	}
-
-	if err := t.historyProcessor.Next(
-		ctx,
-		info,
-		payload.OrderID,
-	); err != nil {
-		return fmt.Errorf("history next: %w", err)
-	}
-
-	return nil
-}
-
-func (t *TGHandler) historyFirst(ctx context.Context, info msginfo.Info, btn button.Button) error {
-	if err := t.historyProcessor.First(
-		ctx,
-		info,
-	); err != nil {
-		return fmt.Errorf("history first: %w", err)
-	}
-
-	return nil
-}
-
-func (t *TGHandler) historyLast(ctx context.Context, info msginfo.Info, btn button.Button) error {
-	if err := t.historyProcessor.Last(
-		ctx,
-		info,
-	); err != nil {
-		return fmt.Errorf("history last: %w", err)
-	}
-
-	return nil
-}
-
 func (t *TGHandler) historyFirstV2(ctx context.Context, info msginfo.Info, btn button.Button) error {
-	if err := t.historyProcessorV2.First(
+	if err := t.historyOrderUsecase.First(
 		ctx,
 		info,
 	); err != nil {
@@ -209,7 +153,7 @@ func (t *TGHandler) historyFirstV2(ctx context.Context, info msginfo.Info, btn b
 }
 
 func (t *TGHandler) historyLastV2(ctx context.Context, info msginfo.Info, btn button.Button) error {
-	if err := t.historyProcessorV2.Last(
+	if err := t.historyOrderUsecase.Last(
 		ctx,
 		info,
 	); err != nil {
@@ -220,12 +164,12 @@ func (t *TGHandler) historyLastV2(ctx context.Context, info msginfo.Info, btn bu
 }
 
 func (t *TGHandler) historyPageV2(ctx context.Context, info msginfo.Info, btn button.Button) error {
-	payload, err := button.GetPayload[button.OrderHistoryByPagePayload](btn)
+	payload, err := button.GetPayload[order.OrderHistoryByPagePayload](btn)
 	if err != nil {
 		return fmt.Errorf("invalid payload: %w", err)
 	}
 
-	if err := t.historyProcessorV2.Page(
+	if err := t.historyOrderUsecase.Page(
 		ctx,
 		info,
 		payload.Page,

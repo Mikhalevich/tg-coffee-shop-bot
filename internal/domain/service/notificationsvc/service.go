@@ -4,12 +4,14 @@ import (
 	"context"
 
 	"github.com/Mikhalevich/tg-coffee-shop-bot/internal/domain/port/msginfo"
+	"github.com/Mikhalevich/tg-coffee-shop-bot/internal/domain/port/order"
 	"github.com/Mikhalevich/tg-coffee-shop-bot/internal/domain/usecase/customer/cartorder"
 	"github.com/Mikhalevich/tg-coffee-shop-bot/internal/domain/usecase/customer/order/activeorder"
 	"github.com/Mikhalevich/tg-coffee-shop-bot/internal/domain/usecase/customer/order/history"
 	"github.com/Mikhalevich/tg-coffee-shop-bot/internal/domain/usecase/customer/order/orderbyid"
 	"github.com/Mikhalevich/tg-coffee-shop-bot/internal/domain/usecase/customer/order/ordercancel"
 	"github.com/Mikhalevich/tg-coffee-shop-bot/internal/domain/usecase/customer/order/payment"
+	"github.com/Mikhalevich/tg-coffee-shop-bot/internal/domain/usecase/customer/order/queuesize"
 	"github.com/Mikhalevich/tg-coffee-shop-bot/internal/domain/usecase/manager/order/nextpending"
 	"github.com/Mikhalevich/tg-coffee-shop-bot/internal/domain/usecase/manager/order/updatestatus"
 )
@@ -23,11 +25,12 @@ var (
 	_ history.NotificationService      = (*Service)(nil)
 	_ nextpending.NotificationService  = (*Service)(nil)
 	_ updatestatus.NotificationService = (*Service)(nil)
+	_ queuesize.NotificationService    = (*Service)(nil)
 )
 
 type Sender interface {
 	SendMessage(ctx context.Context, msg msginfo.Message) error
-	SendInvoice(ctx context.Context, invoice msginfo.Invoice) error
+	SendInvoice(ctx context.Context, invoice order.Invoice) error
 	AnswerPayment(
 		ctx context.Context,
 		paymentID string,
