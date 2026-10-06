@@ -17,7 +17,6 @@ func Start(
 	botCfg config.Bot,
 	cartProcessor tghandler.CartProcessor,
 	actionProcessor tghandler.OrderActionProcessor,
-	historyProcessor tghandler.OrderHistoryProcessor,
 	historyProcessorV2 tghandler.OrderHistoryProcessorV2,
 	paymentProcessor tghandler.OrderPaymentProcessor,
 	buttonProvider tghandler.ButtonProvider,
@@ -26,7 +25,6 @@ func Start(
 		botHandler = tghandler.New(
 			cartProcessor,
 			actionProcessor,
-			historyProcessor,
 			historyProcessorV2,
 			paymentProcessor,
 			buttonProvider,

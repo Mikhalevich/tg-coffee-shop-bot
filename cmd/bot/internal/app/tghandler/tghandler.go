@@ -3,7 +3,7 @@ package tghandler
 import (
 	"context"
 
-	"github.com/Mikhalevich/tg-coffee-shop-bot/internal/domain/messageprocessor/button"
+	"github.com/Mikhalevich/tg-coffee-shop-bot/internal/domain/port/button"
 	"github.com/Mikhalevich/tg-coffee-shop-bot/internal/domain/port/cart"
 	"github.com/Mikhalevich/tg-coffee-shop-bot/internal/domain/port/currency"
 	"github.com/Mikhalevich/tg-coffee-shop-bot/internal/domain/port/msginfo"
@@ -16,9 +16,19 @@ type CartProcessor interface {
 	ViewCategoryProducts(ctx context.Context, info msginfo.Info, cartID cart.ID, categoryID product.CategoryID,
 		currencyID currency.ID) error
 	ViewCategories(ctx context.Context, info msginfo.Info, cartID cart.ID, currencyID currency.ID) error
-	AddProduct(ctx context.Context, info msginfo.Info, cartID cart.ID, categoryID product.CategoryID,
-		productID product.ProductID, currencyID currency.ID) error
-	Cancel(ctx context.Context, info msginfo.Info, cartID cart.ID) error
+	Add(
+		ctx context.Context,
+		info msginfo.Info,
+		cartID cart.ID,
+		categoryID product.CategoryID,
+		productID product.ProductID,
+		currencyID currency.ID,
+	) error
+	Cancel(
+		ctx context.Context,
+		chatID msginfo.ChatID,
+		cartID cart.ID,
+	) error
 	Confirm(ctx context.Context, info msginfo.Info, cartID cart.ID, currencyID currency.ID) error
 }
 
@@ -27,14 +37,6 @@ type OrderActionProcessor interface {
 	Cancel(ctx context.Context, chatID msginfo.ChatID, messageID msginfo.MessageID,
 		orderID order.ID, isTextMsg bool) error
 	QueueSize(ctx context.Context, info msginfo.Info) error
-}
-
-type OrderHistoryProcessor interface {
-	Show(ctx context.Context, chatID msginfo.ChatID) error
-	First(ctx context.Context, info msginfo.Info) error
-	Last(ctx context.Context, info msginfo.Info) error
-	Previous(ctx context.Context, info msginfo.Info, beforeOrderID order.ID) error
-	Next(ctx context.Context, info msginfo.Info, afterOrderID order.ID) error
 }
 
 type OrderHistoryProcessorV2 interface {
@@ -60,7 +62,6 @@ type cbHandler func(ctx context.Context, info msginfo.Info, btn button.Button) e
 type TGHandler struct {
 	cartProcessor      CartProcessor
 	actionProcessor    OrderActionProcessor
-	historyProcessor   OrderHistoryProcessor
 	historyProcessorV2 OrderHistoryProcessorV2
 	paymentProcessor   OrderPaymentProcessor
 	buttonProvider     ButtonProvider
@@ -70,7 +71,6 @@ type TGHandler struct {
 func New(
 	cartProcessor CartProcessor,
 	actionProcessor OrderActionProcessor,
-	historyProcessor OrderHistoryProcessor,
 	historyProcessorV2 OrderHistoryProcessorV2,
 	paymentProcessor OrderPaymentProcessor,
 	buttonProvider ButtonProvider,
@@ -78,7 +78,6 @@ func New(
 	handler := &TGHandler{
 		cartProcessor:      cartProcessor,
 		actionProcessor:    actionProcessor,
-		historyProcessor:   historyProcessor,
 		historyProcessorV2: historyProcessorV2,
 		paymentProcessor:   paymentProcessor,
 		buttonProvider:     buttonProvider,
@@ -97,11 +96,6 @@ func (t *TGHandler) initCBHandlers() {
 		button.OperationCartViewCategories:       t.viewCategories,
 		button.OperationCartViewCategoryProducts: t.viewCategoryProducts,
 		button.OperationCartAddProduct:           t.addProduct,
-
-		button.OperationOrderHistoryByIDPrevious: t.historyPrevious,
-		button.OperationOrderHistoryByIDNext:     t.historyNext,
-		button.OperationOrderHistoryByIDFirst:    t.historyFirst,
-		button.OperationOrderHistoryByIDLast:     t.historyLast,
 
 		button.OperationOrderHistoryByPageFirst: t.historyFirstV2,
 		button.OperationOrderHistoryByPageLast:  t.historyLastV2,
