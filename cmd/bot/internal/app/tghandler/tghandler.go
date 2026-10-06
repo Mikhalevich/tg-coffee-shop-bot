@@ -40,17 +40,25 @@ type OrderActionProcessor interface {
 }
 
 type OrderHistoryProcessorV2 interface {
-	Show(ctx context.Context, info msginfo.Info) error
 	First(ctx context.Context, info msginfo.Info) error
 	Last(ctx context.Context, info msginfo.Info) error
 	Page(ctx context.Context, info msginfo.Info, pageNumber int) error
 }
 
 type OrderPaymentProcessor interface {
-	PaymentInProgress(ctx context.Context, paymentID string, orderID order.ID,
-		currency string, totalAmount int) error
-	PaymentConfirmed(ctx context.Context, chatID msginfo.ChatID, orderID order.ID,
-		currency string, totalAmount int) error
+	InProgress(
+		ctx context.Context,
+		paymentID string,
+		orderID order.ID,
+		totalAmount int,
+	) error
+	Confirmed(
+		ctx context.Context,
+		chatID msginfo.ChatID,
+		orderID order.ID,
+		currency string,
+		totalAmount int,
+	) error
 }
 
 type ButtonProvider interface {

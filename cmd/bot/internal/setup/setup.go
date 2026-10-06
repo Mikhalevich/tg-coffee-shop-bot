@@ -18,9 +18,7 @@ import (
 	"github.com/Mikhalevich/tg-coffee-shop-bot/internal/adapter/dailypositiongenerator"
 	"github.com/Mikhalevich/tg-coffee-shop-bot/internal/adapter/messagesender"
 	"github.com/Mikhalevich/tg-coffee-shop-bot/internal/adapter/qrcodegenerator"
-	"github.com/Mikhalevich/tg-coffee-shop-bot/internal/adapter/repository/postgres"
 	"github.com/Mikhalevich/tg-coffee-shop-bot/internal/adapter/repository/postgres/driver"
-	"github.com/Mikhalevich/tg-coffee-shop-bot/internal/adapter/repository/postgres/orderhistoryoffset"
 	"github.com/Mikhalevich/tg-coffee-shop-bot/internal/adapter/repository/postgres/pgcurrency"
 	"github.com/Mikhalevich/tg-coffee-shop-bot/internal/adapter/repository/postgres/pgorder"
 	"github.com/Mikhalevich/tg-coffee-shop-bot/internal/adapter/repository/postgres/pgoutbox"
@@ -30,20 +28,20 @@ import (
 	"github.com/Mikhalevich/tg-coffee-shop-bot/internal/adapter/timeprovider"
 	"github.com/Mikhalevich/tg-coffee-shop-bot/internal/adapter/verificationcodegenerator"
 	"github.com/Mikhalevich/tg-coffee-shop-bot/internal/domain/customer/cartprocessing"
-	"github.com/Mikhalevich/tg-coffee-shop-bot/internal/domain/customer/orderaction"
-	orderhistoryv2 "github.com/Mikhalevich/tg-coffee-shop-bot/internal/domain/customer/orderhistory/v2"
 	"github.com/Mikhalevich/tg-coffee-shop-bot/internal/domain/customer/orderpayment"
 	"github.com/Mikhalevich/tg-coffee-shop-bot/internal/domain/port/store"
 	"github.com/Mikhalevich/tg-coffee-shop-bot/internal/domain/service/cartsvc"
 	"github.com/Mikhalevich/tg-coffee-shop-bot/internal/domain/service/currencysvc"
-	"github.com/Mikhalevich/tg-coffee-shop-bot/internal/domain/service/messagesvc"
 	"github.com/Mikhalevich/tg-coffee-shop-bot/internal/domain/service/notificationsvc"
 	"github.com/Mikhalevich/tg-coffee-shop-bot/internal/domain/service/ordersvc"
 	"github.com/Mikhalevich/tg-coffee-shop-bot/internal/domain/service/productsvc"
 	"github.com/Mikhalevich/tg-coffee-shop-bot/internal/domain/service/storesvc"
 	"github.com/Mikhalevich/tg-coffee-shop-bot/internal/domain/usecase/customer/cartorder"
+	"github.com/Mikhalevich/tg-coffee-shop-bot/internal/domain/usecase/customer/order/history"
+	"github.com/Mikhalevich/tg-coffee-shop-bot/internal/domain/usecase/customer/order/payment"
 )
 
+//nolint:funlen
 func StartBot(ctx context.Context, cfg config.Config) error {
 	botAPI, err := bot.New(cfg.Bot.Token, bot.WithSkipGetMe())
 	if err != nil {
@@ -74,16 +72,9 @@ func StartBot(ctx context.Context, cfg config.Config) error {
 	var (
 		sqlxDBConn          = sqlx.NewDb(dbConn, driver.Name())
 		transactionProvider = transaction.New(transaction.NewSqlxDB(sqlxDBConn))
-		pgDB                = postgres.New(driver, transactionProvider)
-		pgOrderHistoryPage  = orderhistoryoffset.New(dbConn, driver)
 		sender              = messagesender.New(botAPI, cfg.Bot.PaymentToken)
 		timeProvider        = timeprovider.New()
-		messageService      = messagesvc.New(
-			sender,
-			sender,
-			buttonRepository,
-		)
-		storeService = storesvc.New(
+		storeService        = storesvc.New(
 			store.IDFromInt(cfg.StoreID),
 			pgstore.New(transactionProvider),
 			timeProvider,
@@ -115,20 +106,33 @@ func StartBot(ctx context.Context, cfg config.Config) error {
 			currencyService,
 			notificationService,
 		)
-		qrGenerator        = qrcodegenerator.New()
-		actionProcessor    = orderaction.New(msgProcessor, pgDB, timeProvider)
-		historyProcessorV2 = orderhistoryv2.New(pgOrderHistoryPage, pgDB, msgProcessor, cfg.OrderHistory.PageSize)
-		paymentProcessor   = orderpayment.New(cfg.StoreID, pgDB, msgProcessor, qrGenerator,
-			pgDB.Transactor(), pgDB, pgDB, dailyPosition, verificationcodegenerator.New(), timeProvider)
+		historyOrderUsecase = history.New(
+			cfg.OrderHistory.PageSize,
+			orderService,
+			currencyService,
+			notificationService,
+		)
+		paymentOrderUsecase = payment.New(
+			transactionProvider,
+			storeService,
+			orderService,
+			productService,
+			currencyService,
+			dailyPosition,
+			verificationcodegenerator.New(),
+			qrcodegenerator.New(),
+			timeProvider,
+			notificationService,
+		)
 	)
 
 	if err := app.Start(
 		ctx,
 		cfg.Bot,
 		cartOrderUsecase,
-		actionProcessor,
-		historyProcessorV2,
-		paymentProcessor,
+		nil,
+		historyOrderUsecase,
+		paymentOrderUsecase,
 		buttonRepository,
 	); err != nil {
 		return fmt.Errorf("start bot: %w", err)

@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/Mikhalevich/tg-coffee-shop-bot/internal/domain/port/currency"
 	"github.com/Mikhalevich/tg-coffee-shop-bot/internal/domain/port/order"
 	"github.com/Mikhalevich/tg-coffee-shop-bot/internal/infra/logger"
 )
@@ -13,7 +12,6 @@ func (p *Payment) InProgress(
 	ctx context.Context,
 	paymentID string,
 	orderID order.ID,
-	curr currency.Currency,
 	totalAmount int,
 ) error {
 	storeInfo, err := p.storeService.GetStoreInfo(ctx)
