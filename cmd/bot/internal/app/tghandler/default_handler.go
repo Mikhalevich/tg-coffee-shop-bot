@@ -35,7 +35,7 @@ func (t *TGHandler) processCheckoutPayment(
 		return fmt.Errorf("invalid order id: %w", err)
 	}
 
-	if err := t.paymentProcessor.InProgress(
+	if err := t.orderPaymentUsecase.InProgress(
 		ctx,
 		payment.ID,
 		orderID,
@@ -53,7 +53,7 @@ func (t *TGHandler) processSuccessfulPayment(ctx context.Context, chatID msginfo
 		return fmt.Errorf("invalid order id: %w", err)
 	}
 
-	if err := t.paymentProcessor.Confirmed(
+	if err := t.orderPaymentUsecase.Confirmed(
 		ctx,
 		chatID,
 		orderID,

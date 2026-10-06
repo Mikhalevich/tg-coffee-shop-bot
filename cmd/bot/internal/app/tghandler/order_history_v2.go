@@ -10,7 +10,7 @@ import (
 )
 
 func (t *TGHandler) OrderHistoryV2(ctx context.Context, msg tgbot.BotMessage, sender tgbot.MessageSender) error {
-	if err := t.historyProcessorV2.First(
+	if err := t.historyOrderUsecase.First(
 		ctx,
 		msginfo.Info{
 			ChatID: msginfo.ChatIDFromInt64(msg.ChatID),

@@ -11,7 +11,7 @@ import (
 	"github.com/Mikhalevich/tg-coffee-shop-bot/internal/domain/port/product"
 )
 
-type CartProcessor interface {
+type CartUsecase interface {
 	Create(ctx context.Context, info msginfo.Info) error
 	ViewCategoryProducts(ctx context.Context, info msginfo.Info, cartID cart.ID, categoryID product.CategoryID,
 		currencyID currency.ID) error
@@ -32,20 +32,29 @@ type CartProcessor interface {
 	Confirm(ctx context.Context, info msginfo.Info, cartID cart.ID, currencyID currency.ID) error
 }
 
-type OrderActionProcessor interface {
-	GetActiveOrder(ctx context.Context, info msginfo.Info) error
-	Cancel(ctx context.Context, chatID msginfo.ChatID, messageID msginfo.MessageID,
-		orderID order.ID, isTextMsg bool) error
-	QueueSize(ctx context.Context, info msginfo.Info) error
+type ViewActiveOrderUsecase interface {
+	ViewActiveOrder(ctx context.Context, chatID msginfo.ChatID) error
 }
 
-type OrderHistoryProcessorV2 interface {
+type CancelOrderUsecase interface {
+	Cancel(
+		ctx context.Context,
+		info msginfo.Info,
+		orderID order.ID,
+	) error
+}
+
+type QueueSizeUsecase interface {
+	Size(ctx context.Context, chatID msginfo.ChatID) error
+}
+
+type HistoryOrderUsecase interface {
 	First(ctx context.Context, info msginfo.Info) error
 	Last(ctx context.Context, info msginfo.Info) error
 	Page(ctx context.Context, info msginfo.Info, pageNumber int) error
 }
 
-type OrderPaymentProcessor interface {
+type OrderPaymentUsecase interface {
 	InProgress(
 		ctx context.Context,
 		paymentID string,
@@ -68,27 +77,34 @@ type ButtonProvider interface {
 type cbHandler func(ctx context.Context, info msginfo.Info, btn button.Button) error
 
 type TGHandler struct {
-	cartProcessor      CartProcessor
-	actionProcessor    OrderActionProcessor
-	historyProcessorV2 OrderHistoryProcessorV2
-	paymentProcessor   OrderPaymentProcessor
-	buttonProvider     ButtonProvider
-	cbHandlers         map[button.Operation]cbHandler
+	cartUsecase            CartUsecase
+	viewActiveOrderUsecase ViewActiveOrderUsecase
+	cancelOrderUsecase     CancelOrderUsecase
+	queueSizeUsecase       QueueSizeUsecase
+	historyOrderUsecase    HistoryOrderUsecase
+	orderPaymentUsecase    OrderPaymentUsecase
+	buttonProvider         ButtonProvider
+
+	cbHandlers map[button.Operation]cbHandler
 }
 
 func New(
-	cartProcessor CartProcessor,
-	actionProcessor OrderActionProcessor,
-	historyProcessorV2 OrderHistoryProcessorV2,
-	paymentProcessor OrderPaymentProcessor,
+	cartUsecase CartUsecase,
+	viewActiveOrderUsecase ViewActiveOrderUsecase,
+	cancelOrderUsecase CancelOrderUsecase,
+	queueSizeUsecase QueueSizeUsecase,
+	historyOrderUsecase HistoryOrderUsecase,
+	orderPaymentUsecase OrderPaymentUsecase,
 	buttonProvider ButtonProvider,
 ) *TGHandler {
 	handler := &TGHandler{
-		cartProcessor:      cartProcessor,
-		actionProcessor:    actionProcessor,
-		historyProcessorV2: historyProcessorV2,
-		paymentProcessor:   paymentProcessor,
-		buttonProvider:     buttonProvider,
+		cartUsecase:            cartUsecase,
+		viewActiveOrderUsecase: viewActiveOrderUsecase,
+		cancelOrderUsecase:     cancelOrderUsecase,
+		queueSizeUsecase:       queueSizeUsecase,
+		historyOrderUsecase:    historyOrderUsecase,
+		orderPaymentUsecase:    orderPaymentUsecase,
+		buttonProvider:         buttonProvider,
 	}
 
 	handler.initCBHandlers()

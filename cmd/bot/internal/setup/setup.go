@@ -37,8 +37,11 @@ import (
 	"github.com/Mikhalevich/tg-coffee-shop-bot/internal/domain/service/productsvc"
 	"github.com/Mikhalevich/tg-coffee-shop-bot/internal/domain/service/storesvc"
 	"github.com/Mikhalevich/tg-coffee-shop-bot/internal/domain/usecase/customer/cartorder"
+	"github.com/Mikhalevich/tg-coffee-shop-bot/internal/domain/usecase/customer/order/activeorder"
 	"github.com/Mikhalevich/tg-coffee-shop-bot/internal/domain/usecase/customer/order/history"
+	"github.com/Mikhalevich/tg-coffee-shop-bot/internal/domain/usecase/customer/order/ordercancel"
 	"github.com/Mikhalevich/tg-coffee-shop-bot/internal/domain/usecase/customer/order/payment"
+	"github.com/Mikhalevich/tg-coffee-shop-bot/internal/domain/usecase/customer/order/queuesize"
 )
 
 //nolint:funlen
@@ -124,13 +127,29 @@ func StartBot(ctx context.Context, cfg config.Config) error {
 			timeProvider,
 			notificationService,
 		)
+		getActiveOrderUsecase = activeorder.New(
+			orderService,
+			productService,
+			currencyService,
+			notificationService,
+		)
+		cancelOrderUsecase = ordercancel.New(
+			orderService,
+			notificationService,
+		)
+		queueSizeUsecase = queuesize.New(
+			orderService,
+			notificationService,
+		)
 	)
 
 	if err := app.Start(
 		ctx,
 		cfg.Bot,
 		cartOrderUsecase,
-		nil,
+		getActiveOrderUsecase,
+		cancelOrderUsecase,
+		queueSizeUsecase,
 		historyOrderUsecase,
 		paymentOrderUsecase,
 		buttonRepository,

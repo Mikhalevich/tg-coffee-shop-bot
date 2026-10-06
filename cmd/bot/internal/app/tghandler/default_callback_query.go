@@ -48,12 +48,10 @@ func (t *TGHandler) cancelOrder(ctx context.Context, info msginfo.Info, btn butt
 		return fmt.Errorf("invalid payload: %w", err)
 	}
 
-	if err := t.actionProcessor.Cancel(
+	if err := t.cancelOrderUsecase.Cancel(
 		ctx,
-		info.ChatID,
-		info.MessageID,
+		info,
 		payload.OrderID,
-		payload.IsTextMessage,
 	); err != nil {
 		return fmt.Errorf("cancel order: %w", err)
 	}
@@ -67,7 +65,7 @@ func (t *TGHandler) confirmCart(ctx context.Context, info msginfo.Info, btn butt
 		return fmt.Errorf("invalid payload: %w", err)
 	}
 
-	if err := t.cartProcessor.Confirm(ctx, info, payload.CartID, payload.CurrencyID); err != nil {
+	if err := t.cartUsecase.Confirm(ctx, info, payload.CartID, payload.CurrencyID); err != nil {
 		return fmt.Errorf("create order: %w", err)
 	}
 
@@ -80,7 +78,7 @@ func (t *TGHandler) cancelCart(ctx context.Context, info msginfo.Info, btn butto
 		return fmt.Errorf("invalid payload: %w", err)
 	}
 
-	if err := t.cartProcessor.Cancel(
+	if err := t.cartUsecase.Cancel(
 		ctx,
 		info.ChatID,
 		payload.CartID,
@@ -97,7 +95,7 @@ func (t *TGHandler) viewCategoryProducts(ctx context.Context, info msginfo.Info,
 		return fmt.Errorf("invalid payload: %w", err)
 	}
 
-	if err := t.cartProcessor.ViewCategoryProducts(
+	if err := t.cartUsecase.ViewCategoryProducts(
 		ctx,
 		info,
 		payload.CartID,
@@ -116,7 +114,7 @@ func (t *TGHandler) viewCategories(ctx context.Context, info msginfo.Info, btn b
 		return fmt.Errorf("invalid payload: %w", err)
 	}
 
-	if err := t.cartProcessor.ViewCategories(ctx, info, payload.CartID, payload.CurrencyID); err != nil {
+	if err := t.cartUsecase.ViewCategories(ctx, info, payload.CartID, payload.CurrencyID); err != nil {
 		return fmt.Errorf("cart view categories: %w", err)
 	}
 
@@ -129,7 +127,7 @@ func (t *TGHandler) addProduct(ctx context.Context, info msginfo.Info, btn butto
 		return fmt.Errorf("invalid payload: %w", err)
 	}
 
-	if err := t.cartProcessor.Add(
+	if err := t.cartUsecase.Add(
 		ctx,
 		info,
 		payload.CartID,
@@ -144,7 +142,7 @@ func (t *TGHandler) addProduct(ctx context.Context, info msginfo.Info, btn butto
 }
 
 func (t *TGHandler) historyFirstV2(ctx context.Context, info msginfo.Info, btn button.Button) error {
-	if err := t.historyProcessorV2.First(
+	if err := t.historyOrderUsecase.First(
 		ctx,
 		info,
 	); err != nil {
@@ -155,7 +153,7 @@ func (t *TGHandler) historyFirstV2(ctx context.Context, info msginfo.Info, btn b
 }
 
 func (t *TGHandler) historyLastV2(ctx context.Context, info msginfo.Info, btn button.Button) error {
-	if err := t.historyProcessorV2.Last(
+	if err := t.historyOrderUsecase.Last(
 		ctx,
 		info,
 	); err != nil {
@@ -171,7 +169,7 @@ func (t *TGHandler) historyPageV2(ctx context.Context, info msginfo.Info, btn bu
 		return fmt.Errorf("invalid payload: %w", err)
 	}
 
-	if err := t.historyProcessorV2.Page(
+	if err := t.historyOrderUsecase.Page(
 		ctx,
 		info,
 		payload.Page,

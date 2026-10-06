@@ -11,6 +11,7 @@ import (
 	"github.com/Mikhalevich/tg-coffee-shop-bot/internal/domain/usecase/customer/order/orderbyid"
 	"github.com/Mikhalevich/tg-coffee-shop-bot/internal/domain/usecase/customer/order/ordercancel"
 	"github.com/Mikhalevich/tg-coffee-shop-bot/internal/domain/usecase/customer/order/payment"
+	"github.com/Mikhalevich/tg-coffee-shop-bot/internal/domain/usecase/customer/order/queuesize"
 	"github.com/Mikhalevich/tg-coffee-shop-bot/internal/domain/usecase/manager/order/nextpending"
 	"github.com/Mikhalevich/tg-coffee-shop-bot/internal/domain/usecase/manager/order/updatestatus"
 )
@@ -24,6 +25,7 @@ var (
 	_ history.NotificationService      = (*Service)(nil)
 	_ nextpending.NotificationService  = (*Service)(nil)
 	_ updatestatus.NotificationService = (*Service)(nil)
+	_ queuesize.NotificationService    = (*Service)(nil)
 )
 
 type Sender interface {
