@@ -10,12 +10,9 @@ import (
 )
 
 func (t *TGHandler) OrderQueueSize(ctx context.Context, msg tgbot.BotMessage, sender tgbot.MessageSender) error {
-	if err := t.actionProcessor.QueueSize(
+	if err := t.queueSizeUsecase.Size(
 		ctx,
-		msginfo.Info{
-			ChatID:    msginfo.ChatIDFromInt(msg.ChatID),
-			MessageID: msginfo.MessageIDFromInt(msg.MessageID),
-		},
+		msginfo.ChatIDFromInt64(msg.ChatID),
 	); err != nil {
 		return fmt.Errorf("order queue size: %w", err)
 	}

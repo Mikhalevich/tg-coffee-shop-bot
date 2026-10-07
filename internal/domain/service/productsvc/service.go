@@ -1,0 +1,39 @@
+package productsvc
+
+import (
+	"context"
+
+	"github.com/Mikhalevich/tg-coffee-shop-bot/internal/domain/port/currency"
+	"github.com/Mikhalevich/tg-coffee-shop-bot/internal/domain/port/product"
+	"github.com/Mikhalevich/tg-coffee-shop-bot/internal/domain/usecase/customer/cartorder"
+)
+
+var (
+	_ cartorder.ProductService = (*Service)(nil)
+)
+
+type Repository interface {
+	GetCategories(ctx context.Context) ([]product.Category, error)
+	GetProductsByCategoryID(
+		ctx context.Context,
+		categoryID product.CategoryID,
+		currencyID currency.ID,
+	) ([]product.Product, error)
+	GetProductsByIDs(
+		ctx context.Context,
+		ids []product.ProductID,
+		currencyID currency.ID,
+	) (map[product.ProductID]product.Product, error)
+}
+
+type Service struct {
+	repo Repository
+}
+
+func New(
+	repo Repository,
+) *Service {
+	return &Service{
+		repo: repo,
+	}
+}

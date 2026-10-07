@@ -5,10 +5,10 @@ import (
 
 	"github.com/skip2/go-qrcode"
 
-	"github.com/Mikhalevich/tg-coffee-shop-bot/internal/domain/customer/orderpayment"
+	"github.com/Mikhalevich/tg-coffee-shop-bot/internal/domain/usecase/customer/order/payment"
 )
 
-var _ orderpayment.QRCodeGenerator = (*QRCodeGenerator)(nil)
+var _ payment.QRCodeService = (*QRCodeGenerator)(nil)
 
 const (
 	pngSize = 256

@@ -17,8 +17,7 @@ func New(t Type, msg string) Error {
 }
 
 func ParseError(err error) Error {
-	var perr Error
-	if errors.As(err, &perr) {
+	if perr, ok := errors.AsType[Error](err); ok {
 		return perr
 	}
 
@@ -26,8 +25,7 @@ func ParseError(err error) Error {
 }
 
 func IsType(err error, t Type) bool {
-	var perr Error
-	if errors.As(err, &perr) {
+	if perr, ok := errors.AsType[Error](err); ok {
 		if perr.Type == t {
 			return true
 		}
@@ -50,4 +48,12 @@ func AlreadyExists(msg string) Error {
 
 func InvalidParam(msg string) Error {
 	return New(TypeInvalidParam, msg)
+}
+
+func NoRowsUpdated() Error {
+	return New(TypeNoRowsUpdated, "no rows updated")
+}
+
+func UnableToCancel(msg string) Error {
+	return New(TypeUnableToCancel, msg)
 }

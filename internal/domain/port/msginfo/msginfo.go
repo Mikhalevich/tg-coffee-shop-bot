@@ -1,9 +1,19 @@
 package msginfo
 
+import (
+	"time"
+
+	"github.com/Mikhalevich/tg-coffee-shop-bot/internal/domain/port/button"
+)
+
 type MessageID int
 
 func (m MessageID) Int() int {
 	return int(m)
+}
+
+func (m MessageID) IsValid() bool {
+	return m != 0
 }
 
 func MessageIDFromInt(id int) MessageID {
@@ -12,15 +22,41 @@ func MessageIDFromInt(id int) MessageID {
 
 type ChatID int64
 
-func (c ChatID) Int64() int64 {
-	return int64(c)
+func (id ChatID) Int64() int64 {
+	return int64(id)
 }
 
-func ChatIDFromInt(id int64) ChatID {
+func ChatIDFromInt64(id int64) ChatID {
 	return ChatID(id)
 }
 
 type Info struct {
 	ChatID    ChatID
 	MessageID MessageID
+}
+
+type MessageType int
+
+const (
+	MessageTypePlain MessageType = iota + 1
+	MessageTypeMarkdown
+	MessageTypePNG
+)
+
+func (mt MessageType) Int() int {
+	return int(mt)
+}
+
+func MessageTypeFromInt(t int) MessageType {
+	return MessageType(t)
+}
+
+type Message struct {
+	ChatID       ChatID
+	ReplyMsgID   MessageID
+	Text         string
+	Type         MessageType
+	Payload      []byte
+	Buttons      []button.ButtonRow
+	VisibilityAt time.Time
 }

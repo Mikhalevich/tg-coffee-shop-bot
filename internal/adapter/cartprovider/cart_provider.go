@@ -6,10 +6,12 @@ import (
 
 	"github.com/redis/go-redis/v9"
 
-	"github.com/Mikhalevich/tg-coffee-shop-bot/internal/domain/customer/cartprocessing"
+	"github.com/Mikhalevich/tg-coffee-shop-bot/internal/domain/service/cartsvc"
 )
 
-var _ cartprocessing.CartProvider = (*CartProvider)(nil)
+var (
+	_ cartsvc.Repository = (*CartProvider)(nil)
+)
 
 type CartProvider struct {
 	client *redis.Client

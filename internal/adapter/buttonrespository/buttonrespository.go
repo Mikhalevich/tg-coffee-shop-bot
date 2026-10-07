@@ -10,12 +10,12 @@ import (
 
 	"github.com/redis/go-redis/v9"
 
-	"github.com/Mikhalevich/tg-coffee-shop-bot/internal/domain/messageprocessor"
-	"github.com/Mikhalevich/tg-coffee-shop-bot/internal/domain/messageprocessor/button"
+	"github.com/Mikhalevich/tg-coffee-shop-bot/internal/domain/port/button"
+	"github.com/Mikhalevich/tg-coffee-shop-bot/internal/domain/service/messagesvc"
 )
 
 var (
-	_ messageprocessor.ButtonRepository = (*ButtonRepository)(nil)
+	_ messagesvc.ButtonRepository = (*ButtonRepository)(nil)
 )
 
 type ButtonRepository struct {

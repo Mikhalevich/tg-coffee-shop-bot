@@ -15,20 +15,22 @@ import (
 func Start(
 	ctx context.Context,
 	botCfg config.Bot,
-	cartProcessor tghandler.CartProcessor,
-	actionProcessor tghandler.OrderActionProcessor,
-	historyProcessor tghandler.OrderHistoryProcessor,
-	historyProcessorV2 tghandler.OrderHistoryProcessorV2,
-	paymentProcessor tghandler.OrderPaymentProcessor,
+	cartUsecase tghandler.CartUsecase,
+	viewActiveOrderUsecase tghandler.ViewActiveOrderUsecase,
+	cancelOrderUsecase tghandler.CancelOrderUsecase,
+	queueSizeUsecase tghandler.QueueSizeUsecase,
+	historyOrderUsecase tghandler.HistoryOrderUsecase,
+	orderPaymentUsecase tghandler.OrderPaymentUsecase,
 	buttonProvider tghandler.ButtonProvider,
 ) error {
 	var (
 		botHandler = tghandler.New(
-			cartProcessor,
-			actionProcessor,
-			historyProcessor,
-			historyProcessorV2,
-			paymentProcessor,
+			cartUsecase,
+			viewActiveOrderUsecase,
+			cancelOrderUsecase,
+			queueSizeUsecase,
+			historyOrderUsecase,
+			orderPaymentUsecase,
 			buttonProvider,
 		)
 	)

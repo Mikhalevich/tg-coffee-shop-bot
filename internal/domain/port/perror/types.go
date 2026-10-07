@@ -7,4 +7,6 @@ const (
 	TypeNotFound
 	TypeAlreadyExists
 	TypeInvalidParam
+	TypeNoRowsUpdated
+	TypeUnableToCancel
 )

@@ -43,11 +43,10 @@ func makeHandlerWrapper[I, O any](application *App, pattern string, hndlrFn hand
 }
 
 func supressSensitiveInfoFromError(originErr error) error {
-	var humaError *huma.ErrorModel
-	if errors.As(originErr, &humaError) {
-		humaError.Errors = nil
+	if humaErr, ok := errors.AsType[*huma.ErrorModel](originErr); ok {
+		humaErr.Errors = nil
 
-		return humaError
+		return humaErr
 	}
 
 	return huma.Error500InternalServerError("internal error")

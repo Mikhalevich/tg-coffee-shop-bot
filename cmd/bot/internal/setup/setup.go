@@ -18,21 +18,31 @@ import (
 	"github.com/Mikhalevich/tg-coffee-shop-bot/internal/adapter/dailypositiongenerator"
 	"github.com/Mikhalevich/tg-coffee-shop-bot/internal/adapter/messagesender"
 	"github.com/Mikhalevich/tg-coffee-shop-bot/internal/adapter/qrcodegenerator"
-	"github.com/Mikhalevich/tg-coffee-shop-bot/internal/adapter/repository/postgres"
 	"github.com/Mikhalevich/tg-coffee-shop-bot/internal/adapter/repository/postgres/driver"
-	"github.com/Mikhalevich/tg-coffee-shop-bot/internal/adapter/repository/postgres/orderhistoryid"
-	"github.com/Mikhalevich/tg-coffee-shop-bot/internal/adapter/repository/postgres/orderhistoryoffset"
+	"github.com/Mikhalevich/tg-coffee-shop-bot/internal/adapter/repository/postgres/pgcurrency"
+	"github.com/Mikhalevich/tg-coffee-shop-bot/internal/adapter/repository/postgres/pgorder"
+	"github.com/Mikhalevich/tg-coffee-shop-bot/internal/adapter/repository/postgres/pgoutbox"
+	"github.com/Mikhalevich/tg-coffee-shop-bot/internal/adapter/repository/postgres/pgproduct"
+	"github.com/Mikhalevich/tg-coffee-shop-bot/internal/adapter/repository/postgres/pgstore"
 	"github.com/Mikhalevich/tg-coffee-shop-bot/internal/adapter/repository/postgres/transaction"
 	"github.com/Mikhalevich/tg-coffee-shop-bot/internal/adapter/timeprovider"
 	"github.com/Mikhalevich/tg-coffee-shop-bot/internal/adapter/verificationcodegenerator"
-	"github.com/Mikhalevich/tg-coffee-shop-bot/internal/domain/customer/cartprocessing"
-	"github.com/Mikhalevich/tg-coffee-shop-bot/internal/domain/customer/orderaction"
-	"github.com/Mikhalevich/tg-coffee-shop-bot/internal/domain/customer/orderhistory"
-	orderhistoryv2 "github.com/Mikhalevich/tg-coffee-shop-bot/internal/domain/customer/orderhistory/v2"
-	"github.com/Mikhalevich/tg-coffee-shop-bot/internal/domain/customer/orderpayment"
-	"github.com/Mikhalevich/tg-coffee-shop-bot/internal/domain/messageprocessor"
+	"github.com/Mikhalevich/tg-coffee-shop-bot/internal/domain/port/store"
+	"github.com/Mikhalevich/tg-coffee-shop-bot/internal/domain/service/cartsvc"
+	"github.com/Mikhalevich/tg-coffee-shop-bot/internal/domain/service/currencysvc"
+	"github.com/Mikhalevich/tg-coffee-shop-bot/internal/domain/service/notificationsvc"
+	"github.com/Mikhalevich/tg-coffee-shop-bot/internal/domain/service/ordersvc"
+	"github.com/Mikhalevich/tg-coffee-shop-bot/internal/domain/service/productsvc"
+	"github.com/Mikhalevich/tg-coffee-shop-bot/internal/domain/service/storesvc"
+	"github.com/Mikhalevich/tg-coffee-shop-bot/internal/domain/usecase/customer/cartorder"
+	"github.com/Mikhalevich/tg-coffee-shop-bot/internal/domain/usecase/customer/order/activeorder"
+	"github.com/Mikhalevich/tg-coffee-shop-bot/internal/domain/usecase/customer/order/history"
+	"github.com/Mikhalevich/tg-coffee-shop-bot/internal/domain/usecase/customer/order/ordercancel"
+	"github.com/Mikhalevich/tg-coffee-shop-bot/internal/domain/usecase/customer/order/payment"
+	"github.com/Mikhalevich/tg-coffee-shop-bot/internal/domain/usecase/customer/order/queuesize"
 )
 
+//nolint:funlen
 func StartBot(ctx context.Context, cfg config.Config) error {
 	botAPI, err := bot.New(cfg.Bot.Token, bot.WithSkipGetMe())
 	if err != nil {
@@ -63,31 +73,84 @@ func StartBot(ctx context.Context, cfg config.Config) error {
 	var (
 		sqlxDBConn          = sqlx.NewDb(dbConn, driver.Name())
 		transactionProvider = transaction.New(transaction.NewSqlxDB(sqlxDBConn))
-		pgDB                = postgres.New(driver, transactionProvider)
-		pgOrderHistoryID    = orderhistoryid.New(dbConn, driver)
-		pgOrderHistoryPage  = orderhistoryoffset.New(dbConn, driver)
 		sender              = messagesender.New(botAPI, cfg.Bot.PaymentToken)
-		msgProcessor        = messageprocessor.New(sender, sender, buttonRepository)
-		qrGenerator         = qrcodegenerator.New()
 		timeProvider        = timeprovider.New()
-		cartProcessor       = cartprocessing.New(cfg.StoreID, transactionProvider,
-			pgDB, pgDB, cartRedis, msgProcessor, pgDB, timeProvider)
-		actionProcessor    = orderaction.New(msgProcessor, pgDB, timeProvider)
-		historyProcessor   = orderhistory.New(pgDB, pgOrderHistoryID, msgProcessor, cfg.OrderHistory.PageSize)
-		historyProcessorV2 = orderhistoryv2.New(pgOrderHistoryPage, pgDB, msgProcessor, cfg.OrderHistory.PageSize)
-		paymentProcessor   = orderpayment.New(cfg.StoreID, pgDB, msgProcessor, qrGenerator,
-			pgDB.Transactor(), pgDB, pgDB, dailyPosition, verificationcodegenerator.New(), timeProvider)
+		storeService        = storesvc.New(
+			store.IDFromInt(cfg.StoreID),
+			pgstore.New(transactionProvider),
+			timeProvider,
+		)
+		productService = productsvc.New(
+			pgproduct.New(transactionProvider),
+		)
+		cartService = cartsvc.New(
+			cartRedis,
+		)
+		orderService = ordersvc.New(
+			transactionProvider,
+			pgorder.New(driver, transactionProvider),
+			timeProvider,
+		)
+		currencyService = currencysvc.New(
+			pgcurrency.New(transactionProvider),
+		)
+		notificationService = notificationsvc.New(
+			pgoutbox.New(transactionProvider),
+			sender,
+		)
+		cartOrderUsecase = cartorder.New(
+			transactionProvider,
+			storeService,
+			productService,
+			cartService,
+			orderService,
+			currencyService,
+			notificationService,
+		)
+		historyOrderUsecase = history.New(
+			cfg.OrderHistory.PageSize,
+			orderService,
+			currencyService,
+			notificationService,
+		)
+		paymentOrderUsecase = payment.New(
+			transactionProvider,
+			storeService,
+			orderService,
+			productService,
+			currencyService,
+			dailyPosition,
+			verificationcodegenerator.New(),
+			qrcodegenerator.New(),
+			timeProvider,
+			notificationService,
+		)
+		getActiveOrderUsecase = activeorder.New(
+			orderService,
+			productService,
+			currencyService,
+			notificationService,
+		)
+		cancelOrderUsecase = ordercancel.New(
+			orderService,
+			notificationService,
+		)
+		queueSizeUsecase = queuesize.New(
+			orderService,
+			notificationService,
+		)
 	)
 
 	if err := app.Start(
 		ctx,
 		cfg.Bot,
-		cartProcessor,
-		actionProcessor,
-		historyProcessor,
-		historyProcessorV2,
-		paymentProcessor,
-		msgProcessor,
+		cartOrderUsecase,
+		getActiveOrderUsecase,
+		cancelOrderUsecase,
+		queueSizeUsecase,
+		historyOrderUsecase,
+		paymentOrderUsecase,
+		buttonRepository,
 	); err != nil {
 		return fmt.Errorf("start bot: %w", err)
 	}
@@ -116,7 +179,7 @@ func MakeRedisButtonRepository(
 	return buttonrespository.New(rdb, cfg.TTL), nil
 }
 
-func MakeRedisCart(ctx context.Context, cfg config.CartRedis) (cartprocessing.CartProvider, error) {
+func MakeRedisCart(ctx context.Context, cfg config.CartRedis) (cartsvc.Repository, error) {
 	rdb := redis.NewClient(&redis.Options{
 		Addr:     cfg.Addr,
 		Password: cfg.Pwd,
@@ -137,7 +200,7 @@ func MakeRedisCart(ctx context.Context, cfg config.CartRedis) (cartprocessing.Ca
 func MakeRedisDailyPositionGenerator(
 	ctx context.Context,
 	cfg config.DailyPositionRedis,
-) (orderpayment.DailyPositionGenerator, error) {
+) (payment.PositionService, error) {
 	rdb := redis.NewClient(&redis.Options{
 		Addr:     cfg.Addr,
 		Password: cfg.Pwd,

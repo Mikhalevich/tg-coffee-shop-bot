@@ -10,10 +10,10 @@ import (
 )
 
 func (t *TGHandler) Order(ctx context.Context, msg tgbot.BotMessage, sender tgbot.MessageSender) error {
-	if err := t.cartProcessor.Create(
+	if err := t.cartUsecase.Create(
 		ctx,
 		msginfo.Info{
-			ChatID:    msginfo.ChatIDFromInt(msg.ChatID),
+			ChatID:    msginfo.ChatIDFromInt64(msg.ChatID),
 			MessageID: msginfo.MessageIDFromInt(msg.MessageID),
 		},
 	); err != nil {
