@@ -41,6 +41,12 @@ type Sender interface {
 		ctx context.Context,
 		invoice SenderInvoice,
 	) error
+	AnswerPayment(
+		ctx context.Context,
+		paymentID string,
+		ok bool,
+		errorMsg string,
+	) error
 }
 
 type MarkdownEscaper interface {

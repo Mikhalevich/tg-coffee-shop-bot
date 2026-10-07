@@ -2,6 +2,7 @@ package setup
 
 import (
 	"context"
+	"database/sql"
 	"fmt"
 
 	"github.com/go-telegram/bot"
@@ -12,14 +13,14 @@ import (
 
 	"github.com/Mikhalevich/tg-coffee-shop-bot/cmd/outboxpoller/internal/app"
 	"github.com/Mikhalevich/tg-coffee-shop-bot/cmd/outboxpoller/internal/config"
-	"github.com/Mikhalevich/tg-coffee-shop-bot/internal/adapter/buttonrespositoryobsolete"
-	"github.com/Mikhalevich/tg-coffee-shop-bot/internal/adapter/messagesenderobsolete"
-	"github.com/Mikhalevich/tg-coffee-shop-bot/internal/adapter/repository/postgres"
+	"github.com/Mikhalevich/tg-coffee-shop-bot/internal/adapter/buttonrespository"
+	"github.com/Mikhalevich/tg-coffee-shop-bot/internal/adapter/messagesender"
 	"github.com/Mikhalevich/tg-coffee-shop-bot/internal/adapter/repository/postgres/driver"
+	"github.com/Mikhalevich/tg-coffee-shop-bot/internal/adapter/repository/postgres/pgoutbox"
 	"github.com/Mikhalevich/tg-coffee-shop-bot/internal/adapter/repository/postgres/transaction"
 	"github.com/Mikhalevich/tg-coffee-shop-bot/internal/adapter/timeprovider"
-	"github.com/Mikhalevich/tg-coffee-shop-bot/internal/domain/messageprocessor"
-	"github.com/Mikhalevich/tg-coffee-shop-bot/internal/domain/outboxprocessor"
+	"github.com/Mikhalevich/tg-coffee-shop-bot/internal/domain/service/messagesvc"
+	"github.com/Mikhalevich/tg-coffee-shop-bot/internal/domain/service/outbox/outboxsvc"
 )
 
 func StartPoller(
@@ -36,26 +37,32 @@ func StartPoller(
 		return fmt.Errorf("make redis button repository: %w", err)
 	}
 
-	pgDB, cleanup, err := MakePostgres(cfg.Postgres)
+	dbConn, driver, cleanup, err := MakePGXConnection(ctx, cfg.Postgres)
 	if err != nil {
-		return fmt.Errorf("make postgres: %w", err)
+		return fmt.Errorf("make pgx connection: %w", err)
 	}
 
 	defer cleanup()
 
 	var (
-		sender          = messagesenderobsolete.New(botAPI, cfg.Bot.PaymentToken)
-		msgProcessor    = messageprocessor.New(sender, sender, buttonRepository)
-		timeProvider    = timeprovider.New()
-		outboxProcessor = outboxprocessor.New(
-			pgDB.Transactor(),
-			pgDB,
-			msgProcessor,
+		sqlxDBConn          = sqlx.NewDb(dbConn, driver.Name())
+		transactionProvider = transaction.New(transaction.NewSqlxDB(sqlxDBConn))
+		sender              = messagesender.New(botAPI, cfg.Bot.PaymentToken)
+		timeProvider        = timeprovider.New()
+		messageService      = messagesvc.New(
+			sender,
+			sender,
+			buttonRepository,
+		)
+		outboxService = outboxsvc.New(
+			transactionProvider,
+			pgoutbox.New(transactionProvider),
+			messageService,
 			timeProvider,
 		)
 	)
 
-	app.New(outboxProcessor).Run(
+	app.New(outboxService).Run(
 		ctx,
 		cfg.MessageWorker,
 		cfg.AnswerPaymentWorker,
@@ -68,7 +75,7 @@ func StartPoller(
 func MakeRedisButtonRepository(
 	ctx context.Context,
 	cfg config.ButtonRedis,
-) (*buttonrespositoryobsolete.ButtonRepository, error) {
+) (*buttonrespository.ButtonRepository, error) {
 	rdb := redis.NewClient(&redis.Options{
 		Addr:     cfg.Addr,
 		Password: cfg.Pwd,
@@ -83,28 +90,26 @@ func MakeRedisButtonRepository(
 		return nil, fmt.Errorf("redis ping: %w", err)
 	}
 
-	return buttonrespositoryobsolete.New(rdb, cfg.TTL), nil
+	return buttonrespository.New(rdb, cfg.TTL), nil
 }
 
-func MakePostgres(cfg config.Postgres) (*postgres.Postgres, func(), error) {
+func MakePGXConnection(ctx context.Context, cfg config.Postgres) (*sql.DB, *driver.Pgx, func(), error) {
+	if cfg.Connection == "" {
+		return nil, nil, func() {}, nil
+	}
+
 	driver := driver.NewPgx()
 
 	dbConn, err := otelsql.Open(driver.Name(), cfg.Connection)
 	if err != nil {
-		return nil, nil, fmt.Errorf("open database: %w", err)
+		return nil, nil, nil, fmt.Errorf("open database: %w", err)
 	}
 
-	if err := dbConn.Ping(); err != nil {
-		return nil, nil, fmt.Errorf("ping: %w", err)
+	if err := dbConn.PingContext(ctx); err != nil {
+		return nil, nil, nil, fmt.Errorf("ping: %w", err)
 	}
 
-	var (
-		sqlxDBConn          = sqlx.NewDb(dbConn, driver.Name())
-		transactionProvider = transaction.New(transaction.NewSqlxDB(sqlxDBConn))
-		p                   = postgres.New(driver, transactionProvider)
-	)
-
-	return p, func() {
+	return dbConn, driver, func() {
 		dbConn.Close()
 	}, nil
 }
