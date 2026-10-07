@@ -104,6 +104,7 @@ func ToOutboxMessage(msg Message) (outboxmsg.Message, error) {
 			Text:       msg.Text,
 			Type:       ToMessageType(msg.Type),
 			Payload:    msg.Payload,
+			Buttons:    buttons,
 		},
 	}, nil
 }
