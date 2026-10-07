@@ -6,17 +6,31 @@ import (
 	"github.com/Mikhalevich/tg-coffee-shop-bot/internal/domain/port/order"
 )
 
-type OrderProcessor interface {
-	GetNextPendingOrderToProcess(ctx context.Context) (*order.Order, error)
-	UpdateOrderStatus(ctx context.Context, id order.ID, status order.Status) error
+type GetNextOrderUsecase interface {
+	Next(
+		ctx context.Context,
+	) (order.Order, error)
+}
+
+type UpdateOrderStatusUsecase interface {
+	Update(
+		ctx context.Context,
+		orderID order.ID,
+		status order.Status,
+	) error
 }
 
 type Handler struct {
-	orderProcessor OrderProcessor
+	getNextOrderUsecase      GetNextOrderUsecase
+	updateOrderStatusUsecase UpdateOrderStatusUsecase
 }
 
-func New(orderProcessor OrderProcessor) *Handler {
+func New(
+	getNextOrderUsecase GetNextOrderUsecase,
+	updateOrderStatusUsecase UpdateOrderStatusUsecase,
+) *Handler {
 	return &Handler{
-		orderProcessor: orderProcessor,
+		getNextOrderUsecase:      getNextOrderUsecase,
+		updateOrderStatusUsecase: updateOrderStatusUsecase,
 	}
 }
