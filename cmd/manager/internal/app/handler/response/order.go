@@ -18,7 +18,7 @@ type StatusTime struct {
 	Time   time.Time `json:"time" doc:"Status time"`
 }
 
-func ToOrder(ord *order.Order) *Order {
+func ToOrder(ord order.Order) *Order {
 	timeline := make([]StatusTime, 0, len(ord.Timeline))
 	for _, tl := range ord.Timeline {
 		timeline = append(timeline, StatusTime{

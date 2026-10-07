@@ -2,6 +2,7 @@ package setup
 
 import (
 	"context"
+	"database/sql"
 	"fmt"
 
 	"github.com/go-telegram/bot"
@@ -11,11 +12,15 @@ import (
 	"github.com/Mikhalevich/tg-coffee-shop-bot/cmd/manager/internal/app"
 	"github.com/Mikhalevich/tg-coffee-shop-bot/cmd/manager/internal/config"
 	"github.com/Mikhalevich/tg-coffee-shop-bot/internal/adapter/messagesender"
-	"github.com/Mikhalevich/tg-coffee-shop-bot/internal/adapter/repository/postgres"
 	"github.com/Mikhalevich/tg-coffee-shop-bot/internal/adapter/repository/postgres/driver"
+	"github.com/Mikhalevich/tg-coffee-shop-bot/internal/adapter/repository/postgres/pgorder"
+	"github.com/Mikhalevich/tg-coffee-shop-bot/internal/adapter/repository/postgres/pgoutbox"
 	"github.com/Mikhalevich/tg-coffee-shop-bot/internal/adapter/repository/postgres/transaction"
 	"github.com/Mikhalevich/tg-coffee-shop-bot/internal/adapter/timeprovider"
-	"github.com/Mikhalevich/tg-coffee-shop-bot/internal/domain/manager/orderprocessing"
+	"github.com/Mikhalevich/tg-coffee-shop-bot/internal/domain/service/notificationsvc"
+	"github.com/Mikhalevich/tg-coffee-shop-bot/internal/domain/service/ordersvc"
+	"github.com/Mikhalevich/tg-coffee-shop-bot/internal/domain/usecase/manager/order/nextpending"
+	"github.com/Mikhalevich/tg-coffee-shop-bot/internal/domain/usecase/manager/order/updatestatus"
 	"github.com/Mikhalevich/tg-coffee-shop-bot/internal/infra/logger"
 )
 
@@ -28,18 +33,43 @@ func StartService(
 		return fmt.Errorf("creating bot: %w", err)
 	}
 
-	pgDB, cleanup, err := MakePostgres(cfg.Postgres)
+	dbConn, driver, cleanup, err := MakePGXConnection(ctx, cfg.Postgres)
 	if err != nil {
-		return fmt.Errorf("make postgres: %w", err)
+		return fmt.Errorf("make pgx connection: %w", err)
 	}
 	defer cleanup()
 
 	var (
-		sender         = messagesender.New(botAPI, cfg.Bot.PaymentToken)
-		orderProcessor = orderprocessing.New(pgDB.Transactor(), pgDB, pgDB, sender, timeprovider.New())
+		sqlxDBConn          = sqlx.NewDb(dbConn, driver.Name())
+		transactionProvider = transaction.New(transaction.NewSqlxDB(sqlxDBConn))
+		sender              = messagesender.New(botAPI, cfg.Bot.PaymentToken)
+		timeProvicer        = timeprovider.New()
+		orderService        = ordersvc.New(
+			transactionProvider,
+			pgorder.New(driver, transactionProvider),
+			timeProvicer,
+		)
+		notificationService = notificationsvc.New(
+			pgoutbox.New(transactionProvider),
+			sender,
+		)
+		nextPendingOrderUsecase = nextpending.New(
+			transactionProvider,
+			orderService,
+			notificationService,
+		)
+		updateOrderStatusUsecase = updatestatus.New(
+			transactionProvider,
+			orderService,
+			notificationService,
+		)
 	)
 
-	if err := app.New(orderProcessor, logger.FromContext(ctx)).Start(
+	if err := app.New(
+		logger.FromContext(ctx),
+		nextPendingOrderUsecase,
+		updateOrderStatusUsecase,
+	).Start(
 		ctx,
 		cfg.HTTPPort,
 	); err != nil {
@@ -49,29 +79,23 @@ func StartService(
 	return nil
 }
 
-func MakePostgres(cfg config.Postgres) (*postgres.Postgres, func(), error) {
+func MakePGXConnection(ctx context.Context, cfg config.Postgres) (*sql.DB, *driver.Pgx, func(), error) {
 	if cfg.Connection == "" {
-		return nil, func() {}, nil
+		return nil, nil, func() {}, nil
 	}
 
 	driver := driver.NewPgx()
 
 	dbConn, err := otelsql.Open(driver.Name(), cfg.Connection)
 	if err != nil {
-		return nil, nil, fmt.Errorf("open database: %w", err)
+		return nil, nil, nil, fmt.Errorf("open database: %w", err)
 	}
 
-	if err := dbConn.Ping(); err != nil {
-		return nil, nil, fmt.Errorf("ping: %w", err)
+	if err := dbConn.PingContext(ctx); err != nil {
+		return nil, nil, nil, fmt.Errorf("ping: %w", err)
 	}
 
-	var (
-		sqlxDBConn          = sqlx.NewDb(dbConn, driver.Name())
-		transactionProvider = transaction.New(transaction.NewSqlxDB(sqlxDBConn))
-		p                   = postgres.New(driver, transactionProvider)
-	)
-
-	return p, func() {
+	return dbConn, driver, func() {
 		dbConn.Close()
 	}, nil
 }

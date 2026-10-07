@@ -33,7 +33,7 @@ func (h *Handler) UpdateOrderStatus(
 		return nil, huma.Error400BadRequest("invalid status")
 	}
 
-	if err := h.orderProcessor.UpdateOrderStatus(ctx, orderID, status); err != nil {
+	if err := h.updateOrderStatusUsecase.Update(ctx, orderID, status); err != nil {
 		if perror.IsType(err, perror.TypeNotFound) {
 			return nil, huma.Error404NotFound("no orders with relevant status")
 		}
