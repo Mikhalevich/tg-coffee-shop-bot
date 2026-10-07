@@ -13,8 +13,7 @@ func (t *TGHandler) Order(ctx context.Context, msg tgbot.BotMessage, sender tgbo
 	if err := t.cartUsecase.Create(
 		ctx,
 		msginfo.Info{
-			ChatID:    msginfo.ChatIDFromInt64(msg.ChatID),
-			MessageID: msginfo.MessageIDFromInt(msg.MessageID),
+			ChatID: msginfo.ChatIDFromInt64(msg.ChatID),
 		},
 	); err != nil {
 		return fmt.Errorf("start new cart: %w", err)
