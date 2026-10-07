@@ -6,7 +6,7 @@ import (
 
 	"github.com/jmoiron/sqlx"
 
-	"github.com/Mikhalevich/tg-coffee-shop-bot/internal/adapter/repository/postgres/internal/model"
+	"github.com/Mikhalevich/tg-coffee-shop-bot/internal/adapter/repository/postgres/pgproduct/internal/model"
 	"github.com/Mikhalevich/tg-coffee-shop-bot/internal/domain/port/currency"
 	"github.com/Mikhalevich/tg-coffee-shop-bot/internal/domain/port/product"
 )
@@ -63,7 +63,7 @@ func (p *PgProduct) GetProductsByIDs(
 	output := make(map[product.ProductID]product.Product, len(dbProducts))
 
 	for _, v := range dbProducts {
-		output[product.ProductIDFromInt(v.ID)] = v.ToPortProduct()
+		output[product.ProductIDFromInt(v.ID)] = v.ToDom()
 	}
 
 	return output, nil
