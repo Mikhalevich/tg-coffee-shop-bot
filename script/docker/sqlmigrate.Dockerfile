@@ -1,10 +1,10 @@
-FROM golang:1.25-alpine3.23 AS builder
+FROM golang:1.26-alpine3.24 AS builder
 
 WORKDIR /app
 
 RUN GOBIN=/app go install github.com/rubenv/sql-migrate/...@v1.6.1
 
-FROM alpine:3.23
+FROM alpine:3.24
 
 WORKDIR /app/
 
