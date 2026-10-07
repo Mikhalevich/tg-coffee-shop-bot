@@ -6,7 +6,6 @@ import (
 	"fmt"
 
 	"github.com/Mikhalevich/tg-coffee-shop-bot/cmd/msgconsumer/internal/app/event"
-	"github.com/Mikhalevich/tg-coffee-shop-bot/internal/domain/messageprocessor"
 	"github.com/Mikhalevich/tg-coffee-shop-bot/internal/domain/port/msginfo"
 )
 
@@ -20,7 +19,7 @@ type Consumer interface {
 type MessageSender interface {
 	SendMessage(
 		ctx context.Context,
-		msg messageprocessor.Message,
+		msg msginfo.Message,
 	) error
 }
 
@@ -46,15 +45,15 @@ func (a *App) Start(ctx context.Context) error {
 			return fmt.Errorf("unmarshal message: %w", err)
 		}
 
-		if err := a.sender.SendMessage(ctx, messageprocessor.Message{
+		if err := a.sender.SendMessage(ctx, msginfo.Message{
 			ChatID: msginfo.ChatIDFromInt64(msg.ChatID),
 			Text:   msg.MessageText,
-			Type:   event.ToMessageType(msg.MessageType),
+			Type:   msg.MessageType,
 		}); err != nil {
 			return fmt.Errorf("send message: %w", err)
 		}
 
-		return fmt.Errorf("unknown message type: %s", msg.MessageType)
+		return fmt.Errorf("unknown message type: %d", msg.MessageType)
 	}); err != nil {
 		return fmt.Errorf("consume: %w", err)
 	}

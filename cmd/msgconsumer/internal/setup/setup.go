@@ -11,9 +11,9 @@ import (
 	"github.com/Mikhalevich/tg-coffee-shop-bot/cmd/msgconsumer/internal/app"
 	"github.com/Mikhalevich/tg-coffee-shop-bot/cmd/msgconsumer/internal/app/kafkaconsumer"
 	"github.com/Mikhalevich/tg-coffee-shop-bot/cmd/msgconsumer/internal/config"
-	"github.com/Mikhalevich/tg-coffee-shop-bot/internal/adapter/buttonrespositoryobsolete"
-	"github.com/Mikhalevich/tg-coffee-shop-bot/internal/adapter/messagesenderobsolete"
-	"github.com/Mikhalevich/tg-coffee-shop-bot/internal/domain/messageprocessor"
+	"github.com/Mikhalevich/tg-coffee-shop-bot/internal/adapter/buttonrespository"
+	"github.com/Mikhalevich/tg-coffee-shop-bot/internal/adapter/messagesender"
+	"github.com/Mikhalevich/tg-coffee-shop-bot/internal/domain/service/messagesvc"
 )
 
 func StartConsumer(
@@ -31,12 +31,19 @@ func StartConsumer(
 	}
 
 	var (
-		consumer     = kafkaconsumer.New(cfg.Kafka)
-		sender       = messagesenderobsolete.New(botAPI, cfg.Bot.PaymentToken)
-		msgProcessor = messageprocessor.New(sender, sender, buttonRepository)
+		consumer       = kafkaconsumer.New(cfg.Kafka)
+		sender         = messagesender.New(botAPI, cfg.Bot.PaymentToken)
+		messageService = messagesvc.New(
+			sender,
+			sender,
+			buttonRepository,
+		)
 	)
 
-	if err := app.New(consumer, msgProcessor).Start(ctx); err != nil {
+	if err := app.New(
+		consumer,
+		messageService,
+	).Start(ctx); err != nil {
 		return fmt.Errorf("start app: %w", err)
 	}
 
@@ -46,7 +53,7 @@ func StartConsumer(
 func MakeRedisButtonRepository(
 	ctx context.Context,
 	cfg config.ButtonRedis,
-) (*buttonrespositoryobsolete.ButtonRepository, error) {
+) (*buttonrespository.ButtonRepository, error) {
 	rdb := redis.NewClient(&redis.Options{
 		Addr:     cfg.Addr,
 		Password: cfg.Pwd,
@@ -61,5 +68,5 @@ func MakeRedisButtonRepository(
 		return nil, fmt.Errorf("redis ping: %w", err)
 	}
 
-	return buttonrespositoryobsolete.New(rdb, cfg.TTL), nil
+	return buttonrespository.New(rdb, cfg.TTL), nil
 }
