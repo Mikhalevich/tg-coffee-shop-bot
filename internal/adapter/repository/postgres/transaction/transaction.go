@@ -6,11 +6,11 @@ import (
 
 	"github.com/jmoiron/sqlx"
 
-	"github.com/Mikhalevich/tg-coffee-shop-bot/internal/adapter/repository/postgres"
+	"github.com/Mikhalevich/tg-coffee-shop-bot/internal/adapter/repository/postgres/pgorder"
 )
 
 var (
-	_ postgres.Transactor = (*Transaction)(nil)
+	_ pgorder.Transactor = (*Transaction)(nil)
 )
 
 type transactionCtxKey struct{}

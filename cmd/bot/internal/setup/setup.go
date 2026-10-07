@@ -27,8 +27,6 @@ import (
 	"github.com/Mikhalevich/tg-coffee-shop-bot/internal/adapter/repository/postgres/transaction"
 	"github.com/Mikhalevich/tg-coffee-shop-bot/internal/adapter/timeprovider"
 	"github.com/Mikhalevich/tg-coffee-shop-bot/internal/adapter/verificationcodegenerator"
-	"github.com/Mikhalevich/tg-coffee-shop-bot/internal/domain/customer/cartprocessing"
-	"github.com/Mikhalevich/tg-coffee-shop-bot/internal/domain/customer/orderpayment"
 	"github.com/Mikhalevich/tg-coffee-shop-bot/internal/domain/port/store"
 	"github.com/Mikhalevich/tg-coffee-shop-bot/internal/domain/service/cartsvc"
 	"github.com/Mikhalevich/tg-coffee-shop-bot/internal/domain/service/currencysvc"
@@ -181,7 +179,7 @@ func MakeRedisButtonRepository(
 	return buttonrespository.New(rdb, cfg.TTL), nil
 }
 
-func MakeRedisCart(ctx context.Context, cfg config.CartRedis) (cartprocessing.CartProvider, error) {
+func MakeRedisCart(ctx context.Context, cfg config.CartRedis) (cartsvc.Repository, error) {
 	rdb := redis.NewClient(&redis.Options{
 		Addr:     cfg.Addr,
 		Password: cfg.Pwd,
@@ -202,7 +200,7 @@ func MakeRedisCart(ctx context.Context, cfg config.CartRedis) (cartprocessing.Ca
 func MakeRedisDailyPositionGenerator(
 	ctx context.Context,
 	cfg config.DailyPositionRedis,
-) (orderpayment.DailyPositionGenerator, error) {
+) (payment.PositionService, error) {
 	rdb := redis.NewClient(&redis.Options{
 		Addr:     cfg.Addr,
 		Password: cfg.Pwd,

@@ -6,15 +6,11 @@ import (
 	"github.com/jackc/pgx/v5/pgconn"
 	_ "github.com/jackc/pgx/v5/stdlib"
 
-	"github.com/Mikhalevich/tg-coffee-shop-bot/internal/adapter/repository/postgres"
-	"github.com/Mikhalevich/tg-coffee-shop-bot/internal/adapter/repository/postgres/orderhistoryid"
-	"github.com/Mikhalevich/tg-coffee-shop-bot/internal/adapter/repository/postgres/orderhistoryoffset"
+	"github.com/Mikhalevich/tg-coffee-shop-bot/internal/adapter/repository/postgres/pgorder"
 )
 
 var (
-	_ postgres.Driver           = (*Pgx)(nil)
-	_ orderhistoryid.Driver     = (*Pgx)(nil)
-	_ orderhistoryoffset.Driver = (*Pgx)(nil)
+	_ pgorder.Driver = (*Pgx)(nil)
 )
 
 type Pgx struct {

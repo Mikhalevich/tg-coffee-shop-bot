@@ -4,14 +4,14 @@ import (
 	"fmt"
 	"math/rand"
 
-	"github.com/Mikhalevich/tg-coffee-shop-bot/internal/domain/customer/orderpayment"
+	"github.com/Mikhalevich/tg-coffee-shop-bot/internal/domain/usecase/customer/order/payment"
 )
 
 const (
 	maxCodeValue = 1000
 )
 
-var _ orderpayment.VerificationCodeGenerator = (*VerificationCodeGenerator)(nil)
+var _ payment.CodeGeneratorService = (*VerificationCodeGenerator)(nil)
 
 type VerificationCodeGenerator struct {
 }
