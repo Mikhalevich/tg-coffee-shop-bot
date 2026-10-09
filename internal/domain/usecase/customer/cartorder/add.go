@@ -32,15 +32,17 @@ func (c *CartOrder) Add(
 			return fmt.Errorf("order unavailable msg: %w", err)
 		}
 
-		if err := c.ViewCategoryProducts(
-			ctx,
-			info,
-			cartID,
-			categoryID,
-			currencyID,
-		); err != nil {
-			return fmt.Errorf("view category products: %w", err)
-		}
+		return nil
+	}
+
+	if err := c.ViewCategoryProducts(
+		ctx,
+		info,
+		cartID,
+		categoryID,
+		currencyID,
+	); err != nil {
+		return fmt.Errorf("view category products: %w", err)
 	}
 
 	return nil

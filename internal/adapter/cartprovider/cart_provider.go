@@ -1,7 +1,6 @@
 package cartprovider
 
 import (
-	"errors"
 	"time"
 
 	"github.com/redis/go-redis/v9"
@@ -23,8 +22,4 @@ func New(client *redis.Client, ttl time.Duration) *CartProvider {
 		client: client,
 		ttl:    ttl,
 	}
-}
-
-func (c *CartProvider) IsNotFoundError(err error) bool {
-	return errors.Is(err, redis.Nil)
 }

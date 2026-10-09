@@ -2,6 +2,7 @@ package pgbutton_test
 
 import (
 	"github.com/Mikhalevich/tg-coffee-shop-bot/internal/domain/port/button"
+	"github.com/Mikhalevich/tg-coffee-shop-bot/internal/domain/port/perror"
 )
 
 func (s *ButtonSuit) TestGetButton() {
@@ -48,7 +49,6 @@ func (s *ButtonSuit) TestGetButton() {
 		actual, err := s.pgButton.GetButton(ctx, button.IDFromString("unknown"))
 
 		s.Require().Nil(actual)
-		s.Require().EqualError(err, "button not found")
-		s.Require().True(s.pgButton.IsNotFoundError(err))
+		s.Require().True(perror.IsType(err, perror.TypeNotFound))
 	})
 }

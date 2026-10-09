@@ -4,9 +4,8 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/redis/go-redis/v9"
-
 	"github.com/Mikhalevich/tg-coffee-shop-bot/internal/domain/port/cart"
+	"github.com/Mikhalevich/tg-coffee-shop-bot/internal/domain/port/perror"
 )
 
 func (c *CartProvider) GetProducts(ctx context.Context, id cart.ID) ([]cart.CartProduct, error) {
@@ -16,7 +15,7 @@ func (c *CartProvider) GetProducts(ctx context.Context, id cart.ID) ([]cart.Cart
 	}
 
 	if len(items) == 0 {
-		return nil, redis.Nil
+		return nil, perror.NotFound("products not found")
 	}
 
 	cartItems, err := convertToCartItems(combineDuplicateItems(items))

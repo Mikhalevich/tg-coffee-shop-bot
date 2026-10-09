@@ -3,7 +3,6 @@ package buttonrespository
 import (
 	"bytes"
 	"encoding/gob"
-	"errors"
 	"fmt"
 	"strings"
 	"time"
@@ -28,10 +27,6 @@ func New(client *redis.Client, ttl time.Duration) *ButtonRepository {
 		client: client,
 		ttl:    ttl,
 	}
-}
-
-func (r *ButtonRepository) IsNotFoundError(err error) bool {
-	return errors.Is(err, redis.Nil)
 }
 
 func encodeButton(b button.Button) ([]byte, error) {

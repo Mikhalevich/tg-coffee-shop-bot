@@ -5,7 +5,6 @@ import (
 
 	"github.com/jmoiron/sqlx"
 
-	"github.com/Mikhalevich/tg-coffee-shop-bot/internal/domain/port/perror"
 	"github.com/Mikhalevich/tg-coffee-shop-bot/internal/domain/service/messagesvc"
 )
 
@@ -27,8 +26,4 @@ func New(
 	return &PgButton{
 		transactor: transactor,
 	}
-}
-
-func (p *PgButton) IsNotFoundError(err error) bool {
-	return perror.IsType(err, perror.TypeNotFound)
 }
