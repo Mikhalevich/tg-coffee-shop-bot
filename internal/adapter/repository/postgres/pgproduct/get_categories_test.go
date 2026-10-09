@@ -1,8 +1,6 @@
 package pgproduct_test
 
 import (
-	"github.com/jmoiron/sqlx"
-
 	"github.com/Mikhalevich/tg-coffee-shop-bot/internal/domain/port/product"
 )
 
@@ -123,69 +121,4 @@ func (s *ProductSuit) TestGetCategories() {
 		s.Require().NoError(err)
 		s.Require().Empty(actual)
 	})
-}
-
-func (s *ProductSuit) insertCategory(title string, isEnabled bool) int {
-	var (
-		ctx        = s.T().Context()
-		categoryID int
-	)
-
-	err := sqlx.GetContext(ctx, s.transactor.ExtContext(ctx), &categoryID, `
-		INSERT INTO category (
-			title,
-			is_enabled
-		) VALUES (
-			$1,
-			$2
-		) RETURNING id`,
-		title,
-		isEnabled,
-	)
-	s.Require().NoError(err)
-
-	return categoryID
-}
-
-func (s *ProductSuit) insertProduct(title string, isEnabled bool) int {
-	var (
-		ctx       = s.T().Context()
-		productID int
-	)
-
-	err := sqlx.GetContext(ctx, s.transactor.ExtContext(ctx), &productID, `
-		INSERT INTO product (
-			title,
-			is_enabled,
-			created_at,
-			updated_at
-		) VALUES (
-			$1,
-			$2,
-			NOW(),
-			NOW()
-		) RETURNING id`,
-		title,
-		isEnabled,
-	)
-	s.Require().NoError(err)
-
-	return productID
-}
-
-func (s *ProductSuit) linkProductCategory(productID int, categoryID int) {
-	ctx := s.T().Context()
-
-	_, err := s.transactor.ExtContext(ctx).ExecContext(ctx, `
-		INSERT INTO product_category (
-			product_id,
-			category_id
-		) VALUES (
-			$1,
-			$2
-		)`,
-		productID,
-		categoryID,
-	)
-	s.Require().NoError(err)
 }
