@@ -2,9 +2,13 @@ package buttonrespository
 
 import (
 	"context"
+	"errors"
 	"fmt"
 
+	"github.com/redis/go-redis/v9"
+
 	"github.com/Mikhalevich/tg-coffee-shop-bot/internal/domain/port/button"
+	"github.com/Mikhalevich/tg-coffee-shop-bot/internal/domain/port/perror"
 )
 
 func (r *ButtonRepository) GetButton(ctx context.Context, id button.ID) (*button.Button, error) {
@@ -27,12 +31,16 @@ func (r *ButtonRepository) GetButton(ctx context.Context, id button.ID) (*button
 }
 
 func (r *ButtonRepository) singleButton(ctx context.Context, key string) (*button.Button, error) {
-	b, err := r.client.GetDel(ctx, key).Bytes()
+	rawBtn, err := r.client.GetDel(ctx, key).Bytes()
 	if err != nil {
+		if errors.Is(err, redis.Nil) {
+			return nil, perror.NotFound("button not found")
+		}
+
 		return nil, fmt.Errorf("redis get: %w", err)
 	}
 
-	btn, err := decodeButton(b)
+	btn, err := decodeButton(rawBtn)
 	if err != nil {
 		return nil, fmt.Errorf("decode button: %w", err)
 	}
@@ -41,12 +49,16 @@ func (r *ButtonRepository) singleButton(ctx context.Context, key string) (*butto
 }
 
 func (r *ButtonRepository) hmapButton(ctx context.Context, key, field string) (*button.Button, error) {
-	b, err := r.client.HGet(ctx, key, field).Result()
+	rawBtn, err := r.client.HGet(ctx, key, field).Result()
 	if err != nil {
+		if errors.Is(err, redis.Nil) {
+			return nil, perror.NotFound("button not found")
+		}
+
 		return nil, fmt.Errorf("hget: %w", err)
 	}
 
-	btn, err := decodeButton([]byte(b))
+	btn, err := decodeButton([]byte(rawBtn))
 	if err != nil {
 		return nil, fmt.Errorf("decode button: %w", err)
 	}

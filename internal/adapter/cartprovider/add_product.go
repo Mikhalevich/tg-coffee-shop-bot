@@ -4,13 +4,13 @@ import (
 	"bytes"
 	"context"
 	"encoding/gob"
-	"errors"
 	"fmt"
 	"strings"
 
 	"github.com/redis/go-redis/v9"
 
 	"github.com/Mikhalevich/tg-coffee-shop-bot/internal/domain/port/cart"
+	"github.com/Mikhalevich/tg-coffee-shop-bot/internal/domain/port/perror"
 	"github.com/Mikhalevich/tg-coffee-shop-bot/internal/domain/port/product"
 )
 
@@ -23,13 +23,12 @@ func (c *CartProvider) AddProduct(ctx context.Context, cartID cart.ID, p cart.Ca
 		return fmt.Errorf("encode cart product: %w", err)
 	}
 
-	exists, err := c.addProductToExistingList(ctx, makeCartProductsKey(cartID.String()), encodedProduct)
-	if err != nil {
+	if err := c.addProductToExistingList(
+		ctx,
+		makeCartProductsKey(cartID.String()),
+		encodedProduct,
+	); err != nil {
 		return fmt.Errorf("add product to existing list: %w", err)
-	}
-
-	if !exists {
-		return redis.Nil
 	}
 
 	return nil
@@ -58,22 +57,19 @@ func decodeCartProduct(s string) (cartProduct, error) {
 	return p, nil
 }
 
-// addProductToExistingList returns false is the list is not exists and true otherwise.
-func (c *CartProvider) addProductToExistingList(ctx context.Context, key string, data string) (bool, error) {
+// addProductToExistingList appends the product to an existing cart list
+// and returns a not-found error if the cart has expired.
+func (c *CartProvider) addProductToExistingList(ctx context.Context, key string, data string) error {
 	newLen, err := c.client.RPushX(ctx, key, data).Result()
 	if err != nil {
-		if errors.Is(err, redis.Nil) {
-			return false, nil
-		}
-
-		return false, fmt.Errorf("rpushx: %w", err)
+		return fmt.Errorf("rpushx: %w", err)
 	}
 
 	if newLen == 0 {
-		return false, nil
+		return perror.NotFound("cart not found")
 	}
 
-	return true, nil
+	return nil
 }
 
 //nolint:unused

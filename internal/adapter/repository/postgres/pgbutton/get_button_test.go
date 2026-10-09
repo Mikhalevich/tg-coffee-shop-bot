@@ -1,0 +1,54 @@
+package pgbutton_test
+
+import (
+	"github.com/Mikhalevich/tg-coffee-shop-bot/internal/domain/port/button"
+	"github.com/Mikhalevich/tg-coffee-shop-bot/internal/domain/port/perror"
+)
+
+func (s *ButtonSuit) TestGetButton() {
+	s.Run("success", func() {
+		var (
+			ctx      = s.T().Context()
+			expected = button.MustCreateButton(
+				"Cancel",
+				button.OperationOrderCancel,
+				button.WithStyle(button.StyleDanger),
+				button.WithDeleteAfterProcess(),
+				button.WithPayload(42),
+			)
+		)
+
+		s.Require().NoError(s.pgButton.SetButtonRows(ctx, button.Row(expected)))
+
+		actual, err := s.pgButton.GetButton(ctx, expected.ID)
+
+		s.Require().NoError(err)
+		s.Require().Equal(&expected, actual)
+	})
+
+	s.Run("not deleted after get", func() {
+		var (
+			ctx      = s.T().Context()
+			expected = button.MustCreateButton("Categories", button.OperationCartViewCategories)
+		)
+
+		s.Require().NoError(s.pgButton.SetButtonRows(ctx, button.Row(expected)))
+
+		_, err := s.pgButton.GetButton(ctx, expected.ID)
+		s.Require().NoError(err)
+
+		actual, err := s.pgButton.GetButton(ctx, expected.ID)
+
+		s.Require().NoError(err)
+		s.Require().Equal(&expected, actual)
+	})
+
+	s.Run("not found", func() {
+		ctx := s.T().Context()
+
+		actual, err := s.pgButton.GetButton(ctx, button.IDFromString("unknown"))
+
+		s.Require().Nil(actual)
+		s.Require().True(perror.IsType(err, perror.TypeNotFound))
+	})
+}

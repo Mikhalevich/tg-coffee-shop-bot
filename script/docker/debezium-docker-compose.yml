@@ -39,6 +39,8 @@ services:
     depends_on:
       jaeger:
         condition: service_started
+      sql-migrate:
+        condition: service_completed_successfully
       kafka:
         condition: service_healthy
     volumes:

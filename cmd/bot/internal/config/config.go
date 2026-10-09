@@ -9,7 +9,6 @@ type Config struct {
 	Tracing            Tracing            `yaml:"tracing" required:"true"`
 	Bot                Bot                `yaml:"bot" required:"true"`
 	Postgres           Postgres           `yaml:"postgres" required:"true"`
-	ButtonRedis        ButtonRedis        `yaml:"button_redis" required:"true"`
 	CartRedis          CartRedis          `yaml:"cart_redis" required:"true"`
 	DailyPositionRedis DailyPositionRedis `yaml:"daily_position_redis" required:"true"`
 	StoreID            int                `yaml:"store_id" required:"true"`
@@ -41,13 +40,6 @@ type Bot struct {
 
 type Postgres struct {
 	Connection string `yaml:"connection" required:"true"`
-}
-
-type ButtonRedis struct {
-	Addr string        `yaml:"addr" required:"true"`
-	Pwd  string        `yaml:"pwd" required:"true"`
-	DB   int           `yaml:"db" required:"true"`
-	TTL  time.Duration `yaml:"ttl" required:"true"`
 }
 
 type CartRedis struct {
