@@ -25,22 +25,21 @@ func (s *ButtonSuit) TestGetButton() {
 		s.Require().Equal(&expected, actual)
 	})
 
-	s.Run("deleted after get", func() {
+	s.Run("not deleted after get", func() {
 		var (
-			ctx = s.T().Context()
-			btn = button.MustCreateButton("Categories", button.OperationCartViewCategories)
+			ctx      = s.T().Context()
+			expected = button.MustCreateButton("Categories", button.OperationCartViewCategories)
 		)
 
-		s.Require().NoError(s.pgButton.SetButtonRows(ctx, button.Row(btn)))
+		s.Require().NoError(s.pgButton.SetButtonRows(ctx, button.Row(expected)))
 
-		_, err := s.pgButton.GetButton(ctx, btn.ID)
+		_, err := s.pgButton.GetButton(ctx, expected.ID)
 		s.Require().NoError(err)
 
-		actual, err := s.pgButton.GetButton(ctx, btn.ID)
+		actual, err := s.pgButton.GetButton(ctx, expected.ID)
 
-		s.Require().Nil(actual)
-		s.Require().EqualError(err, "button not found")
-		s.Require().True(s.pgButton.IsNotFoundError(err))
+		s.Require().NoError(err)
+		s.Require().Equal(&expected, actual)
 	})
 
 	s.Run("not found", func() {

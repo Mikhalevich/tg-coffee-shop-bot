@@ -13,15 +13,10 @@ import (
 	"github.com/Mikhalevich/tg-coffee-shop-bot/internal/domain/port/perror"
 )
 
-// GetButton returns button and deletes it from storage.
 func (p *PgButton) GetButton(ctx context.Context, buttonID button.ID) (*button.Button, error) {
 	var (
 		query = `
-			DELETE FROM
-				buttons
-			WHERE
-				id = :id
-			RETURNING
+			SELECT
 				id,
 				caption,
 				operation,
@@ -30,6 +25,10 @@ func (p *PgButton) GetButton(ctx context.Context, buttonID button.ID) (*button.B
 				url,
 				payload,
 				pay
+			FROM
+				buttons
+			WHERE
+				id = :id
 		`
 
 		trx = p.transactor.ExtContext(ctx)
