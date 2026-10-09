@@ -13,12 +13,12 @@ import (
 
 	"github.com/Mikhalevich/tg-coffee-shop-bot/cmd/bot/internal/app"
 	"github.com/Mikhalevich/tg-coffee-shop-bot/cmd/bot/internal/config"
-	"github.com/Mikhalevich/tg-coffee-shop-bot/internal/adapter/buttonrespository"
 	"github.com/Mikhalevich/tg-coffee-shop-bot/internal/adapter/cartprovider"
 	"github.com/Mikhalevich/tg-coffee-shop-bot/internal/adapter/dailypositiongenerator"
 	"github.com/Mikhalevich/tg-coffee-shop-bot/internal/adapter/messagesender"
 	"github.com/Mikhalevich/tg-coffee-shop-bot/internal/adapter/qrcodegenerator"
 	"github.com/Mikhalevich/tg-coffee-shop-bot/internal/adapter/repository/postgres/driver"
+	"github.com/Mikhalevich/tg-coffee-shop-bot/internal/adapter/repository/postgres/pgbutton"
 	"github.com/Mikhalevich/tg-coffee-shop-bot/internal/adapter/repository/postgres/pgcurrency"
 	"github.com/Mikhalevich/tg-coffee-shop-bot/internal/adapter/repository/postgres/pgorder"
 	"github.com/Mikhalevich/tg-coffee-shop-bot/internal/adapter/repository/postgres/pgoutbox"
@@ -63,11 +63,6 @@ func StartBot(ctx context.Context, cfg config.Config) error {
 	dailyPosition, err := MakeRedisDailyPositionGenerator(ctx, cfg.DailyPositionRedis)
 	if err != nil {
 		return fmt.Errorf("make redis daily position generator: %w", err)
-	}
-
-	buttonRepository, err := MakeRedisButtonRepository(ctx, cfg.ButtonRedis)
-	if err != nil {
-		return fmt.Errorf("make redis button repository: %w", err)
 	}
 
 	var (
@@ -150,33 +145,12 @@ func StartBot(ctx context.Context, cfg config.Config) error {
 		queueSizeUsecase,
 		historyOrderUsecase,
 		paymentOrderUsecase,
-		buttonRepository,
+		pgbutton.New(transactionProvider),
 	); err != nil {
 		return fmt.Errorf("start bot: %w", err)
 	}
 
 	return nil
-}
-
-func MakeRedisButtonRepository(
-	ctx context.Context,
-	cfg config.ButtonRedis,
-) (*buttonrespository.ButtonRepository, error) {
-	rdb := redis.NewClient(&redis.Options{
-		Addr:     cfg.Addr,
-		Password: cfg.Pwd,
-		DB:       cfg.DB,
-	})
-
-	if err := redisotel.InstrumentTracing(rdb); err != nil {
-		return nil, fmt.Errorf("redis instrument tracing: %w", err)
-	}
-
-	if err := rdb.Ping(ctx).Err(); err != nil {
-		return nil, fmt.Errorf("redis ping: %w", err)
-	}
-
-	return buttonrespository.New(rdb, cfg.TTL), nil
 }
 
 func MakeRedisCart(ctx context.Context, cfg config.CartRedis) (cartsvc.Repository, error) {

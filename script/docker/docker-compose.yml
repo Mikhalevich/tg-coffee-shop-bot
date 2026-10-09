@@ -41,8 +41,6 @@ services:
         condition: service_started
       sql-migrate:
         condition: service_completed_successfully
-      redis:
-        condition: service_healthy
     volumes:
       - ./../../config/config-outbox-poller.yaml:/app/config/config-outbox-poller.yaml
     networks:

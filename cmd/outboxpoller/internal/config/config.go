@@ -3,14 +3,13 @@ package config
 import "time"
 
 type Config struct {
-	LogLevel            string      `yaml:"log_level" required:"true"`
-	Tracing             Tracing     `yaml:"tracing" required:"true"`
-	Postgres            Postgres    `yaml:"postgres" required:"true"`
-	Bot                 Bot         `yaml:"bot" required:"true"`
-	ButtonRedis         ButtonRedis `yaml:"button_redis" required:"true"`
-	MessageWorker       Worker      `yaml:"message_worker" required:"true"`
-	AnswerPaymentWorker Worker      `yaml:"answer_payment_worker" required:"true"`
-	InvoiceWorker       Worker      `yaml:"invoice_worker" required:"true"`
+	LogLevel            string   `yaml:"log_level" required:"true"`
+	Tracing             Tracing  `yaml:"tracing" required:"true"`
+	Postgres            Postgres `yaml:"postgres" required:"true"`
+	Bot                 Bot      `yaml:"bot" required:"true"`
+	MessageWorker       Worker   `yaml:"message_worker" required:"true"`
+	AnswerPaymentWorker Worker   `yaml:"answer_payment_worker" required:"true"`
+	InvoiceWorker       Worker   `yaml:"invoice_worker" required:"true"`
 }
 
 func (c *Config) Level() string {
@@ -37,13 +36,6 @@ type Postgres struct {
 type Bot struct {
 	Token        string `yaml:"token" required:"true"`
 	PaymentToken string `yaml:"payment_token" required:"true"`
-}
-
-type ButtonRedis struct {
-	Addr string        `yaml:"addr" required:"true"`
-	Pwd  string        `yaml:"pwd" required:"true"`
-	DB   int           `yaml:"db" required:"true"`
-	TTL  time.Duration `yaml:"ttl" required:"true"`
 }
 
 type Worker struct {

@@ -2,17 +2,20 @@ package setup
 
 import (
 	"context"
+	"database/sql"
 	"fmt"
 
 	"github.com/go-telegram/bot"
-	"github.com/redis/go-redis/extra/redisotel/v9"
-	"github.com/redis/go-redis/v9"
+	"github.com/jmoiron/sqlx"
+	"github.com/uptrace/opentelemetry-go-extra/otelsql"
 
 	"github.com/Mikhalevich/tg-coffee-shop-bot/cmd/msgconsumer/internal/app"
 	"github.com/Mikhalevich/tg-coffee-shop-bot/cmd/msgconsumer/internal/app/kafkaconsumer"
 	"github.com/Mikhalevich/tg-coffee-shop-bot/cmd/msgconsumer/internal/config"
-	"github.com/Mikhalevich/tg-coffee-shop-bot/internal/adapter/buttonrespository"
 	"github.com/Mikhalevich/tg-coffee-shop-bot/internal/adapter/messagesender"
+	"github.com/Mikhalevich/tg-coffee-shop-bot/internal/adapter/repository/postgres/driver"
+	"github.com/Mikhalevich/tg-coffee-shop-bot/internal/adapter/repository/postgres/pgbutton"
+	"github.com/Mikhalevich/tg-coffee-shop-bot/internal/adapter/repository/postgres/transaction"
 	"github.com/Mikhalevich/tg-coffee-shop-bot/internal/domain/service/messagesvc"
 )
 
@@ -25,18 +28,22 @@ func StartConsumer(
 		return fmt.Errorf("creating bot: %w", err)
 	}
 
-	buttonRepository, err := MakeRedisButtonRepository(ctx, cfg.ButtonRedis)
+	dbConn, driver, cleanup, err := MakePGXConnection(ctx, cfg.Postgres)
 	if err != nil {
-		return fmt.Errorf("make redis button repository: %w", err)
+		return fmt.Errorf("make pgx connection: %w", err)
 	}
 
+	defer cleanup()
+
 	var (
-		consumer       = kafkaconsumer.New(cfg.Kafka)
-		sender         = messagesender.New(botAPI, cfg.Bot.PaymentToken)
-		messageService = messagesvc.New(
+		sqlxDBConn          = sqlx.NewDb(dbConn, driver.Name())
+		transactionProvider = transaction.New(transaction.NewSqlxDB(sqlxDBConn))
+		consumer            = kafkaconsumer.New(cfg.Kafka)
+		sender              = messagesender.New(botAPI, cfg.Bot.PaymentToken)
+		messageService      = messagesvc.New(
 			sender,
 			sender,
-			buttonRepository,
+			pgbutton.New(transactionProvider),
 		)
 	)
 
@@ -50,23 +57,23 @@ func StartConsumer(
 	return nil
 }
 
-func MakeRedisButtonRepository(
-	ctx context.Context,
-	cfg config.ButtonRedis,
-) (*buttonrespository.ButtonRepository, error) {
-	rdb := redis.NewClient(&redis.Options{
-		Addr:     cfg.Addr,
-		Password: cfg.Pwd,
-		DB:       cfg.DB,
-	})
-
-	if err := redisotel.InstrumentTracing(rdb); err != nil {
-		return nil, fmt.Errorf("redis instrument tracing: %w", err)
+func MakePGXConnection(ctx context.Context, cfg config.Postgres) (*sql.DB, *driver.Pgx, func(), error) {
+	if cfg.Connection == "" {
+		return nil, nil, func() {}, nil
 	}
 
-	if err := rdb.Ping(ctx).Err(); err != nil {
-		return nil, fmt.Errorf("redis ping: %w", err)
+	driver := driver.NewPgx()
+
+	dbConn, err := otelsql.Open(driver.Name(), cfg.Connection)
+	if err != nil {
+		return nil, nil, nil, fmt.Errorf("open database: %w", err)
 	}
 
-	return buttonrespository.New(rdb, cfg.TTL), nil
+	if err := dbConn.PingContext(ctx); err != nil {
+		return nil, nil, nil, fmt.Errorf("ping: %w", err)
+	}
+
+	return dbConn, driver, func() {
+		dbConn.Close()
+	}, nil
 }
