@@ -8,14 +8,23 @@ import (
 
 	"github.com/Mikhalevich/tg-coffee-shop-bot/internal/adapter/repository/postgres/pgproduct/internal/model"
 	"github.com/Mikhalevich/tg-coffee-shop-bot/internal/domain/port/currency"
+	"github.com/Mikhalevich/tg-coffee-shop-bot/internal/domain/port/perror"
 	"github.com/Mikhalevich/tg-coffee-shop-bot/internal/domain/port/product"
 )
 
+// GetProductsByIDs returns the products with the given ids keyed by product ID, each with its price
+// in currencyID. Products are returned regardless of their enabled state; ids that do not exist or
+// have no price in currencyID are omitted. It returns a nil map and nil error if nothing matches,
+// and an error if ids is empty.
 func (p *PgProduct) GetProductsByIDs(
 	ctx context.Context,
 	ids []product.ProductID,
 	currencyID currency.ID,
 ) (map[product.ProductID]product.Product, error) {
+	if len(ids) == 0 {
+		return nil, perror.InvalidParam("ids is empty")
+	}
+
 	var (
 		query = `
 			SELECT

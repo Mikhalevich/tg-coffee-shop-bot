@@ -11,6 +11,9 @@ import (
 	"github.com/Mikhalevich/tg-coffee-shop-bot/internal/domain/port/product"
 )
 
+// GetProductsByCategoryID returns enabled products of the category with categoryID, ordered by title.
+// Each product carries its price in currencyID; products without a price in that currency are omitted.
+// It returns an empty slice if no product matches.
 func (p *PgProduct) GetProductsByCategoryID(
 	ctx context.Context,
 	categoryID product.CategoryID,

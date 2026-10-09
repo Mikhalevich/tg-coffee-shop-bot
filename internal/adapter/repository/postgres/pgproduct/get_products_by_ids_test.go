@@ -127,7 +127,7 @@ func (s *ProductSuit) TestGetProductsByIDs() {
 			currency.IDFromInt(usd),
 		)
 
-		s.Require().Error(err)
+		s.Require().EqualError(err, "ids is empty")
 		s.Require().Nil(actual)
 	})
 }
