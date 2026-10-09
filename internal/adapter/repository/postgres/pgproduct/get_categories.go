@@ -10,6 +10,8 @@ import (
 	"github.com/Mikhalevich/tg-coffee-shop-bot/internal/domain/port/product"
 )
 
+// GetCategories returns enabled categories that contain at least one enabled product,
+// ordered by title. It returns an empty slice if no category matches.
 func (p *PgProduct) GetCategories(ctx context.Context) ([]product.Category, error) {
 	var (
 		query = `
