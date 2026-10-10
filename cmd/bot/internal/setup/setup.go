@@ -14,12 +14,12 @@ import (
 	"github.com/Mikhalevich/tg-coffee-shop-bot/cmd/bot/internal/app"
 	"github.com/Mikhalevich/tg-coffee-shop-bot/cmd/bot/internal/config"
 	"github.com/Mikhalevich/tg-coffee-shop-bot/internal/adapter/cartprovider"
-	"github.com/Mikhalevich/tg-coffee-shop-bot/internal/adapter/dailypositiongenerator"
 	"github.com/Mikhalevich/tg-coffee-shop-bot/internal/adapter/messagesender"
 	"github.com/Mikhalevich/tg-coffee-shop-bot/internal/adapter/qrcodegenerator"
 	"github.com/Mikhalevich/tg-coffee-shop-bot/internal/adapter/repository/postgres/driver"
 	"github.com/Mikhalevich/tg-coffee-shop-bot/internal/adapter/repository/postgres/pgbutton"
 	"github.com/Mikhalevich/tg-coffee-shop-bot/internal/adapter/repository/postgres/pgcurrency"
+	"github.com/Mikhalevich/tg-coffee-shop-bot/internal/adapter/repository/postgres/pgdailyposition"
 	"github.com/Mikhalevich/tg-coffee-shop-bot/internal/adapter/repository/postgres/pgorder"
 	"github.com/Mikhalevich/tg-coffee-shop-bot/internal/adapter/repository/postgres/pgoutbox"
 	"github.com/Mikhalevich/tg-coffee-shop-bot/internal/adapter/repository/postgres/pgproduct"
@@ -58,11 +58,6 @@ func StartBot(ctx context.Context, cfg config.Config) error {
 	cartRedis, err := MakeRedisCart(ctx, cfg.CartRedis)
 	if err != nil {
 		return fmt.Errorf("make redis cart: %w", err)
-	}
-
-	dailyPosition, err := MakeRedisDailyPositionGenerator(ctx, cfg.DailyPositionRedis)
-	if err != nil {
-		return fmt.Errorf("make redis daily position generator: %w", err)
 	}
 
 	var (
@@ -114,7 +109,7 @@ func StartBot(ctx context.Context, cfg config.Config) error {
 			orderService,
 			productService,
 			currencyService,
-			dailyPosition,
+			pgdailyposition.New(transactionProvider),
 			verificationcodegenerator.New(),
 			qrcodegenerator.New(),
 			timeProvider,
@@ -169,27 +164,6 @@ func MakeRedisCart(ctx context.Context, cfg config.CartRedis) (cartsvc.Repositor
 	}
 
 	return cartprovider.New(rdb, cfg.TTL), nil
-}
-
-func MakeRedisDailyPositionGenerator(
-	ctx context.Context,
-	cfg config.DailyPositionRedis,
-) (payment.PositionService, error) {
-	rdb := redis.NewClient(&redis.Options{
-		Addr:     cfg.Addr,
-		Password: cfg.Pwd,
-		DB:       cfg.DB,
-	})
-
-	if err := redisotel.InstrumentTracing(rdb); err != nil {
-		return nil, fmt.Errorf("redis instrument tracing: %w", err)
-	}
-
-	if err := rdb.Ping(ctx).Err(); err != nil {
-		return nil, fmt.Errorf("redis ping: %w", err)
-	}
-
-	return dailypositiongenerator.New(rdb, cfg.TTL), nil
 }
 
 func MakePGXConnection(ctx context.Context, cfg config.Postgres) (*sql.DB, *driver.Pgx, func(), error) {
