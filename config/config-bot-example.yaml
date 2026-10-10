@@ -13,11 +13,6 @@ cart_redis:
   pwd: "redis123"
   db: 2
   ttl: 1h
-daily_position_redis:
-  addr: "redis:6379"
-  pwd: "redis123"
-  db: 3
-  ttl: 30h
 store_id: 1
 order_history:
   page_size: 10

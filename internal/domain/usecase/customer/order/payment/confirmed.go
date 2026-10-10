@@ -16,16 +16,17 @@ func (p *Payment) Confirmed(
 	currency string,
 	totalAmount int,
 ) error {
-	now := p.timeProvider.Now()
-
-	position, err := p.positionService.Position(ctx, now)
-	if err != nil {
-		return fmt.Errorf("daily position: %w", err)
-	}
-
-	verificationCode := p.codeGeneratorService.Generate()
+	var (
+		now              = p.timeProvider.Now()
+		verificationCode = p.codeGeneratorService.Generate()
+	)
 
 	if err := p.transactor.Transaction(ctx, func(ctx context.Context) error {
+		position, err := p.positionService.Position(ctx, now)
+		if err != nil {
+			return fmt.Errorf("daily position: %w", err)
+		}
+
 		if err := p.confimOrder(
 			ctx,
 			chatID,

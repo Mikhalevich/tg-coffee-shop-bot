@@ -5,14 +5,13 @@ import (
 )
 
 type Config struct {
-	LogLevel           string             `yaml:"log_level" required:"true"`
-	Tracing            Tracing            `yaml:"tracing" required:"true"`
-	Bot                Bot                `yaml:"bot" required:"true"`
-	Postgres           Postgres           `yaml:"postgres" required:"true"`
-	CartRedis          CartRedis          `yaml:"cart_redis" required:"true"`
-	DailyPositionRedis DailyPositionRedis `yaml:"daily_position_redis" required:"true"`
-	StoreID            int                `yaml:"store_id" required:"true"`
-	OrderHistory       OrderHistory       `yaml:"order_history" required:"true"`
+	LogLevel     string       `yaml:"log_level" required:"true"`
+	Tracing      Tracing      `yaml:"tracing" required:"true"`
+	Bot          Bot          `yaml:"bot" required:"true"`
+	Postgres     Postgres     `yaml:"postgres" required:"true"`
+	CartRedis    CartRedis    `yaml:"cart_redis" required:"true"`
+	StoreID      int          `yaml:"store_id" required:"true"`
+	OrderHistory OrderHistory `yaml:"order_history" required:"true"`
 }
 
 func (c *Config) Level() string {
@@ -43,13 +42,6 @@ type Postgres struct {
 }
 
 type CartRedis struct {
-	Addr string        `yaml:"addr" required:"true"`
-	Pwd  string        `yaml:"pwd" required:"true"`
-	DB   int           `yaml:"db" required:"true"`
-	TTL  time.Duration `yaml:"ttl" required:"true"`
-}
-
-type DailyPositionRedis struct {
 	Addr string        `yaml:"addr" required:"true"`
 	Pwd  string        `yaml:"pwd" required:"true"`
 	DB   int           `yaml:"db" required:"true"`
