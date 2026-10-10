@@ -11,7 +11,7 @@ make build        # builds all Go binaries into ./bin (uses -mod=vendor)
 make test         # go test ./...
 make lint         # golangci-lint v2 (auto-installed into tools/bin) with .golangci.yml
 make fmt          # gofmt + goimports via golangci-lint
-make generate     # go generate ./... (mockgen is a go.mod `tool` dependency)
+make generate     # go generate ./... (currently no //go:generate directives — see mocks note below)
 make vendor       # go mod tidy && go mod vendor — run after changing dependencies
 make compose-up   # full stack: postgres, redis, jaeger, sql-migrate, bot, httpmanager, outboxpoller
 make debezium-compose-up  # alternative stack using Debezium CDC -> Kafka -> msgconsumer
@@ -20,6 +20,7 @@ make load-test-data       # load script/db/dataset/test_data.sql into local post
 
 Run a single test: `go test ./internal/adapter/repository/postgres/pgorder/ -run TestPgOrderSuit/TestName`
 
+- Mocks (`*_mock.go`, `go.uber.org/mock`) are generated per file with mockgen (a go.mod `tool` dependency), e.g. `go tool mockgen -source=<file>.go -destination=<file>_mock.go -package=<pkg>`; the exact command is in each mock's header.
 - Dependencies are vendored (`vendor/`); builds use `-mod=vendor`, so `make vendor` is required after editing `go.mod`.
 - Postgres repository tests use `ory/dockertest` to spin up a real Postgres container and apply `script/db/migrations` via `sql-migrate` — Docker must be running.
 - The linter enables nearly all linters (`default: all`); expect strict rules (funlen, gochecknoglobals, varnamelen, wrapcheck, etc.). Use targeted `//nolint:<linter>` only when justified, as existing code does.
@@ -46,13 +47,13 @@ Every Go binary follows the same shape: `main.go` calls `application.Run(&cfg, f
 - `domain/port/` — domain types and value objects (order, product, store, msginfo, button, etc.) and `perror` (typed domain errors; check with `perror.IsType`).
 - `domain/service/` — reusable domain services (`ordersvc`, `cartsvc`, `productsvc`, `notificationsvc`, `outbox/outboxsvc`, ...).
 - `domain/usecase/` — application use cases split by actor (`customer/...`, `manager/...`). Each use case package declares the narrow interfaces it consumes (`OrderService`, `NotificationService`, ...) — consumer-side interfaces. Services assert conformance with `var _ usecase.Iface = (*Service)(nil)` blocks.
-- `adapter/` — implementations: Postgres repositories (`repository/postgres/pg*`, sqlx + pgx, with private `internal/model` row structs), Redis-backed cart / daily position counter / button storage, Telegram `messagesender`, QR and verification code generators.
+- `adapter/` — implementations: Postgres repositories (`repository/postgres/pg*`, sqlx + pgx, with private `internal/model` row structs), Redis-backed cart and daily position counter, Telegram `messagesender`, QR and verification code generators.
 - `infra/` — application bootstrap, logger (logrus, carried in context via `logger.FromContext`), tracing (OpenTelemetry/Jaeger).
 
 Key cross-cutting patterns:
 
-- **Transactions via context**: `transaction.Transaction(ctx, fn)` stores the tx in the context; repositories pick it up automatically and nested calls reuse the outer tx.
+- **Transactions via context**: `transaction.Transaction` (`adapter/repository/postgres/transaction`) — `Transaction(ctx, fn)` stores the tx in the context; repositories pick it up automatically and nested calls reuse the outer tx.
 - **Transactional outbox**: in `bot` and `manager`, `notificationsvc` is constructed with `pgoutbox` as its sender, so user-facing Telegram messages/invoices are written to outbox tables inside the business transaction rather than sent directly. `outboxpoller` (or Debezium → Kafka → `msgconsumer`) later delivers them via `messagesender`.
-- **Inline button callbacks**: button payloads are stored in Redis (`buttonrespository`) and referenced by ID in Telegram callback data.
+- **Inline button callbacks**: button payloads are stored in Postgres (`pgbutton`) and referenced by ID in Telegram callback data.
 
 DB schema lives in `script/db/migrations/*.sql` (applied by the `sql-migrate` container in compose and by repository tests). Kubernetes manifests for minikube are in `script/k8s/minikube`.
