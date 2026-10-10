@@ -8,10 +8,10 @@ import (
 	"path/filepath"
 	"runtime"
 	"testing"
+	"time"
 
 	"github.com/jmoiron/sqlx"
-	"github.com/ory/dockertest/v3"
-	"github.com/ory/dockertest/v3/docker"
+	"github.com/ory/dockertest/v4"
 	migrate "github.com/rubenv/sql-migrate"
 	"github.com/stretchr/testify/suite"
 
@@ -24,7 +24,6 @@ type CurrencySuit struct {
 	*suite.Suite
 
 	transactor pgcurrency.Transactor
-	dbCleanup  func() error
 	pgCurrency *pgcurrency.PgCurrency
 }
 
@@ -39,7 +38,7 @@ func TestCurrencySuit(t *testing.T) {
 func (s *CurrencySuit) SetupSuite() {
 	dbDriver := driver.NewPgx()
 
-	dbConn, cleanup, err := connectToDatabase(s.T().Context(), dbDriver.Name())
+	dbConn, err := connectToDatabase(s.T(), dbDriver.Name())
 	if err != nil {
 		s.FailNow("could not connect to database", err)
 	}
@@ -55,14 +54,7 @@ func (s *CurrencySuit) SetupSuite() {
 	)
 
 	s.transactor = transactionProvider
-	s.dbCleanup = cleanup
 	s.pgCurrency = pgCurrency
-}
-
-func (s *CurrencySuit) TearDownSuite() {
-	if err := s.dbCleanup(); err != nil {
-		s.FailNow("could not db cleanup", err)
-	}
 }
 
 func (s *CurrencySuit) TearDownTest() {
@@ -81,65 +73,49 @@ func (s *CurrencySuit) cleanup() {
 	sqlx.MustExecContext(ctx, s.transactor.ExtContext(ctx), "DELETE FROM currency")
 }
 
-func connectToDatabase(ctx context.Context, driverName string) (*sql.DB, func() error, error) {
-	pool, err := dockertest.NewPool("")
-	if err != nil {
-		return nil, nil, fmt.Errorf("construct pool: %w", err)
-	}
+func connectToDatabase(t *testing.T, driverName string) (*sql.DB, error) {
+	t.Helper()
 
-	if err := pool.Client.Ping(); err != nil {
-		return nil, nil, fmt.Errorf("connect to docker: %w", err)
-	}
+	pool := dockertest.NewPoolT(t, "")
 
-	resource, err := pool.RunWithOptions(&dockertest.RunOptions{
-		Repository: "postgres",
-		Tag:        "16.3-alpine3.20",
-		Env: []string{
+	resource := pool.RunT(t, "postgres",
+		dockertest.WithTag("16.3-alpine3.20"),
+		dockertest.WithEnv([]string{
 			"POSTGRES_DB=bot",
 			"POSTGRES_USER=bot",
 			"POSTGRES_PASSWORD=bot",
 			"listen_addresses = '*'",
-		},
-	}, func(config *docker.HostConfig) {
-		config.AutoRemove = true
-		config.RestartPolicy = docker.RestartPolicy{
-			Name: "no",
-		}
-	})
-
-	if err != nil {
-		return nil, nil, fmt.Errorf("run docker: %w", err)
-	}
+		}),
+		dockertest.WithoutReuse(),
+	)
 
 	var dbConn *sql.DB
 
-	if err := pool.Retry(func() error {
+	if err := pool.Retry(t.Context(), time.Minute, func() error {
+		var err error
+
 		dbConn, err = sql.Open(driverName,
 			fmt.Sprintf("host=localhost port=%s user=bot password=bot dbname=bot sslmode=disable", resource.GetPort("5432/tcp")))
 		if err != nil {
 			return fmt.Errorf("sql open: %w", err)
 		}
 
-		if err := dbConn.PingContext(ctx); err != nil {
+		if err := dbConn.PingContext(t.Context()); err != nil {
 			return fmt.Errorf("ping: %w", err)
 		}
 
 		return nil
 	}); err != nil {
-		return nil, nil, fmt.Errorf("connect to database: %w", err)
+		return nil, fmt.Errorf("connect to database: %w", err)
 	}
 
-	return dbConn, func() error {
+	t.Cleanup(func() {
 		if err := dbConn.Close(); err != nil {
-			return fmt.Errorf("close database connection: %w", err)
+			t.Errorf("close database connection: %v", err)
 		}
+	})
 
-		if err := pool.Purge(resource); err != nil {
-			return fmt.Errorf("purge resource: %w", err)
-		}
-
-		return nil
-	}, nil
+	return dbConn, nil
 }
 
 func migrationsUp(dbConn *sql.DB, pathToMigrations string) error {
