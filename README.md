@@ -35,7 +35,7 @@ Order lifecycle: `waiting_payment` → `payment_in_progress` → `confirmed` →
 
 User notifications use the transactional outbox pattern. The bot and the manager write outgoing messages to outbox tables in the same database transaction as the business change. A separate dispatcher (`outboxpoller` or `msgconsumer`) then delivers them to Telegram.
 
-Stack: Go, PostgreSQL, Redis (cart, button callback data, daily order positions), OpenTelemetry + Jaeger, Kafka + Debezium (optional).
+Stack: Go, PostgreSQL, Redis (cart, daily order positions), OpenTelemetry + Jaeger, Kafka + Debezium (optional).
 
 ## Getting started
 
