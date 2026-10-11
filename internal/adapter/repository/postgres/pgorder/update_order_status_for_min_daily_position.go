@@ -13,7 +13,7 @@ import (
 	"github.com/Mikhalevich/tg-coffee-shop-bot/internal/domain/port/perror"
 )
 
-func (p *PgOrder) UpdateOrderStatusForMinID(
+func (p *PgOrder) UpdateOrderStatusForMinDailyPosition(
 	ctx context.Context,
 	operationTime time.Time,
 	newStatus, prevStatus order.Status,
@@ -23,9 +23,11 @@ func (p *PgOrder) UpdateOrderStatusForMinID(
 			status = :new_status,
 			updated_at = :updated_at
 		WHERE id = (
-				SELECT MIN(id)
+				SELECT id
 				FROM orders
 				WHERE status = :previous_status
+				ORDER BY CAST(updated_at AS DATE), daily_position, id
+				LIMIT 1
 			)
 		RETURNING id
 		`, map[string]any{

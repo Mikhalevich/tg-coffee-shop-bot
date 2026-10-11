@@ -16,7 +16,7 @@ func (s *Service) GetNextPendingOrder(
 	if err := s.transactor.Transaction(ctx, func(ctx context.Context) error {
 		now := s.timeProvider.Now()
 
-		orderID, err := s.repo.UpdateOrderStatusForMinID(
+		orderID, err := s.repo.UpdateOrderStatusForMinDailyPosition(
 			ctx,
 			now,
 			order.StatusInProgress,
@@ -24,7 +24,7 @@ func (s *Service) GetNextPendingOrder(
 		)
 
 		if err != nil {
-			return fmt.Errorf("update order status for min id: %w", err)
+			return fmt.Errorf("update order status for min daily position: %w", err)
 		}
 
 		if err := s.repo.InsertOrderTimeline(

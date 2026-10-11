@@ -43,7 +43,7 @@ func (s *PgOrderSuit) SetupSuite() {
 		s.FailNow("could not connect to database", err)
 	}
 
-	if err := migrationsUp(dbConn, "../../../../script/db/migrations"); err != nil {
+	if err := migrationsUp(dbConn, "../../../../../script/db/migrations"); err != nil {
 		s.FailNow("could not exec migrations", err)
 	}
 
@@ -74,6 +74,7 @@ func (s *PgOrderSuit) cleanup() {
 	sqlx.MustExecContext(ctx, trx, "DELETE FROM order_status_timeline")
 	sqlx.MustExecContext(ctx, trx, "DELETE FROM order_products")
 	sqlx.MustExecContext(ctx, trx, "DELETE FROM orders")
+	sqlx.MustExecContext(ctx, trx, "DELETE FROM currency")
 }
 
 func connectToDatabase(t *testing.T, driverName string) (*sql.DB, error) {

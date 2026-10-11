@@ -95,7 +95,7 @@ type Repository interface {
 		ctx context.Context,
 		chatID msginfo.ChatID,
 	) (int, error)
-	UpdateOrderStatusForMinID(
+	UpdateOrderStatusForMinDailyPosition(
 		ctx context.Context,
 		operationTime time.Time,
 		newStatus, prevStatus order.Status,
